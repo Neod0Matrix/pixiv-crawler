@@ -9,9 +9,9 @@
 __author__          = 'Neod Anderjon'                               # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v0p6_develop'                                # version string
+__version__         = 'v0p7_LTE'                                    # version string
 
-import time, string                                                 # name folder and files
+import time, string, os                                             # name folder and files
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
@@ -72,9 +72,20 @@ imgThumbnailRegex = '<img src=".*?"'                                # many strin
 # input a string for request image number, transfer string to number
 imageCrawleNbr = string.atoi(raw_input(SHELLHEAD + 'how many daily-rank top pictures do you want(max is 50): '))
 ymdRealTime = time.localtime()
-fileManager = 'nautilus'                                            # define os gui file manager
-homeFolder = '/home/neod-anderjon/LTEProjects/pixiv_collection/'      # save last path
-privateFolder = homeFolder + '%s-%s-%s' \
+
+# set os platform to set folder format
+def SetOSHomeFolder ():
+    os_name = os.name
+
+    if os_name == 'POSIX':
+        fileManager = 'nautilus'                                            # define os gui file manager
+        homeFolder = '/home/neod-anderjon/LTEProjects/pixiv_collection/'    # save last path
+    elif os_name == 'nt':
+        homeFolder = 'E:/Pixiv_Collection/'
+
+    return homeFolder
+
+privateFolder = SetOSHomeFolder() + '%s-%s-%s' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
 logFilePath = privateFolder + '/PixivCrawlerLog-%s-%s-%s.log' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))

@@ -26,6 +26,7 @@ class MainProcess:
 
     # create a file directory to save pictures
     def MkDir(self):
+        pllc.SetOSHomeFolder()
         # create a folder to save picture
         if not os.path.exists(pllc.privateFolder):
             os.makedirs(pllc.privateFolder)
@@ -224,7 +225,9 @@ class MainProcess:
         imageWebURLs = self.GetImageURLs(imageWebPages)
         self.SaveInfo(rankListItems)
         self.SaveImageData(imageWebURLs, imageWebPages, projectPath)
-        os.system(pllc.fileManager + ' ' + pllc.homeFolder)
+        # open filebox to watch result
+        if os.name == 'POSIX':
+            os.system(pllc.fileManager + ' ' + pllc.homeFolder)
 
 if __name__ == '__main__':
     MainProcess().StartCrawlerWork()                                # use last class
