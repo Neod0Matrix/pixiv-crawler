@@ -73,14 +73,13 @@ imgThumbnailRegex = '<img src=".*?"'                                # many strin
 imageCrawleNbr = string.atoi(raw_input(SHELLHEAD + 'how many daily-rank top pictures do you want(max is 50): '))
 ymdRealTime = time.localtime()
 
-fileManager = 'nautilus'                                                    # define os gui file manager
+fileManager = 'nautilus'                                            # define os gui file manager
+os_name = os.name                                                   # get os platform type
 
 # set os platform to set folder format
 def SetOSHomeFolder ():
-    os_name = os.name                                                       # get os platform type
-
     # linux
-    if os_name == 'POSIX':
+    if os_name == 'posix':
         homeFolder = '/home/neod-anderjon/LTEProjects/pixiv_collection/'
     # windows
     elif os_name == 'nt':

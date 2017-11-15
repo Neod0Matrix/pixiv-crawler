@@ -2,13 +2,16 @@ License
 ======
 Code by </MATRIX>@Neod Anderjon
 
+Thanks to fork or watch my project
+
 Update
 ======
 Version: v0p7_LTE
-Last Update Time: 20171114pm2351
+Last Update Time: 20171115pm1235
 
 This python crawler is written to crawl Pixiv dailyRank top n(n<=50) images
 Please run in tn a good network, in some contry and area, it may run slowly
+Pixiv website will often change the image URL, please use the lastest results from javascript console
 
 Platform
 ======
@@ -30,5 +33,5 @@ Windows
 > python pixiv-crawler.py
 
 
-Thanks to fork or watch my project
+
 

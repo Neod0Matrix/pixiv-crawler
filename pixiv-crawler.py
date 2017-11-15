@@ -96,7 +96,7 @@ class MainProcess:
         # ergodic all id page, first 100
         for index, url in enumerate(img_pages[:pllc.imageCrawleNbr]): # select download picture number
             # print url # every url of id page
-            print pllc.SHELLHEAD + 'find out no.%d picture page' % (index + 1) # index is 0-49, add 1 to be a 1 first index
+            print pllc.SHELLHEAD + 'locking no.%d picture page' % (index + 1) # index is 0-49, add 1 to be a 1 first index
             request = urllib2.Request(url)                          # request a response url
             response = self.opener.open(request)                    # get original image page source code
             content = response.read().decode('UTF-8')               # decode to utf-8
@@ -226,7 +226,7 @@ class MainProcess:
         self.SaveInfo(rankListItems)
         self.SaveImageData(imageWebURLs, imageWebPages, projectPath)
         # open filebox to watch result
-        if os.name == 'POSIX':
+        if pllc.os_name == 'posix':
             os.system(pllc.fileManager + ' ' + pllc.homeFolder)
 
 if __name__ == '__main__':
