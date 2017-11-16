@@ -30,7 +30,7 @@ loginDataHeader = {
             'Content-Length': reqSuccessCode,
             'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
             'Host': "accounts.pixiv.net",
-            'Origin': "http://accounts.pixiv.net",
+            'Origin': "https://accounts.pixiv.net",
             ## 'Upgrade-Insecure-Requests': "1",
             'Referer': "http://www.pixiv.net/login.php?return_to=0",
             'User-Agent': useragentForLinuxBrowser,
@@ -56,11 +56,11 @@ postwayRegInfo = {
 getwayRegInfo = [('user', userMailBox), ('pass', userPassword)]
 
 # ========================================some use url address=====================================================
+# maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
 hostWebURL = 'http://www.pixiv.net/'
-# pixiv page request:
-# author: http://www.pixiv.net/member.php?id=
 rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily&content=illust' # dailyRank
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
+illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home
 
 # =====================================regex for dailyRank and image================================================
 rankURLRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'

@@ -6,15 +6,17 @@ Thanks to fork and watch my project
 
 Update
 ======
-Version: v0p9_LTE 
+Version: v1p0_LTE 
 
-Last Update Time: 20171116pm2310
+Last Update Time: 20171117am0010
 
-This python crawler is written to crawl Pixiv dailyRank top n(n<=50) images
+This python crawler is built to crawl pixiv images
 
-Please run in tn a good network, in some contry and area, it may run slowly
+It have two mode: dailyRankTop and illustRepoAll 
 
-Pixiv website will often change the image URL, please use the lastest results from javascript console
+* This version's illustRepoAll mode haven't built, don't use
+
+Please run in a good network, in some contry and area, it may crawl slowly
 
 Platform
 ======
@@ -42,5 +44,7 @@ Problems that may arise
 If you frequently use the crawler to request resources from the server, 
 then after some time the server may throw you 10060 error, 
 just wait for a second and ok
+
+Pixiv website will often change the image URL, please use the lastest results from javascript console
 
 
