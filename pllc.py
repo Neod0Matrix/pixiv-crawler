@@ -9,7 +9,7 @@
 __author__          = 'Neod Anderjon'                               # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v0p7_LTE'                                    # version string
+__version__         = 'v0p8_LTE'                                    # version string
 
 import time, string, os                                             # name folder and files
 
@@ -73,6 +73,8 @@ imgThumbnailRegex = '<img src=".*?"'                                # many strin
 imageCrawleNbr = string.atoi(raw_input(SHELLHEAD + 'how many daily-rank top pictures do you want(max is 50): '))
 ymdRealTime = time.localtime()
 
+image_header = '%s-%s-%s-' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+
 fileManager = 'nautilus'                                            # define os gui file manager
 os_name = os.name                                                   # get os platform type
 
@@ -89,10 +91,13 @@ def SetOSHomeFolder ():
 
 privateFolder = SetOSHomeFolder() + '%s-%s-%s' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+# crawler work log
 logFilePath = privateFolder + '/PixivCrawlerLog-%s-%s-%s.log' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
-illustInfoFilePath = privateFolder + '/PixivCrawlerTopInfo-%s-%s-%s.txt' \
+# illuster info
+illustInfoFilePath = privateFolder + '/PixivCrawlerTopInfo-%s-%s-%s.info' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+# time log
 excFinishTime = '%s-%s-%s %s:%s:%s' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]), str(ymdRealTime[3]), str(ymdRealTime[4]), str(ymdRealTime[5]))
 

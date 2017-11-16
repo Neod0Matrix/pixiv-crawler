@@ -5,7 +5,6 @@
 # =====================================================================
 
 import urllib, urllib2, cookielib, re, os, json                     # crawler depends
-import logging                                                      # log record
 import pllc                                                         # messages
 
 # create a class for url response
@@ -24,20 +23,28 @@ class MainProcess:
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie)
         self.opener = urllib2.build_opener(self.cookieHandler)
 
+    # work log save
+    def LogCrawlerWork (self, logInfo):
+        logFile = open(pllc.logFilePath, 'a+')                      # add context to file option 'a+'
+        print pllc.SHELLHEAD + logInfo                              # with shell header
+        print >> logFile, pllc.SHELLHEAD + logInfo
+
     # create a file directory to save pictures
     def MkDir(self):
         pllc.SetOSHomeFolder()
         # create a folder to save picture
         if not os.path.exists(pllc.privateFolder):
             os.makedirs(pllc.privateFolder)
-            print pllc.SHELLHEAD + 'folder create successed'
-            logging.info(pllc.SHELLHEAD + 'folder create successed')
+            logContext = 'MatPixivCrawler start logging'
+            self.LogCrawlerWork(logContext)
+            logContext = 'folder create successed'
         else:
-            print pllc.SHELLHEAD + 'the folder has already existed'
-            logging.info(pllc.SHELLHEAD + 'the folder has already existed')
-        logging.basicConfig(filename = pllc.logFilePath, level = logging.DEBUG)  # save log
-        print pllc.SHELLHEAD + 'this python auto-crawler work to crawle pixiv website daily top %d images' % pllc.imageCrawleNbr
-        logging.info(pllc.SHELLHEAD + 'this python auto-crawler work to crawle pixiv website daily top %d images' % pllc.imageCrawleNbr)
+            logContext = 'the folder has already existed'
+        self.LogCrawlerWork(logContext)
+
+        logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % pllc.imageCrawleNbr
+        self.LogCrawlerWork(logContext)
+
         return pllc.privateFolder
 
     # first try to request website link
@@ -48,34 +55,41 @@ class MainProcess:
         response = self.opener.open(request)
         content = response.read().decode('utf-8')                   # read it, and decode with UTF-8
         if response.getcode() == pllc.reqSuccessCode:               # http request situation code, ok is 200
-            print pllc.SHELLHEAD + 'website response successed'
-            logging.info(pllc.SHELLHEAD + 'website response successed')
+            logContext = 'website response successed'
         else:
-            print pllc.SHELLHEAD + 'website response fatal, return code %d' % response.getcode()
-            logging.info(pllc.SHELLHEAD + 'website response fatal, return code %d' % response.getcode())
+            logContext = 'website response fatal, return code %d' % response.getcode()
+        self.LogCrawlerWork(logContext)
+
         return content
 
     # run into dailyRank page
     def GetDailyRankList(self):
-        rank_url = pllc.rankWebURL                            # daily rank url
+        rank_url = pllc.rankWebURL                                  # daily rank url
         request = urllib2.Request(rank_url)
         response = self.opener.open(request)
         content = response.read().decode('UTF-8')                   # read it, and decode with UTF-8
 
         ## print response.getcode()
-        pattern = re.compile(pllc.rankURLRegex, re.S)                 # use regex, find dailyRank art works messages
+        pattern = re.compile(pllc.rankURLRegex, re.S)               # use regex, find dailyRank art works messages
         items = re.findall(pattern, content)                        # findall return a tuple include 5 members
 
         # print it to check
         for item in items:
             print item[0], item[1], item[2], item[3], item[4]
-            logging.info(item[0], item[1], item[2], item[3], item[4])
-        print pllc.SHELLHEAD + 'daily-rank page request successed, get the info of pictures and authors'
-        logging.info(pllc.SHELLHEAD + 'daily-rank page request successed, get the info of pictures and authors')
+        logContext =  'daily-rank page request successed, get the info of pictures and authors'
+        self.LogCrawlerWork(logContext)
+
         return items
 
+    # get the page url
+    def GetImagePage(self, items):
+        illust_id = [item[4] for item in items]                     # item[4] is author_id
+        img_pages = [pllc.baseWebURL + str(i) for i in
+                     illust_id]  # every picture url address: base_url address + picture_id
+        return img_pages  # get original image page
+
     # write top info to a text file
-    def SaveInfo(self, items):
+    def SaveDailyRankList(self, items):
         infos = 'top ' + str(pllc.imageCrawleNbr) + ' messages:\n'
         for item in items[:50]:                                     # findall class max get 50 memebr from list
             infos += '------------no.%s-----------\n' % item[0]
@@ -84,19 +98,15 @@ class MainProcess:
         with open(pllc.illustInfoFilePath, 'w') as text:
             text.write(infos.encode('UTF-8'))
 
-    # get the page url
-    def GetImagePage(self):
-        illust_id = [item[4] for item in self.GetDailyRankList()]   # item[4] is author_id
-        img_pages = [pllc.baseWebURL + str(i) for i in illust_id]     # every picture url address: base_url address + picture_id
-        return img_pages                                            # get original image page
-
     # get the pages urls
     def GetImageURLs(self, img_pages):
         img_urls = []                                               # create a list to storage urls, init to empty
         # ergodic all id page, first 100
         for index, url in enumerate(img_pages[:pllc.imageCrawleNbr]): # select download picture number
             # print url # every url of id page
-            print pllc.SHELLHEAD + 'locking no.%d picture page' % (index + 1) # index is 0-49, add 1 to be a 1 first index
+            logContext = 'locking no.%d picture page' % (index + 1) # index is 0-49, add 1 to be a 1 first index
+            self.LogCrawlerWork(logContext)
+
             request = urllib2.Request(url)                          # request a response url
             response = self.opener.open(request)                    # get original image page source code
             content = response.read().decode('UTF-8')               # decode to utf-8
@@ -113,18 +123,18 @@ class MainProcess:
                 img_original_http = 'https://i.pximg.net/img-original/img' \
                                 + img_http[44:-18] + '_p0.png'      # default is png, then process jpg format
                 # check match result
-                print pllc.SHELLHEAD + 'no.%d picture web address: ' % (index + 1) + img_original_http
-                print pllc.SHELLHEAD + 'author pixiv id: ' + img_original_http[-15:-7] # only print id
-                logging.info(pllc.SHELLHEAD + 'no.%d picture web address: ' % (index + 1) + img_original_http)
-                logging.info(pllc.SHELLHEAD + 'author pixiv id: ' + img_original_http[-15:-7])
+                logContext = 'no.%d picture web address: ' % (index + 1) + img_original_http
+                self.LogCrawlerWork(logContext)
+                logContext = 'author pixiv id: ' + img_original_http[-15:-7] # only print id
+                self.LogCrawlerWork(logContext)
 
             # I don't suggest get manga, so I forbidden it
             except AttributeError:                                  # turn to manga comic, jump
                 img_original_http = ''                              # set to empty, jump
-                print pllc.SHELLHEAD + 'this maybe a manga comic, jump out'
-                logging.info(pllc.SHELLHEAD + 'this maybe a manga comic, jump out')
-
+                logContext = 'this maybe a manga comic, jump out'
+                self.LogCrawlerWork(logContext)
             img_urls.append(img_original_http)                      # put into a list
+
         return img_urls
 # ============================================================================================================ #
 # ============================================================================================================ #
@@ -161,16 +171,20 @@ class MainProcess:
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
             urllib2.install_opener(opener)                          # must install new created opener
 
-            ## start_time = time.time()                                # log run time
+            ## start_time = time.time()                             # log run time
 
+            image_name = pllc.image_header + str(i)                 # image name
+
+            # pixiv website image format have jpg and png two format
             try:
                 img_response = urllib2.urlopen(img_request, timeout = 30)
-            except Exception, error:
+            except Exception, e:
+                logContext = "check http error: " + str(e)
+                self.LogCrawlerWork(logContext)
                 img_type_flag += 1                                  # replace jpg format
-                print pllc.SHELLHEAD + "this image maybe a manga comic or a jpg image"
-                logging.info(pllc.SHELLHEAD + "this image maybe a manga comic or a jpg image")
+                logContext = "this image maybe a manga comic or a jpg image"
+                self.LogCrawlerWork(logContext)
 
-                ## print str(error)                                 # http error 404
                 img_request = urllib2.Request(
                     url = img_url[0:-3] + 'jpg',                    # img_http
                     ## data = json_login_data,                      # login cookie
@@ -178,29 +192,28 @@ class MainProcess:
                 )
                 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
                 urllib2.install_opener(opener)                      # must install new created opener
-                img_response = urllib2.urlopen(img_request, timeout = 30)
+                img_response = urllib2.urlopen(img_request, timeout = 300) # request timeout set longer
 
                 if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
-                    print pllc.SHELLHEAD + 'get target image ok'
-                    logging.info(pllc.SHELLHEAD + 'get target image ok')
-
+                    logContext = 'get target image ok'
+                    self.LogCrawlerWork(logContext)
                     # image has two format: jpg
-                    with open(path + '/' + str(i) + '.jpg', 'wb') as jpg:
+                    with open(path + '/' + image_name + '.jpg', 'wb') as jpg:
                         jpg.write(img_response.read())              # do not decode
-                        print pllc.SHELLHEAD + 'save no.%d image' % i
-                        logging.info(pllc.SHELLHEAD + 'save no.%d image' % i)
+                        logContext = 'save no.%d image' % i
+                        self.LogCrawlerWork(logContext)
 
             ## print 'Image response code: %d' % img_response.getcode()
 
             if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
-                print pllc.SHELLHEAD + 'get target image ok'
-                logging.info(pllc.SHELLHEAD + 'get target image ok')
+                logContext = 'get target image ok'
+                self.LogCrawlerWork(logContext)
 
                 # image has two format: png
-                with open(path + '/' + str(i) + '.png', 'wb') as png:
+                with open(path + '/' + image_name + '.png', 'wb') as png:
                     png.write(img_response.read())                  # do not decode
-                    print pllc.SHELLHEAD + 'save no.%d image' % i
-                    logging.info(pllc.SHELLHEAD + 'save no.%d image' % i)
+                    logContext = 'save no.%d image' % i
+                    self.LogCrawlerWork(logContext)
 
             # log save picture time
             ## end_time = time.time()
@@ -221,10 +234,14 @@ class MainProcess:
         projectPath = self.MkDir()
         self.GetFirstPage()
         rankListItems = self.GetDailyRankList()
-        imageWebPages = self.GetImagePage()
+        imageWebPages = self.GetImagePage(rankListItems)
         imageWebURLs = self.GetImageURLs(imageWebPages)
-        self.SaveInfo(rankListItems)
+        self.SaveDailyRankList(rankListItems)
         self.SaveImageData(imageWebURLs, imageWebPages, projectPath)
+
+        logContext = "crawler work finished"
+        self.LogCrawlerWork(logContext)
+
         # open filebox to watch result
         if pllc.os_name == 'posix':
             os.system(pllc.fileManager + ' ' + pllc.homeFolder)
@@ -234,8 +251,8 @@ if __name__ == '__main__':
 
 print                                                               # print a empty row
 print pllc.SHELLHEAD + 'log finished time: ' + pllc.excFinishTime   # log finished time
-print 'copyright @' + pllc.__laboratory__ + ' technology support'
-print 'code by ' + pllc.__organization__ + '@' + pllc.__author__    # print private logo
+print 'Copyright @' + pllc.__laboratory__ + ' technology support'
+print 'Code by ' + pllc.__organization__ + '@' + pllc.__author__    # print private logo
 print pllc.__version__                                              # print version string
 
 # =====================================================================
