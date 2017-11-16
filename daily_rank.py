@@ -4,7 +4,7 @@
 # =====================================================================
 # this python script is built to get pixiv dailyRank top images
 
-import urllib, urllib2, cookielib, re, os, json                     # crawler depends
+import urllib, urllib2, cookielib, re, os, json, string             # crawler depends
 import pllc                                                         # messages
 
 # create a class for pixiv dailyRank top
@@ -33,6 +33,15 @@ class DailyRankTop:
         print pllc.SHELLHEAD + logInfo                              # with shell header
         print >> logFile, pllc.SHELLHEAD + logInfo
 
+    # get input image count
+    def GetInputImageCnt (self):
+        # input a string for request image number, transfer string to number
+        cnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
+        logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % cnt
+        self.LogCrawlerWork(logContext)
+
+        return cnt
+
     # create a file directory to save pictures
     def MkDir(self):
         pllc.SetOSHomeFolder()
@@ -44,9 +53,6 @@ class DailyRankTop:
             logContext = 'folder create successed'
         else:
             logContext = 'the folder has already existed'
-        self.LogCrawlerWork(logContext)
-
-        logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % pllc.imageCrawleNbr
         self.LogCrawlerWork(logContext)
 
         return pllc.privateFolder
@@ -92,8 +98,8 @@ class DailyRankTop:
         return img_pages  # get original image page
 
     # write top info to a text file
-    def SaveDailyRankList(self, items):
-        infos = 'top ' + str(pllc.imageCrawleNbr) + ' messages:\n'
+    def SaveDailyRankList(self, items, img_nbr):
+        infos = 'top ' + str(img_nbr) + ' messages:\n'
         for item in items[:50]:                                     # findall class max get 50 memebr from list
             infos += '------------no.%s-----------\n' % item[0]
             infos += 'name: %s\nauthor: %s\nid: %s\n' % (item[1], item[2], item[4])
@@ -102,10 +108,10 @@ class DailyRankTop:
             text.write(infos.encode('UTF-8'))
 
     # get the pages urls
-    def GetImageURLs(self, img_pages, items):
+    def GetImageURLs(self, img_pages, items, img_nbr):
         img_urls = []                                               # create a list to storage urls, init to empty
         # ergodic all id page, first 100
-        for index, url in enumerate(img_pages[:pllc.imageCrawleNbr]): # select download picture number
+        for index, url in enumerate(img_pages[:img_nbr]):           # select download picture number
             # print url # every url of id page
             logContext = 'locking no.%d picture page' % index
             self.LogCrawlerWork(logContext)
@@ -229,9 +235,23 @@ class DailyRankTop:
                 self.LogCrawlerWork(logContext)
                 continue
 
-            # log save picture time
-            ## end_time = time.time()
-            ## print pllc.pclhs + 'Elaspsed time: %f ms' % (end_time - start_time) * 1000
+    # work over
+    def crawlerFinishWork (self):
+        # logging info
+        logContext = "crawler work finished, log time: " + pllc.excFinishTime
+        self.LogCrawlerWork(logContext)
+        logContext = "\n"  # print a empty row
+        self.LogCrawlerWork(logContext)
+        logContext = \
+            'copyright @' + pllc.__laboratory__ + ' technology support\n' \
+                                                  'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n' \
+            + pllc.__version__  # print version string
+        self.LogCrawlerWork(logContext)
+
+        # open filebox to watch result
+        if pllc.os_name == 'posix':
+            os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
+            exit()  # after open folder exit process
 # ============================================================================================================ #
 # ============================================================================================================ #
 
@@ -246,29 +266,16 @@ class DailyRankTop:
     # open the storage directory with filemanager
     def StartCrawlerWork(self):
         projectPath = self.MkDir()
+        # input count of images
+        imgCrwNbr = self.GetInputImageCnt()
         self.GetFirstPage()
         rankListItems = self.GetDailyRankList()
         print rankListItems
         imageWebPages = self.GetImagePage(rankListItems)
-        imageWebURLs = self.GetImageURLs(imageWebPages, rankListItems)
-        self.SaveDailyRankList(rankListItems)
+        imageWebURLs = self.GetImageURLs(imageWebPages, rankListItems, imgCrwNbr)
+        self.SaveDailyRankList(rankListItems, imgCrwNbr)
         self.SaveImageData(imageWebURLs, imageWebPages, projectPath)
-
-        # logging info
-        logContext = "crawler work finished, log time: " + pllc.excFinishTime
-        self.LogCrawlerWork(logContext)
-        logContext = "\n"                                           # print a empty row
-        self.LogCrawlerWork(logContext)
-        logContext = \
-            'copyright @' + pllc.__laboratory__ + ' technology support\n' \
-            'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n' \
-            + pllc.__version__                                      # print version string
-        self.LogCrawlerWork(logContext)
-
-        # open filebox to watch result
-        if pllc.os_name == 'posix':
-            os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
-            exit()                                                  # after open folder exit process
+        self.crawlerFinishWork()
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

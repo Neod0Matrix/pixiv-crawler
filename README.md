@@ -8,7 +8,7 @@ Update
 ======
 Version: v1p0_LTE 
 
-Last Update Time: 20171117am0010
+Last Update Time: 20171117am0048
 
 This python crawler is built to crawl pixiv images
 

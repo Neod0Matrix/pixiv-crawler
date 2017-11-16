@@ -11,7 +11,7 @@ __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
 __version__         = 'v0p8_LTE'                                    # version string
 
-import time, string, os                                             # name folder and files
+import time, os                                                     # name folder and files
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
@@ -67,9 +67,6 @@ rankURLRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-n
 imgThumbnailRegex = '<img src=".*?"'                                # many strings array
 
 # ======================get format time, and get year-month-date to be a folder name===============================
-# input a string for request image number, transfer string to number
-imageCrawleNbr = string.atoi(raw_input(SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
-
 ymdRealTime = time.localtime()
 image_header = '%s-%s-%s-' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
 
