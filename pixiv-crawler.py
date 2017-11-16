@@ -8,9 +8,9 @@ import pllc, daily_rank, illust_repo
 
 # main fuction
 def crawlerCallHandler ():
-    mode = raw_input(pllc.SHELLHEAD + 'what mode you want to run: ')
+    mode = raw_input(pllc.SHELLHEAD + 'select a mode: ')
     if mode == 'drt':
-        daily_rank.DailyRankTop().StartCrawlerWork()
+        daily_rank.DailyRankTop().drtStartCrawler()
     elif mode == 'ira':
         # illust_repo.IllustRepoAll().StartCrawlerWork()
         print pllc.SHELLHEAD + "this fuction haven't built\n"

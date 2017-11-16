@@ -5,78 +5,28 @@
 # this python script is built to get pixiv dailyRank top images
 
 import urllib, urllib2, cookielib, re, os, json, string             # crawler depends
-import pllc                                                         # messages
+import pllc, priv_lib
 
 # create a class for pixiv dailyRank top
 class DailyRankTop:
     # class include init process
     def __init__(self):
-        # request sheet
-        self.loginURL = pllc.hostWebURL                             # pixiv login page
-        # javascript console's headers dict
-        # only use in linux's google chrome
-        self.loginHeader = pllc.loginDataHeader
-        # use post way to request service
-        self.postData = json.dumps(urllib.urlencode(pllc.postwayRegInfo))
-        # get local cookie, create a opener for pixiv class
-        self.cookie = cookielib.LWPCookieJar()                      # use last sheet to create a cookie-module
-        self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie)
-        self.opener = urllib2.build_opener(self.cookieHandler)
-
-    # work log save
-    def LogCrawlerWork (self, logInfo):
-        # if log file existed, delete it
-        if os.path.exists(pllc.logFilePath):
-            os.remove(pllc.logFilePath)
-        # build a new log
-        logFile = open(pllc.logFilePath, 'a+')                      # add context to file option 'a+'
-        print pllc.SHELLHEAD + logInfo                              # with shell header
-        print >> logFile, pllc.SHELLHEAD + logInfo
+        priv_lib.PrivateLib().__init__()
 
     # get input image count
     def GetInputImageCnt (self):
         # input a string for request image number, transfer string to number
         cnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
         logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % cnt
-        self.LogCrawlerWork(logContext)
+        priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
         return cnt
-
-    # create a file directory to save pictures
-    def MkDir(self):
-        pllc.SetOSHomeFolder()
-        # create a folder to save picture
-        if not os.path.exists(pllc.privateFolder):
-            os.makedirs(pllc.privateFolder)
-            logContext = 'MatPixivCrawler start logging'
-            self.LogCrawlerWork(logContext)
-            logContext = 'folder create successed'
-        else:
-            logContext = 'the folder has already existed'
-        self.LogCrawlerWork(logContext)
-
-        return pllc.privateFolder
-
-    # first try to request website link
-    def GetFirstPage(self):
-        # request to server, include url, headers, sheet, request way is post
-        request = urllib2.Request(self.loginURL, self.postData, self.loginHeader)
-        # use new created opener(include cookies) to open, return server response sheet
-        response = self.opener.open(request)
-        content = response.read().decode('utf-8')                   # read it, and decode with UTF-8
-        if response.getcode() == pllc.reqSuccessCode:               # http request situation code, ok is 200
-            logContext = 'website response successed'
-        else:
-            logContext = 'website response fatal, return code %d' % response.getcode()
-        self.LogCrawlerWork(logContext)
-
-        return content
 
     # run into dailyRank page
     def GetDailyRankList(self):
         rank_url = pllc.rankWebURL                                  # daily rank url
         request = urllib2.Request(rank_url)
-        response = self.opener.open(request)
+        response = priv_lib.PrivateLib().opener.open(request)
         content = response.read().decode('UTF-8')                   # read it, and decode with UTF-8
 
         ## print response.getcode()
@@ -87,7 +37,7 @@ class DailyRankTop:
         for item in items:
             print item[0], item[1], item[2], item[3], item[4]
         logContext =  'daily-rank page request successed, get the info of pictures and authors'
-        self.LogCrawlerWork(logContext)
+        priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
         return items
 
@@ -114,9 +64,9 @@ class DailyRankTop:
         for index, url in enumerate(img_pages[:img_nbr]):           # select download picture number
             # print url # every url of id page
             logContext = 'locking no.%d picture page' % index
-            self.LogCrawlerWork(logContext)
+            priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
-            response = self.opener.open(urllib2.Request(url))       # get original image page source code
+            response = priv_lib.PrivateLib().opener.open(urllib2.Request(url))       # get original image page source code
             content = response.read().decode('UTF-8')               # decode to utf-8
 
             mateIDs = [item[4] for item in items]                   # all catch illust id list
@@ -139,15 +89,15 @@ class DailyRankTop:
 
                 # check match result
                 logContext = 'no.%d image web address: ' % index + img_original_http
-                self.LogCrawlerWork(logContext)
+                priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
                 logContext = 'author pixiv id: ' + illusterID
-                self.LogCrawlerWork(logContext)
+                priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
             # I don't suggest get manga, so I forbidden it
             except AttributeError:                                  # turn to manga comic, jump
                 img_original_http = ''                              # set to empty, jump
                 logContext = 'this maybe a manga comic, jump out'
-                self.LogCrawlerWork(logContext)
+                priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
             img_urls.append(img_original_http)                      # put into a list
 
         return img_urls
@@ -175,7 +125,6 @@ class DailyRankTop:
             # use GET way to request server
             ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
             # make a request
-            # if you want the original, the request url should be like "http://i2.pixiv.net/img-original/img/2015/04/04/00/30/41/49642237_p0.jpg"
             img_request = urllib2.Request(
                 url = img_url,                                      # img_http
                 ## data = json_login_data,                          # login cookie
@@ -186,8 +135,6 @@ class DailyRankTop:
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
             urllib2.install_opener(opener)                          # must install new created opener
 
-            ## start_time = time.time()                             # log run time
-
             image_name = pllc.image_header + str(i)                 # image name
 
             # pixiv website image format have jpg and png two format
@@ -195,10 +142,10 @@ class DailyRankTop:
                 img_response = urllib2.urlopen(img_request, timeout = 30)
             except Exception, e:
                 logContext = "check http error: " + str(e)
-                self.LogCrawlerWork(logContext)
+                priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
                 img_type_flag += 1                                  # replace jpg format
                 logContext = "this image maybe a manga comic or a jpg image"
-                self.LogCrawlerWork(logContext)
+                priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
                 img_request = urllib2.Request(
                     url = img_url[0:-3] + 'jpg',                    # img_http
@@ -211,71 +158,44 @@ class DailyRankTop:
 
                 if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
                     logContext = 'get target image ok'
-                    self.LogCrawlerWork(logContext)
+                    priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
                     # image has two format: jpg
                     with open(path + '/' + image_name + '.jpg', 'wb') as jpg:
                         jpg.write(img_response.read())              # do not decode
                         logContext = 'save no.%d image' % i
-                        self.LogCrawlerWork(logContext)
-
-            ## print 'Image response code: %d' % img_response.getcode()
+                        priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
             if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
                 logContext = 'get target image ok'
-                self.LogCrawlerWork(logContext)
+                priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
                 # image has two format: png
                 with open(path + '/' + image_name + '.png', 'wb') as png:
                     png.write(img_response.read())                  # do not decode
                     logContext = 'save no.%d image' % i
-                    self.LogCrawlerWork(logContext)
+                    priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
             # give up one page
             elif img_response.getcode() != pllc.reqSuccessCode and img_type_flag == 0:
                 logContext = "give no.%d image up, next" % i
-                self.LogCrawlerWork(logContext)
+                priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
                 continue
 
-    # work over
-    def crawlerFinishWork (self):
-        # logging info
-        logContext = "crawler work finished, log time: " + pllc.excFinishTime
-        self.LogCrawlerWork(logContext)
-        logContext = "\n"  # print a empty row
-        self.LogCrawlerWork(logContext)
-        logContext = \
-            'copyright @' + pllc.__laboratory__ + ' technology support\n' \
-                                                  'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n' \
-            + pllc.__version__  # print version string
-        self.LogCrawlerWork(logContext)
-
-        # open filebox to watch result
-        if pllc.os_name == 'posix':
-            os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
-            exit()  # after open folder exit process
-# ============================================================================================================ #
-# ============================================================================================================ #
-
-    # execute fuction:
-    # create a folder to storage data and set to work-directory
-    # try to get daily-rank page data
-    # get the target list
-    # get the image page
-    # get the image urls
-    # save top info
-    # save image
-    # open the storage directory with filemanager
-    def StartCrawlerWork(self):
-        projectPath = self.MkDir()
-        # input count of images
-        imgCrwNbr = self.GetInputImageCnt()
-        self.GetFirstPage()
-        rankListItems = self.GetDailyRankList()
-        print rankListItems
+    def drtStartCrawler(self):
+        crawlerWorkDir = priv_lib.PrivateLib().MkDir(pllc.logFilePath,  # first create folder
+                                                     pllc.privateFolder)
+        imgCrwNbr = self.GetInputImageCnt()                         # input count of images
+        priv_lib.PrivateLib().CrawlerSignIn(pllc.logFilePath)       # sign in to pixiv
+        rankListItems = self.GetDailyRankList()                     # get rank list
         imageWebPages = self.GetImagePage(rankListItems)
-        imageWebURLs = self.GetImageURLs(imageWebPages, rankListItems, imgCrwNbr)
-        self.SaveDailyRankList(rankListItems, imgCrwNbr)
-        self.SaveImageData(imageWebURLs, imageWebPages, projectPath)
-        self.crawlerFinishWork()
+        imageWebURLs = self.GetImageURLs(imageWebPages,             # get urls
+                                         rankListItems,
+                                         imgCrwNbr)
+        self.SaveDailyRankList(rankListItems,                       # save list
+                               imgCrwNbr)
+        self.SaveImageData(imageWebURLs,                            # save image
+                           imageWebPages,
+                           crawlerWorkDir)
+        priv_lib.PrivateLib().crawlerFinishWork(pllc.logFilePath)   # finish
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

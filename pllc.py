@@ -60,7 +60,8 @@ getwayRegInfo = [('user', userMailBox), ('pass', userPassword)]
 hostWebURL = 'http://www.pixiv.net/'
 rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily&content=illust' # dailyRank
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
-illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home
+illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
+illustArtworkIndex = 'http://www.pixiv.net/member_illust.php?id='   # artwork index
 
 # =====================================regex for dailyRank and image================================================
 rankURLRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
@@ -95,6 +96,11 @@ illustInfoFilePath = privateFolder + '/PixivCrawlerTopInfo-%s-%s-%s.info' \
 # time log
 excFinishTime = '%s-%s-%s %s:%s:%s' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]), str(ymdRealTime[3]), str(ymdRealTime[4]), str(ymdRealTime[5]))
+
+illustInputID = raw_input(SHELLHEAD + 'enter you want to crawl illuster id: ')
+illustHomeFolder = SetOSHomeFolder() + illustInputID\
+                    + '/%s-%s-%s/' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+illustLogFilePath = illustHomeFolder + 'PixivCrawlerLog.log'
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon
