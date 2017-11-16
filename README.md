@@ -6,9 +6,9 @@ Thanks to fork and watch my project
 
 Update
 ======
-Version: v0p8_LTE 
+Version: v0p9_LTE 
 
-Last Update Time: 20171116pm1724
+Last Update Time: 20171116pm2126
 
 This python crawler is written to crawl Pixiv dailyRank top n(n<=50) images
 

@@ -25,6 +25,7 @@ class MainProcess:
 
     # work log save
     def LogCrawlerWork (self, logInfo):
+        os.remove(pllc.logFilePath)                                 # first delete last same-name log file
         logFile = open(pllc.logFilePath, 'a+')                      # add context to file option 'a+'
         print pllc.SHELLHEAD + logInfo                              # with shell header
         print >> logFile, pllc.SHELLHEAD + logInfo
@@ -84,8 +85,7 @@ class MainProcess:
     # get the page url
     def GetImagePage(self, items):
         illust_id = [item[4] for item in items]                     # item[4] is author_id
-        img_pages = [pllc.baseWebURL + str(i) for i in
-                     illust_id]  # every picture url address: base_url address + picture_id
+        img_pages = [pllc.baseWebURL + str(i) for i in illust_id]   # every picture url address: base_url address + picture_id
         return img_pages  # get original image page
 
     # write top info to a text file
@@ -99,33 +99,39 @@ class MainProcess:
             text.write(infos.encode('UTF-8'))
 
     # get the pages urls
-    def GetImageURLs(self, img_pages):
+    def GetImageURLs(self, img_pages, items):
         img_urls = []                                               # create a list to storage urls, init to empty
         # ergodic all id page, first 100
         for index, url in enumerate(img_pages[:pllc.imageCrawleNbr]): # select download picture number
             # print url # every url of id page
-            logContext = 'locking no.%d picture page' % (index + 1) # index is 0-49, add 1 to be a 1 first index
+            logContext = 'locking no.%d picture page' % index
             self.LogCrawlerWork(logContext)
 
-            request = urllib2.Request(url)                          # request a response url
-            response = self.opener.open(request)                    # get original image page source code
+            response = self.opener.open(urllib2.Request(url))       # get original image page source code
             content = response.read().decode('UTF-8')               # decode to utf-8
 
-            # (.*?) is short mate regex
-            # first use thumbnail regex to match thumbnail, then make the original with thumbnail
-            # target: original illust image, others not
+            mateIDs = [item[4] for item in items]                   # all catch illust id list
+            # use thumbnail info to get key info, then build original image url
             try:
-                pattern = re.compile(pllc.imgThumbnailRegex, re.S)
-                # img = re.search(pattern, content) # find in server inspect
-                img_https = pattern.findall(content)[3][10:-1]      # cut to get a https address
-                img_http = img_https[0:4] + img_https[4:]           # cut to get a http address
+                start_mate = 2                                      # 20171116pm2052 test value set to 2
+                illusterID = 0                                      # start is 0
+                # because pixiv will often change website model format, use mate to get correct image
+                # must have a verify way
+                while illusterID != mateIDs[index]:
+                    # cut to get a https address
+                    img_https = re.compile(pllc.imgThumbnailRegex, re.S).findall(content)[start_mate][10:-1]
+                    # cut to get a http address
+                    img_http = img_https[0:4] + img_https[4:]
+                    # default is png, after handle jpg
+                    img_original_http = 'https://i.pximg.net/img-original/img' + img_http[44:-18] + '_p0.png'
+                    illusterID = img_original_http[-15:-7]
 
-                img_original_http = 'https://i.pximg.net/img-original/img' \
-                                + img_http[44:-18] + '_p0.png'      # default is png, then process jpg format
+                    start_mate = start_mate + 1                     # continue to next element
+
                 # check match result
-                logContext = 'no.%d picture web address: ' % (index + 1) + img_original_http
+                logContext = 'no.%d image web address: ' % index + img_original_http
                 self.LogCrawlerWork(logContext)
-                logContext = 'author pixiv id: ' + img_original_http[-15:-7] # only print id
+                logContext = 'author pixiv id: ' + illusterID
                 self.LogCrawlerWork(logContext)
 
             # I don't suggest get manga, so I forbidden it
@@ -214,6 +220,11 @@ class MainProcess:
                     png.write(img_response.read())                  # do not decode
                     logContext = 'save no.%d image' % i
                     self.LogCrawlerWork(logContext)
+            # give up one page
+            elif img_response.getcode() != pllc.reqSuccessCode and img_type_flag == 0:
+                logContext = "give no.%d image up, next" % i
+                self.LogCrawlerWork(logContext)
+                continue
 
             # log save picture time
             ## end_time = time.time()
@@ -234,26 +245,29 @@ class MainProcess:
         projectPath = self.MkDir()
         self.GetFirstPage()
         rankListItems = self.GetDailyRankList()
+        print rankListItems
         imageWebPages = self.GetImagePage(rankListItems)
-        imageWebURLs = self.GetImageURLs(imageWebPages)
+        imageWebURLs = self.GetImageURLs(imageWebPages, rankListItems)
         self.SaveDailyRankList(rankListItems)
         self.SaveImageData(imageWebURLs, imageWebPages, projectPath)
 
-        logContext = "crawler work finished"
+        # logging info
+        logContext = "crawler work finished, log time: " + pllc.excFinishTime
+        self.LogCrawlerWork(logContext)
+        logContext = "\n"                                           # print a empty row
+        self.LogCrawlerWork(logContext)
+        logContext = \
+            'copyright @' + pllc.__laboratory__ + ' technology support\n' \
+            'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n' \
+            + pllc.__version__                                      # print version string
         self.LogCrawlerWork(logContext)
 
         # open filebox to watch result
         if pllc.os_name == 'posix':
-            os.system(pllc.fileManager + ' ' + pllc.homeFolder)
+            os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
 
 if __name__ == '__main__':
-    MainProcess().StartCrawlerWork()                                # use last class
-
-print                                                               # print a empty row
-print pllc.SHELLHEAD + 'log finished time: ' + pllc.excFinishTime   # log finished time
-print 'Copyright @' + pllc.__laboratory__ + ' technology support'
-print 'Code by ' + pllc.__organization__ + '@' + pllc.__author__    # print private logo
-print pllc.__version__                                              # print version string
+    MainProcess().StartCrawlerWork()
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

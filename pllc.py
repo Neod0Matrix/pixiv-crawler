@@ -65,14 +65,12 @@ baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # b
 # =====================================regex for dailyRank and image================================================
 rankURLRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
 imgThumbnailRegex = '<img src=".*?"'                                # many strings array
-## img_original_regex = '<img alt(.*?)data-src="(.*?)"'             # only one mate
-## comic_regex = '<div class="multiple(.*?)src="(.*?)"'
 
 # ======================get format time, and get year-month-date to be a folder name===============================
 # input a string for request image number, transfer string to number
-imageCrawleNbr = string.atoi(raw_input(SHELLHEAD + 'how many daily-rank top pictures do you want(max is 50): '))
-ymdRealTime = time.localtime()
+imageCrawleNbr = string.atoi(raw_input(SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
 
+ymdRealTime = time.localtime()
 image_header = '%s-%s-%s-' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
 
 fileManager = 'nautilus'                                            # define os gui file manager
@@ -85,7 +83,7 @@ def SetOSHomeFolder ():
         homeFolder = '/home/neod-anderjon/LTEProjects/pixiv_collection/'
     # windows
     elif os_name == 'nt':
-        homeFolder = 'E:/Pixiv_Collection/'
+        homeFolder = 'E:/pixiv_collection/'
 
     return homeFolder
 
