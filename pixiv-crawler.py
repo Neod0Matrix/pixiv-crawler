@@ -8,11 +8,11 @@ import urllib, urllib2, cookielib, re, os, json                     # crawler de
 import pllc                                                         # messages
 
 # create a class for url response
-class MainProcess:
+class DailyRankTop:
     # class include init process
     def __init__(self):
         # request sheet
-        self.loginURL = pllc.hostWebURL                              # pixiv login page
+        self.loginURL = pllc.hostWebURL                             # pixiv login page
         # javascript console's headers dict
         # only use in linux's google chrome
         self.loginHeader = pllc.loginDataHeader
@@ -265,9 +265,10 @@ class MainProcess:
         # open filebox to watch result
         if pllc.os_name == 'posix':
             os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
+            exit()                                                  # after open folder exit process
 
 if __name__ == '__main__':
-    MainProcess().StartCrawlerWork()
+    DailyRankTop().StartCrawlerWork()
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon
