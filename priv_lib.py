@@ -28,7 +28,7 @@ class PrivateLib:
         # this log file must be a new file
         logFile = open(logPath, 'a+')                               # add context to file option 'a+'
         print pllc.SHELLHEAD + logInfo                              # with shell header
-        print >> logFile, pllc.SHELLHEAD + logInfo
+        print >> logFile, pllc.SHELLHEAD + logInfo                  # write to log
 
     # create a file directory to save pictures
     def MkDir(self, logPath, folder):
@@ -77,7 +77,7 @@ class PrivateLib:
         self.LogCrawlerWork(logPath, logContext)
 
         # open filebox to watch result
-        if pllc.os_name == 'posix':
+        if os.name == 'posix':
             os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
             exit()  # after open folder exit process
 

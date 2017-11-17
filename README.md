@@ -6,9 +6,9 @@ Thanks to fork and watch my project
 
 Update
 ======
-Version: v1p4_LTE 
+Version: v1p5_LTE 
 
-Last Update Time: 20171117pm1844
+Last Update Time: 20171117pm1902
 
 This python crawler is built to crawl pixiv images
 

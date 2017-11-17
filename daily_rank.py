@@ -4,7 +4,7 @@
 # =====================================================================
 # this python script is built to get pixiv dailyRank top images
 
-import urllib2, cookielib, re, string                               # crawler depends
+import urllib2, cookielib, re, string, os                           # crawler depends
 import pllc, priv_lib
 
 # create a class for pixiv dailyRank top
@@ -47,16 +47,14 @@ class DailyRankTop:
         # findall class max get 50 memebr from list
         for i in dataCapture[:img_nbr]:
             infos += '------------no.%s-----------\n' % i[0]  # artwork title
-            infos += 'name: %s\nauthor: %s\nid: %s\n' % (i[1], i[2], i[4])  # info
+            infos += 'name: %s\nauthor: %s\nid: %s\n' % (i[1], i[2], i[4])
 
         # save info in a text
         with open(pllc.illustInfoFilePath, 'w+') as text:
             text.write(infos.encode('UTF-8'))
 
-        # build url list
-        illustIDs = [i[4] for i in dataCapture]                     # i[4] is author_id
-
-        return illustIDs
+        # i[4] is illust id
+        return [i[4] for i in dataCapture]
 
     # get the pages urls
     @staticmethod
@@ -110,30 +108,34 @@ class DailyRankTop:
     @staticmethod
     def SaveImageBinData(self, img_urls, path):
         for i, img_url in enumerate(img_urls):
-            ## login_data = urllib.urlencode(pllc.post_data)
-            ## json_login_data = json.dumps(login_data)
+            if os.name == 'posix':
+                img_headers = {
+                    'Accept': "image/webp,image/*,*/*;q=0.8",
+                    'Accept-Encoding': "gzip, deflate, sdch",
+                    'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
+                    'Connection': "keep-alive",
+                    # 'Host': img_url[8:9] + '.pixiv.net',          # host from last web page
+                    # must add referer, or server will return a damn http error 403, 404
+                    # copy from javascript console network request headers of image
+                    'Referer': self.basePages[i],                   # request page
+                    'User-Agent': pllc.useragentForLinuxBrowser,
+                }
+            elif os.name == 'nt':
+                img_headers = {
+                    'Accept': "image/webp,image/*,*/*;q=0.8",
+                    'Accept-Encoding': "gzip, deflate, sdch",
+                    'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
+                    'Connection': "keep-alive",
+                    # 'Host': img_url[8:9] + '.pixiv.net', # host from last web page
+                    # must add referer, or server will return a damn http error 403, 404
+                    # copy from javascript console network request headers of image
+                    'Referer': self.basePages[i],
+                    'User-Agent': pllc.useragentForWindowsBrowser,
+                }
 
-            # linux's chrome
-            img_headers = {
-                'Accept': "image/webp,image/*,*/*;q=0.8",
-                'Accept-Encoding': "gzip, deflate, sdch",
-                'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
-                'Connection': "keep-alive",
-                # 'Host': img_url[8:9] + '.pixiv.net', # host from last web page
-                # must add referer, or server will return a damn http error 403, 404
-                # copy from javascript console network request headers of image
-                'Referer': self.basePages[i],
-                'User-Agent': pllc.useragentForLinuxBrowser,         # stable for linux chrome
-            }
             # use GET way to request server
             ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
-            # make a request
-            img_request = urllib2.Request(
-                url = img_url,                                      # img_http
-                ## data = json_login_data,                          # login cookie
-                headers = img_headers
-            )
-
+            img_request = urllib2.Request(url = img_url, headers = img_headers)
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
             urllib2.install_opener(opener)                          # must install new created opener
 
@@ -177,10 +179,6 @@ class DailyRankTop:
                     png.write(img_response.read())                  # do not decode
                     logContext = 'save no.%d image' % i
                     priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-            # give up one page
-            elif img_response.getcode() != pllc.reqSuccessCode and img_type_flag == 0:
-                logContext = "give no.%d image up, next" % i
-                priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
     # class main call process
     def drtStartCrawler(self):

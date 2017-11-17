@@ -26,7 +26,7 @@ useragentForWindowsBrowser = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb
 # headers data use in http request
 def SetUserAgentHeader():
     # linux
-    if os_name == 'posix':
+    if os.name == 'posix':
         loginDataHeader = {
             ## 'Accept': "application/json, text/javascript, */*; q=0.01",
             ## 'Accept-Encoding': "gzip, deflate, br",
@@ -42,7 +42,7 @@ def SetUserAgentHeader():
             'X-Requested-With': "XMLHttpRequest",
         }
     # windows
-    elif os_name == 'nt':
+    elif os.name == 'nt':
         loginDataHeader = {
             ## 'Accept': "application/json, text/javascript, */*; q=0.01",
             ## 'Accept-Encoding': "gzip, deflate, br",
@@ -101,15 +101,14 @@ ymdRealTime = time.localtime()
 image_header = '%s-%s-%s-' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
 
 fileManager = 'nautilus'                                            # define os gui file manager
-os_name = os.name                                                   # get os platform type
 
 # set os platform to set folder format
 def SetOSHomeFolder ():
     # linux
-    if os_name == 'posix':
+    if os.name == 'posix':
         homeFolder = '/home/neod-anderjon/LTEProjects/pixiv_collection/'
     # windows
-    elif os_name == 'nt':
+    elif os.name == 'nt':
         homeFolder = 'E:/pixiv_collection/'
 
     return homeFolder

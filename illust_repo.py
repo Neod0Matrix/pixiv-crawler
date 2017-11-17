@@ -48,6 +48,8 @@ class IllustRepoAll:
 
         return capCnt
 
+
+
     def iraStartCrawler(self):
         # collect essential info
         logFilePath = self.GetInputEssentialInfo(self)
