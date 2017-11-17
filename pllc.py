@@ -86,9 +86,10 @@ baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # b
 illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
 illustArtworkIndex = 'http://www.pixiv.net/member_illust.php?id='   # artwork index
 
-# =====================================regex for dailyRank and image================================================
+# =======================================regex collection==========================================================
 rankURLRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
 imgThumbnailRegex = '<img src=".*?"'                                # many strings array
+imgs150x150Regex = 'data-src=".*?_p0_master1200.jpg"'
 
 # illust artwork count mate
 def illustAWCntRegex(setid):

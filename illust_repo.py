@@ -26,7 +26,7 @@ class IllustRepoAll:
 
     # craw illust artwork count
     @staticmethod
-    def CrawlTargetMaxCnt(self):
+    def CheckCrawlTargetCnt(self, logPath):
         cnt_url = pllc.illustHomeURL + self.illustInputID
         # build http request
         request = urllib2.Request(cnt_url)
@@ -36,18 +36,15 @@ class IllustRepoAll:
         pattern = re.compile(pllc.illustAWCntRegex(self.illustInputID), re.S)  # use regex, find dailyRank art works messages
         dataCapture = re.findall(pattern, web_src)                  # findall return a tuple include 5 members
         maxCnt = string.atoi(dataCapture[0][-4:-1])                 # get illust max artwork count
-
-        return maxCnt
-
-    # input want image count
-    @staticmethod
-    def GetInputCrawlCnt(self, max_cnt):
+        # input want image count
         capCnt = string.atoi(raw_input(pllc.SHELLHEAD
-                                       + 'enter you want to crawl image count(must <= %d): ' % max_cnt))
+                        + 'enter you want to crawl image count(must <= %d): ' % maxCnt))
         # count error
-        while (capCnt > max_cnt) or (capCnt <= 0):
+        while (capCnt > maxCnt) or (capCnt <= 0):
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD
-                                        + 'error, rewrite you want to crawl image count(must <= %d, not 0): ' % max_cnt))
+                        + 'error, input count must <= %d and not 0: ' % maxCnt))
+        logContext = "check collect illustID:" + self.illustInputID + " images:%d" % capCnt
+        priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
         return capCnt
 
@@ -57,8 +54,8 @@ class IllustRepoAll:
         # sign in to pixiv
         priv_lib.PrivateLib().CrawlerSignIn(logFilePath)
         # get capture image count
-        crawCnt = self.CrawlTargetMaxCnt(self)
-        actCnt = self.GetInputCrawlCnt(self, crawCnt)
+        crawCnt = self.CheckCrawlTargetCnt(self, logFilePath)
+
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

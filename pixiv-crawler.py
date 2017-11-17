@@ -7,7 +7,7 @@
 import pllc, daily_rank, illust_repo
 
 # main fuction
-def crawlerCallHandler ():
+def main ():
     mode = raw_input(pllc.SHELLHEAD + 'select a mode: ')
     if mode == 'drt':
         print pllc.SHELLHEAD + "dailyRankTop mode"
@@ -28,7 +28,7 @@ def crawlerCallHandler ():
     return mode
 
 if __name__ == '__main__':
-    crawlerCallHandler()
+    main()
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon
