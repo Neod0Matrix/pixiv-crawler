@@ -82,6 +82,7 @@ getwayRegInfo = [('user', userMailBox), ('pass', userPassword)]
 # maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
 hostWebURL = 'http://www.pixiv.net/'
 rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily&content=illust' # dailyRank
+rankWebURL_R18 = 'https://www.pixiv.net/ranking.php?mode=daily_r18&content=illust&ref=rn-h-r18-3'
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
 illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
 illustArtworkIndex = 'http://www.pixiv.net/member_illust.php?id='   # artwork index

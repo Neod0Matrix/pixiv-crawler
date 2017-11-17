@@ -31,7 +31,7 @@ class DailyRankTop:
     # crawl dailyRank list
     @staticmethod
     def CrawlTargetURLList(self, img_nbr):
-        rank_url = pllc.rankWebURL                                  # daily rank url
+        rank_url = pllc.rankWebURL
         request = urllib2.Request(rank_url)
         response = priv_lib.PrivateLib().opener.open(request)
         web_src = response.read().decode('UTF-8')                   # get webpage src
@@ -63,10 +63,10 @@ class DailyRankTop:
     def BuildOriginalImageURL(self, ilu_ids, img_nbr):
         img_urls = []                                               # create a list to storage urls, init to empty
 
-        basePages = [pllc.baseWebURL + str(i) for i in ilu_ids]     # every picture url address: base_url address + picture_id
+        self.basePages = [pllc.baseWebURL + str(i) for i in ilu_ids]     # every picture url address: base_url address + picture_id
 
         # ergodic all id page, first 100
-        for index, url in enumerate(basePages[:img_nbr]):           # select download picture number
+        for index, url in enumerate(self.basePages[:img_nbr]):           # select download picture number
             # print url # every url of id page
             logContext = 'locking no.%d picture page' % index
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
@@ -108,9 +108,7 @@ class DailyRankTop:
 
     # save get images
     @staticmethod
-    def SaveImageBinData(self, img_urls, ilu_ids, path):
-        basePages = [pllc.baseWebURL + str(i) for i in ilu_ids]     # every picture url address: base_url address + picture_id
-
+    def SaveImageBinData(self, img_urls, path):
         for i, img_url in enumerate(img_urls):
             ## login_data = urllib.urlencode(pllc.post_data)
             ## json_login_data = json.dumps(login_data)
@@ -124,7 +122,7 @@ class DailyRankTop:
                 # 'Host': img_url[8:9] + '.pixiv.net', # host from last web page
                 # must add referer, or server will return a damn http error 403, 404
                 # copy from javascript console network request headers of image
-                'Referer': basePages[i],
+                'Referer': self.basePages[i],
                 'User-Agent': pllc.useragentForLinuxBrowser,         # stable for linux chrome
             }
             # use GET way to request server
@@ -194,7 +192,7 @@ class DailyRankTop:
         ids = self.CrawlTargetURLList(self, nbr)
         urls = self.BuildOriginalImageURL(self, ids, nbr)
         # save images
-        self.SaveImageBinData(self, urls, ids, self.workdir)
+        self.SaveImageBinData(self, urls, self.workdir)
         priv_lib.PrivateLib().crawlerFinishWork(self.logpath)
 
 # =====================================================================
