@@ -1,1 +1,1 @@
-﻿[login]
+[login]

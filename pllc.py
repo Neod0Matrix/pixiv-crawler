@@ -73,17 +73,34 @@ def LoginInfoLoad():
     if isLoginCrExisted:
         userMailBox = linecache.getline(loginFilePath, 2)           # row 2, usernamemail
         userPassword = linecache.getline(loginFilePath, 3)          # row 3, password
+        # empty file
+        if userMailBox == '' or userPassword == '':
+            print SHELLHEAD + "login.cr file invaild, please input your login info"
+            userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
+            userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
+        else:
+            print SHELLHEAD + "please check your info:\n" + userMailBox + userPassword
+            check = raw_input(SHELLHEAD + "Yes or No?: ")
+            # check error
+            if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
+                print SHELLHEAD + "you can write new info"
+                userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
+                userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
+    # no login.cr file
     else:
         print SHELLHEAD + "cannot find login.cr file, please input your login info"
         userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
         userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
+
     return userMailBox, userPassword
+
+loginInfo = LoginInfoLoad()
 
 # POST way to login
 postwayRegInfo = {
             'mode': 'login', # this mode login my chrome browser has no
-            'pixiv_id': LoginInfoLoad()[0],
-            'pass': LoginInfoLoad()[1],
+            'pixiv_id': loginInfo[0],
+            'pass': loginInfo[1],
             ## 'captcha': "",
             ## 'g_recaptcha_response': "",
             ## 'source': "pc",
@@ -92,7 +109,7 @@ postwayRegInfo = {
             'skip': 1 # this skip parameter my chrome has no
         }
 # GET way need info
-getwayRegInfo = [('user', LoginInfoLoad()[0]), ('pass', LoginInfoLoad()[1])]
+getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]
 
 # ========================================some use url address=====================================================
 # maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
