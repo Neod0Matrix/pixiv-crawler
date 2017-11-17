@@ -97,10 +97,10 @@ illustInfoFilePath = privateFolder + '/PixivCrawlerTopInfo-%s-%s-%s.info' \
 excFinishTime = '%s-%s-%s %s:%s:%s' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]), str(ymdRealTime[3]), str(ymdRealTime[4]), str(ymdRealTime[5]))
 
-illustInputID = raw_input(SHELLHEAD + 'enter you want to crawl illuster id: ')
-illustHomeFolder = SetOSHomeFolder() + illustInputID\
-                    + '/%s-%s-%s/' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
-illustLogFilePath = illustHomeFolder + 'PixivCrawlerLog.log'
+## illustInputID = raw_input(SHELLHEAD + 'enter you want to crawl illuster id: ')
+## illustHomeFolder = SetOSHomeFolder() + illustInputID\
+##                    + '/%s-%s-%s/' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+## illustLogFilePath = illustHomeFolder + 'PixivCrawlerLog.log'
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

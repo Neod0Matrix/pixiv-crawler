@@ -53,13 +53,15 @@ class PrivateLib:
         # use new created opener(include cookies) to open, return server response sheet
         response = self.opener.open(request)
         content = response.read().decode('utf-8')                   # read it, and decode with UTF-8
-        if response.getcode() == pllc.reqSuccessCode:               # http request situation code, ok is 200
+
+        # http request situation code, ok is 200
+        if response.getcode() == pllc.reqSuccessCode:
             logContext = 'website response successed'
         else:
             logContext = 'website response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
 
-        return content
+        return response.getcode()                                   # run status flag
 
     # work over
     def crawlerFinishWork (self, logPath):

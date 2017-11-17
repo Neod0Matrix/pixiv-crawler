@@ -13,6 +13,9 @@ class IllustRepoAll:
     def __init__(self):
         priv_lib.PrivateLib().__init__()
 
+    def iraStartCrawler(self):
+        priv_lib.PrivateLib().crawlerFinishWork(pllc.logFilePath)   # finish
+
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

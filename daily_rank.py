@@ -4,7 +4,7 @@
 # =====================================================================
 # this python script is built to get pixiv dailyRank top images
 
-import urllib, urllib2, cookielib, re, os, json, string             # crawler depends
+import urllib2, cookielib, re, string                               # crawler depends
 import pllc, priv_lib
 
 # create a class for pixiv dailyRank top
@@ -14,52 +14,46 @@ class DailyRankTop:
         priv_lib.PrivateLib().__init__()
 
     # get input image count
+    @staticmethod
     def GetInputImageCnt (self):
         # input a string for request image number, transfer string to number
-        cnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
-        logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % cnt
+        imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
+        logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % imgCnt
         priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
-        return cnt
+        return imgCnt
 
     # run into dailyRank page
-    def GetDailyRankList(self):
+    @staticmethod
+    def CrawlTargetList(self):
         rank_url = pllc.rankWebURL                                  # daily rank url
         request = urllib2.Request(rank_url)
         response = priv_lib.PrivateLib().opener.open(request)
         content = response.read().decode('UTF-8')                   # read it, and decode with UTF-8
 
-        ## print response.getcode()
         pattern = re.compile(pllc.rankURLRegex, re.S)               # use regex, find dailyRank art works messages
-        items = re.findall(pattern, content)                        # findall return a tuple include 5 members
+        dataCapture = re.findall(pattern, content)                  # findall return a tuple include 5 members
 
-        # print it to check
-        for item in items:
-            print item[0], item[1], item[2], item[3], item[4]
+        for i in dataCapture:
+            print i[0], i[1], i[2], i[3], i[4]                      # list all members
         logContext =  'daily-rank page request successed, get the info of pictures and authors'
         priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
-        return items
+        return dataCapture
 
     # get the page url
-    def GetImagePage(self, items):
+    @staticmethod
+    def BuildBasePage(self, items):
         illust_id = [item[4] for item in items]                     # item[4] is author_id
-        img_pages = [pllc.baseWebURL + str(i) for i in illust_id]   # every picture url address: base_url address + picture_id
-        return img_pages  # get original image page
+        basePages = [pllc.baseWebURL + str(i) for i in illust_id]   # every picture url address: base_url address + picture_id
 
-    # write top info to a text file
-    def SaveDailyRankList(self, items, img_nbr):
-        infos = 'top ' + str(img_nbr) + ' messages:\n'
-        for item in items[:50]:                                     # findall class max get 50 memebr from list
-            infos += '------------no.%s-----------\n' % item[0]
-            infos += 'name: %s\nauthor: %s\nid: %s\n' % (item[1], item[2], item[4])
-        # save info in a text
-        with open(pllc.illustInfoFilePath, 'w') as text:
-            text.write(infos.encode('UTF-8'))
+        return basePages
 
     # get the pages urls
-    def GetImageURLs(self, img_pages, items, img_nbr):
+    @staticmethod
+    def BuildOriginalImageURL(self, img_pages, items, img_nbr):
         img_urls = []                                               # create a list to storage urls, init to empty
+
         # ergodic all id page, first 100
         for index, url in enumerate(img_pages[:img_nbr]):           # select download picture number
             # print url # every url of id page
@@ -101,11 +95,25 @@ class DailyRankTop:
             img_urls.append(img_original_http)                      # put into a list
 
         return img_urls
-# ============================================================================================================ #
-# ============================================================================================================ #
+
+    # write top info to a text file
+    @staticmethod
+    def SaveIndexList(self, indexs, img_nbr):
+        infos = 'top ' + str(img_nbr) + ' messages:\n'
+        # findall class max get 50 memebr from list
+        for i in indexs[:img_nbr]:
+            infos += '------------no.%s-----------\n' % i[0]  # artwork title
+            infos += 'name: %s\nauthor: %s\nid: %s\n' % (i[1], i[2], i[4])  # info
+
+        # save info in a text
+        with open(pllc.illustInfoFilePath, 'w+') as text:
+            text.write(infos.encode('UTF-8'))
+
+        return pllc.illustInfoFilePath
 
     # save get images
-    def SaveImageData(self, img_urls, img_pages, path):
+    @staticmethod
+    def SaveImageBinData(self, img_urls, img_pages, path):
         for i, img_url in enumerate(img_urls):
             ## login_data = urllib.urlencode(pllc.post_data)
             ## json_login_data = json.dumps(login_data)
@@ -130,7 +138,6 @@ class DailyRankTop:
                 ## data = json_login_data,                          # login cookie
                 headers = img_headers
             )
-            img_type_flag = 0                                       # replace png format
 
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
             urllib2.install_opener(opener)                          # must install new created opener
@@ -138,6 +145,7 @@ class DailyRankTop:
             image_name = pllc.image_header + str(i)                 # image name
 
             # pixiv website image format have jpg and png two format
+            img_type_flag = 0                                       # replace png format, reset last
             try:
                 img_response = urllib2.urlopen(img_request, timeout = 30)
             except Exception, e:
@@ -180,22 +188,23 @@ class DailyRankTop:
                 priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
                 continue
 
+    # class main call process
     def drtStartCrawler(self):
-        crawlerWorkDir = priv_lib.PrivateLib().MkDir(pllc.logFilePath,  # first create folder
-                                                     pllc.privateFolder)
-        imgCrwNbr = self.GetInputImageCnt()                         # input count of images
-        priv_lib.PrivateLib().CrawlerSignIn(pllc.logFilePath)       # sign in to pixiv
-        rankListItems = self.GetDailyRankList()                     # get rank list
-        imageWebPages = self.GetImagePage(rankListItems)
-        imageWebURLs = self.GetImageURLs(imageWebPages,             # get urls
-                                         rankListItems,
-                                         imgCrwNbr)
-        self.SaveDailyRankList(rankListItems,                       # save list
-                               imgCrwNbr)
-        self.SaveImageData(imageWebURLs,                            # save image
-                           imageWebPages,
-                           crawlerWorkDir)
-        priv_lib.PrivateLib().crawlerFinishWork(pllc.logFilePath)   # finish
+        # first create folder
+        crawlerWorkDir = priv_lib.PrivateLib().MkDir(pllc.logFilePath, pllc.privateFolder)
+        # input count of images
+        imgCrwNbr = self.GetInputImageCnt(self)
+        # sign in to pixiv
+        priv_lib.PrivateLib().CrawlerSignIn(pllc.logFilePath)
+        # get rank, page and url
+        rankListItems = self.CrawlTargetList(self)
+        imageWebPages = self.BuildBasePage(self, rankListItems)
+        imageWebURLs = self.BuildOriginalImageURL(self, imageWebPages, rankListItems, imgCrwNbr)
+        # save data
+        self.SaveIndexList(self, rankListItems, imgCrwNbr)
+        self.SaveImageBinData(self, imageWebURLs, imageWebPages, crawlerWorkDir)
+        # finish
+        priv_lib.PrivateLib().crawlerFinishWork(pllc.logFilePath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

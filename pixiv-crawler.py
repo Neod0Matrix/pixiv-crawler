@@ -10,10 +10,18 @@ import pllc, daily_rank, illust_repo
 def crawlerCallHandler ():
     mode = raw_input(pllc.SHELLHEAD + 'select a mode: ')
     if mode == 'drt':
+        print pllc.SHELLHEAD + "dailyRankTop mode"
         daily_rank.DailyRankTop().drtStartCrawler()
     elif mode == 'ira':
-        # illust_repo.IllustRepoAll().StartCrawlerWork()
-        print pllc.SHELLHEAD + "this fuction haven't built\n"
+        print pllc.SHELLHEAD + "illustRepoAll mode"
+        illust_repo.IllustRepoAll().iraStartCrawler()
+    elif mode == 'h':
+        print pllc.SHELLHEAD + \
+              "code by </MATRIX>@Neod Anderjon\n" \
+              "MatPixivCrawler Help Page\n" \
+              "drt  ---     dailyRankTop mode\n" \
+              "ira  ---     illustRepoAll mode\n" \
+              "h    ---     help page\n"
     else:
         print pllc.SHELLHEAD + "argv error\n"
 
