@@ -25,6 +25,8 @@ def crawlerCallHandler ():
     else:
         print pllc.SHELLHEAD + "argv error\n"
 
+    return mode
+
 if __name__ == '__main__':
     crawlerCallHandler()
 

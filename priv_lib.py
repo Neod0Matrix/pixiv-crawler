@@ -15,7 +15,7 @@ class PrivateLib:
         self.loginURL = pllc.hostWebURL                             # pixiv login page
         # javascript console's headers dict
         # only use in linux's google chrome
-        self.loginHeader = pllc.loginDataHeader
+        self.loginHeader = pllc.SetUserAgentHeader()                # mate linux and windows
         # use post way to request service
         self.postData = json.dumps(urllib.urlencode(pllc.postwayRegInfo))
         # get local cookie, create a opener for pixiv class
@@ -24,7 +24,7 @@ class PrivateLib:
         self.opener = urllib2.build_opener(self.cookieHandler)
 
     # work log save
-    def LogCrawlerWork (self, logPath, logInfo):
+    def LogCrawlerWork(self, logPath, logInfo):
         # this log file must be a new file
         logFile = open(logPath, 'a+')                               # add context to file option 'a+'
         print pllc.SHELLHEAD + logInfo                              # with shell header
@@ -52,7 +52,7 @@ class PrivateLib:
         request = urllib2.Request(self.loginURL, self.postData, self.loginHeader)
         # use new created opener(include cookies) to open, return server response sheet
         response = self.opener.open(request)
-        content = response.read().decode('utf-8')                   # read it, and decode with UTF-8
+        web_src = response.read().decode('utf-8')                   # read it, and decode with UTF-8
 
         # http request situation code, ok is 200
         if response.getcode() == pllc.reqSuccessCode:
@@ -61,10 +61,10 @@ class PrivateLib:
             logContext = 'website response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
 
-        return response.getcode()                                   # run status flag
+        return web_src
 
     # work over
-    def crawlerFinishWork (self, logPath):
+    def crawlerFinishWork(self, logPath):
         # logging info
         logContext = "crawler work finished, log time: " + pllc.excFinishTime
         self.LogCrawlerWork(logPath, logContext)

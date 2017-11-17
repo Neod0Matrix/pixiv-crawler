@@ -6,15 +6,15 @@ Thanks to fork and watch my project
 
 Update
 ======
-Version: v1p2_LTE 
+Version: v1p3_LTE 
 
-Last Update Time: 20171117pm1341
+Last Update Time: 20171117pm1644
 
 This python crawler is built to crawl pixiv images
 
 It have two mode: dailyRankTop and illustRepoAll 
 
-* This version's illustRepoAll mode haven't built, don't use
+* This version's illustRepoAll mode haven't been finished
 
 Please run in a good network, in some contry and area, it may crawl slowly
 

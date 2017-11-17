@@ -15,7 +15,7 @@ class DailyRankTop:
 
     # get input image count
     @staticmethod
-    def GetInputImageCnt (self):
+    def GetInputImageCnt(self):
         # input a string for request image number, transfer string to number
         imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
         logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % imgCnt
@@ -23,16 +23,16 @@ class DailyRankTop:
 
         return imgCnt
 
-    # run into dailyRank page
+    # crawl dailyRank list
     @staticmethod
     def CrawlTargetList(self):
         rank_url = pllc.rankWebURL                                  # daily rank url
         request = urllib2.Request(rank_url)
         response = priv_lib.PrivateLib().opener.open(request)
-        content = response.read().decode('UTF-8')                   # read it, and decode with UTF-8
-
+        web_src = response.read().decode('UTF-8')                   # get webpage src
+        print web_src
         pattern = re.compile(pllc.rankURLRegex, re.S)               # use regex, find dailyRank art works messages
-        dataCapture = re.findall(pattern, content)                  # findall return a tuple include 5 members
+        dataCapture = re.findall(pattern, web_src)                  # findall return a tuple include 5 members
 
         for i in dataCapture:
             print i[0], i[1], i[2], i[3], i[4]                      # list all members
@@ -60,8 +60,8 @@ class DailyRankTop:
             logContext = 'locking no.%d picture page' % index
             priv_lib.PrivateLib().LogCrawlerWork(pllc.logFilePath, logContext)
 
-            response = priv_lib.PrivateLib().opener.open(urllib2.Request(url))       # get original image page source code
-            content = response.read().decode('UTF-8')               # decode to utf-8
+            response = priv_lib.PrivateLib().opener.open(urllib2.Request(url)) # get original image page source code
+            web_src = response.read().decode('UTF-8')               # decode to utf-8
 
             mateIDs = [item[4] for item in items]                   # all catch illust id list
             # use thumbnail info to get key info, then build original image url
@@ -72,7 +72,7 @@ class DailyRankTop:
                 # must have a verify way
                 while illusterID != mateIDs[index]:
                     # cut to get a https address
-                    img_https = re.compile(pllc.imgThumbnailRegex, re.S).findall(content)[start_mate][10:-1]
+                    img_https = re.compile(pllc.imgThumbnailRegex, re.S).findall(web_src)[start_mate][10:-1]
                     # cut to get a http address
                     img_http = img_https[0:4] + img_https[4:]
                     # default is png, after handle jpg
