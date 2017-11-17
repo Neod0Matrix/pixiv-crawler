@@ -7,7 +7,7 @@
 import pllc, daily_rank, illust_repo
 
 # main fuction
-def main ():
+def main():
     mode = raw_input(pllc.SHELLHEAD + 'select a mode: ')
     if mode == 'drt':
         print pllc.SHELLHEAD + "dailyRankTop mode"

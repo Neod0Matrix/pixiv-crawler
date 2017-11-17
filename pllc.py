@@ -11,7 +11,7 @@ __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
 __version__         = 'v0p8_LTE'                                    # version string
 
-import time, os                                                     # name folder and files
+import time, os, linecache                                          # name folder and files
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
@@ -60,14 +60,30 @@ def SetUserAgentHeader():
 
     return loginDataHeader
 
-# login account
-userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
-userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
+# login.cr read or manual input
+loginCrFile = 'login.cr'                                            # login info file
+# =================================
+# [login]
+# <mail>
+# <passwd>
+# =================================
+def LoginInfoLoad():
+    loginFilePath = os.getcwd() + '/' + loginCrFile                 # get local dir path
+    isLoginCrExisted = os.path.exists(loginFilePath)
+    if isLoginCrExisted:
+        userMailBox = linecache.getline(loginFilePath, 2)           # row 2, usernamemail
+        userPassword = linecache.getline(loginFilePath, 3)          # row 3, password
+    else:
+        print SHELLHEAD + "cannot find login.cr file, please input your login info"
+        userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
+        userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
+    return userMailBox, userPassword
+
 # POST way to login
 postwayRegInfo = {
             'mode': 'login', # this mode login my chrome browser has no
-            'pixiv_id': userMailBox,
-            'pass': userPassword,
+            'pixiv_id': LoginInfoLoad()[0],
+            'pass': LoginInfoLoad()[1],
             ## 'captcha': "",
             ## 'g_recaptcha_response': "",
             ## 'source': "pc",
@@ -76,7 +92,7 @@ postwayRegInfo = {
             'skip': 1 # this skip parameter my chrome has no
         }
 # GET way need info
-getwayRegInfo = [('user', userMailBox), ('pass', userPassword)]
+getwayRegInfo = [('user', LoginInfoLoad()[0]), ('pass', LoginInfoLoad()[1])]
 
 # ========================================some use url address=====================================================
 # maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
