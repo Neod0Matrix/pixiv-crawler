@@ -4,8 +4,9 @@
 # =====================================================================
 # this python script is built to get a illust all repo images
 
-import urllib2, cookielib, re, os, json, string                     # crawler depends
-import pllc, priv_lib
+import urllib2, cookielib, re                                       # crawler depends
+import datetime, os, string
+import pllc, priv_lib                                               # local lib
 
 # create a class for pixiv dailyRank top
 class IllustRepoAll:
@@ -48,15 +49,21 @@ class IllustRepoAll:
 
         return capCnt
 
-
-
     def iraStartCrawler(self):
         # collect essential info
         logFilePath = self.GetInputEssentialInfo(self)
+        # log runtime
+        starttime = datetime.datetime.now()
         # sign in to pixiv
         priv_lib.PrivateLib().CrawlerSignIn(logFilePath)
         # get capture image count
         crawCnt = self.CheckCrawlTargetCnt(self, logFilePath)
+        # stop log time
+        endtime = datetime.datetime.now()
+        logContext = "time consuming: %ds" % (endtime - starttime).seconds
+        priv_lib.PrivateLib().LogCrawlerWork(logFilePath, logContext)
+        # finish
+        priv_lib.PrivateLib().crawlerFinishWork(logFilePath)
 
 
 # =====================================================================

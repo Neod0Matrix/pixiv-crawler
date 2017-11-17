@@ -4,8 +4,9 @@
 # =====================================================================
 # this python script is built to get pixiv dailyRank top images
 
-import urllib2, cookielib, re, string, os                           # crawler depends
-import pllc, priv_lib
+import urllib2, cookielib, re                                       # crawler depends
+import datetime, os, string
+import pllc, priv_lib                                               # local lib
 
 # create a class for pixiv dailyRank top
 class DailyRankTop:
@@ -184,6 +185,8 @@ class DailyRankTop:
     def drtStartCrawler(self):
         # prepare works
         nbr = self.GetEssentialInfo(self, self.workdir, self.logpath)
+        # log runtime
+        starttime = datetime.datetime.now()
         # sign in to pixiv
         priv_lib.PrivateLib().CrawlerSignIn(self.logpath)
         # get ids and urls
@@ -191,6 +194,11 @@ class DailyRankTop:
         urls = self.BuildOriginalImageURL(self, ids, nbr)
         # save images
         self.SaveImageBinData(self, urls, self.workdir)
+        # stop log time
+        endtime = datetime.datetime.now()
+        logContext = "time consuming: %ds" % (endtime - starttime).seconds
+        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+        # finish
         priv_lib.PrivateLib().crawlerFinishWork(self.logpath)
 
 # =====================================================================
