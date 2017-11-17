@@ -123,7 +123,7 @@ illustArtworkIndex = 'http://www.pixiv.net/member_illust.php?id='   # artwork in
 # =======================================regex collection==========================================================
 rankURLRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
 imgThumbnailRegex = '<img src=".*?"'                                # many strings array
-imgs150x150Regex = 'data-src=".*?_p0_master1200.jpg"'
+imgs150x150Regex = ''
 
 # illust artwork count mate
 def illustAWCntRegex(setid):

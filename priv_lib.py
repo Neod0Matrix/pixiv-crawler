@@ -68,18 +68,19 @@ class PrivateLib:
         # logging info
         logContext = "crawler work finished, log time: " + pllc.excFinishTime
         self.LogCrawlerWork(logPath, logContext)
-        logContext = "\n"  # print a empty row
+        logContext = "\n"                                           # print a empty row
         self.LogCrawlerWork(logPath, logContext)
         logContext = \
-            'copyright @' + pllc.__laboratory__ + ' technology support\n' \
-                                                  'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n' \
-            + pllc.__version__  # print version string
+            'copyright @' + pllc.__laboratory__ \
+            + ' technology support\n' \
+            'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n' \
+            + pllc.__version__                                      # print version string
         self.LogCrawlerWork(logPath, logContext)
 
         # open filebox to watch result
         if os.name == 'posix':
             os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
-            exit()  # after open folder exit process
+            exit()                                                  # after open folder exit process
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

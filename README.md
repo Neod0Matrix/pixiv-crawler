@@ -8,7 +8,7 @@ Update
 ======
 Version: v1p7_LTE 
 
-Last Update Time: 20171117pm2109
+Last Update Time: 20171117pm2323
 
 This python crawler is built to crawl pixiv images
 
@@ -32,6 +32,9 @@ All needed data in pllc.py, please check all then run pixiv-crawler.py
 
 Run
 ======
+
+* git clone https://github.com/Neod0Matrix/pixiv-crawler.git
+
 First config your local folder in pllc.py
 
 Then:

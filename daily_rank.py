@@ -32,6 +32,9 @@ class DailyRankTop:
     # crawl dailyRank list
     @staticmethod
     def CrawlTargetURLList(self, img_nbr):
+        logContext = 'crawl rank list======>'
+        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+
         rank_url = pllc.rankWebURL
         request = urllib2.Request(rank_url)
         response = priv_lib.PrivateLib().opener.open(request)
@@ -48,7 +51,7 @@ class DailyRankTop:
         # findall class max get 50 memebr from list
         for i in dataCapture[:img_nbr]:
             infos += '------------no.%s-----------\n' % i[0]  # artwork title
-            infos += 'name: %s\nauthor: %s\nid: %s\n' % (i[1], i[2], i[4])
+            infos += 'name: %s\nilluster: %s\nid: %s\n' % (i[1], i[2], i[4])
 
         # save info in a text
         with open(pllc.illustInfoFilePath, 'w+') as text:
@@ -63,6 +66,9 @@ class DailyRankTop:
         img_urls = []                                               # create a list to storage urls, init to empty
 
         self.basePages = [pllc.baseWebURL + str(i) for i in ilu_ids]     # every picture url address: base_url address + picture_id
+
+        logContext = 'collect some url info======>'
+        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
         # ergodic all id page, first 100
         for index, url in enumerate(self.basePages[:img_nbr]):           # select download picture number
@@ -108,6 +114,9 @@ class DailyRankTop:
     # save get images
     @staticmethod
     def SaveImageBinData(self, img_urls, path):
+        logContext = 'start to download target======>'
+        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+
         for i, img_url in enumerate(img_urls):
             if os.name == 'posix':
                 img_headers = {
@@ -168,8 +177,8 @@ class DailyRankTop:
                     # image has two format: jpg
                     with open(path + '/' + image_name + '.jpg', 'wb') as jpg:
                         jpg.write(img_response.read())              # do not decode
-                        logContext = 'save no.%d image' % i
-                        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+                    logContext = 'download no.%d finished' % i
+                    priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
             if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
                 logContext = 'get target image ok'
@@ -178,8 +187,8 @@ class DailyRankTop:
                 # image has two format: png
                 with open(path + '/' + image_name + '.png', 'wb') as png:
                     png.write(img_response.read())                  # do not decode
-                    logContext = 'save no.%d image' % i
-                    priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+                logContext = 'download no.%d finished' % i
+                priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
     # class main call process
     def drtStartCrawler(self):

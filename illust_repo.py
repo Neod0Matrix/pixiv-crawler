@@ -28,7 +28,7 @@ class IllustRepoAll:
     # craw illust artwork count
     @staticmethod
     def CheckCrawlTargetCnt(self, logPath):
-        cnt_url = pllc.illustHomeURL + self.illustInputID
+        cnt_url = pllc.illustArtworkIndex + self.illustInputID
         # build http request
         request = urllib2.Request(cnt_url)
         response = priv_lib.PrivateLib().opener.open(request)
@@ -58,6 +58,7 @@ class IllustRepoAll:
         priv_lib.PrivateLib().CrawlerSignIn(logFilePath)
         # get capture image count
         crawCnt = self.CheckCrawlTargetCnt(self, logFilePath)
+
         # stop log time
         endtime = datetime.datetime.now()
         logContext = "time consuming: %ds" % (endtime - starttime).seconds
