@@ -4,9 +4,12 @@
 # =====================================================================
 # this python script is built to get a illust all repo images
 
-import urllib2, cookielib, re, json, urllib                         # crawler depends
-import datetime, os, string
+import urllib2, cookielib, re                                       # crawler depends
+import datetime, string, sys
 import pllc, priv_lib                                               # local lib
+
+reload(sys)
+sys.setdefaultencoding('UTF-8')
 
 # create a class for pixiv dailyRank top
 class IllustRepoAll:
@@ -20,6 +23,7 @@ class IllustRepoAll:
     def GetInputEssentialInfo(self):
         illustHomeFolder = pllc.SetOSHomeFolder() + self.illustInputID + '/'
         self.workdir = illustHomeFolder
+        self.infoPath = illustHomeFolder + 'images.info'
         illustLogFilePath = illustHomeFolder + 'PixivCrawlerLog.log'
         # create illust homefolder
         priv_lib.PrivateLib().MkDir(illustLogFilePath, illustHomeFolder)
@@ -35,9 +39,17 @@ class IllustRepoAll:
         response = priv_lib.PrivateLib().opener.open(request)
         web_src = response.read().decode('UTF-8')                   # read it, and decode with UTF-8
 
+        # mate illust name
+        illustNamePattern = re.compile(pllc.illustNameRegex, re.S)
+        self.illustName = re.findall(illustNamePattern, web_src)[0][-5:] # get illust id name
+
+        # mate images name
+        imagesNamePattern = re.compile(pllc.imagesNameRegex, re.S)
+        self.imagesName = re.findall(imagesNamePattern, web_src)[1:][5:][:-8] # get images name list
+
         # mate id and max count parse
-        pattern = re.compile(pllc.illustAWCntRegex(self.illustInputID), re.S)  # use regex, find dailyRank art works messages
-        dataCapture = re.findall(pattern, web_src)                  # findall return a tuple include 5 members
+        pattern = re.compile(pllc.illustAWCntRegex(self.illustInputID), re.S)
+        dataCapture = re.findall(pattern, web_src)
 
         # cut count from include parse
         nbrPattern = re.compile(pllc.nbrRegex, re.S)
@@ -51,7 +63,7 @@ class IllustRepoAll:
         while (capCnt > maxCnt) or (capCnt <= 0):
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD
                         + 'error, input count must <= %d and not 0: ' % maxCnt))
-        logContext = "check collect illustID:" + self.illustInputID + " images:%d" % capCnt
+        logContext = "check collect illuster id:" + self.illustInputID + " image(s):%d" % capCnt
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
         return capCnt
@@ -85,6 +97,7 @@ class IllustRepoAll:
         # cut artwork id list
         nbrPattern = re.compile(pllc.nbrRegex, re.S)
 
+        artworkIDs = []                                             # images id list
         imgOriginalhttps = []                                       # image original page url
         self.basePages = []                                         # image basic page
         for i in urlCapture:
@@ -92,9 +105,18 @@ class IllustRepoAll:
             # init to png, then will change jpg
             build_http = 'https://i.pximg.net/img-original/img/' + vaildWord + '_p0.png'
             # build basic page use to request image
-            basePage = pllc.baseWebURL + re.findall(nbrPattern, vaildWord)[6]
+            img_id = re.findall(nbrPattern, vaildWord)[6]
+            basePage = pllc.baseWebURL + img_id
+            artworkIDs.append(img_id)                               # image id list
             imgOriginalhttps.append(build_http)                     # image url list
             self.basePages.append(basePage)                         # basic page list
+
+        # log images info
+        logContext = 'illuster ' + self.illustName + ' id ' + self.illustInputID + ' artworks info: \n'
+        priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
+        for k, i in enumerate(self.imagesName):
+            logContext = 'no.%d image: %s id: %s' % (k, i, artworkIDs[k])
+            priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
         return imgOriginalhttps
 

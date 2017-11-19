@@ -11,7 +11,10 @@ __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
 __version__         = 'v0p8_LTE'                                    # version string
 
-import time, os, linecache                                          # name folder and files
+import time, os, linecache, sys                                     # name folder and files
+
+reload(sys)
+sys.setdefaultencoding('UTF-8')
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
@@ -160,13 +163,12 @@ def illustArtworkIndex(setid):
 rankURLRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
 imgThumbnailRegex = '<img src=".*?"'                                # many strings array
 nbrRegex = '\d+\.?\d*'                                              # cut number
+illustNameRegex = 'r:title" content=".*? '                          # mate illust name
+imagesNameRegex = 'alt="(.*?)"></a></'                              # mate images name
 
 # illust artwork count mate
 def illustAWCntRegex(setid):
     return 'eRegister" data-user-id="%s">.*?<' % setid
-
-def illustAWIndexRegex(setid):
-    return 'illust_id=' + setid + '"class'
 
 # ======================get format time, and get year-month-date to be a folder name===============================
 ymdRealTime = time.localtime()

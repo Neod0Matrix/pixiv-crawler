@@ -5,7 +5,11 @@
 # this python script is built to create a private library use in this crawler
 
 import urllib, urllib2, cookielib, os, json                         # crawler depends
+import sys
 import pllc                                                         # messages
+
+reload(sys)
+sys.setdefaultencoding('UTF-8')
 
 # create a class for pixiv dailyRank top
 class PrivateLib:
