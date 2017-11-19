@@ -111,85 +111,6 @@ class DailyRankTop:
 
         return img_urls
 
-    # save get images
-    @staticmethod
-    def SaveImageBinData(self, img_urls, path):
-        logContext = 'start to download target======>'
-        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-        for i, img_url in enumerate(img_urls):
-            if os.name == 'posix':
-                img_headers = {
-                    'Accept': "image/webp,image/*,*/*;q=0.8",
-                    'Accept-Encoding': "gzip, deflate, sdch",
-                    'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
-                    'Connection': "keep-alive",
-                    # 'Host': img_url[8:9] + '.pixiv.net',          # host from last web page
-                    # must add referer, or server will return a damn http error 403, 404
-                    # copy from javascript console network request headers of image
-                    'Referer': self.basePages[i],                   # request page
-                    'User-Agent': pllc.useragentForLinuxBrowser,
-                }
-            elif os.name == 'nt':
-                img_headers = {
-                    'Accept': "image/webp,image/*,*/*;q=0.8",
-                    'Accept-Encoding': "gzip, deflate, sdch",
-                    'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
-                    'Connection': "keep-alive",
-                    # 'Host': img_url[8:9] + '.pixiv.net', # host from last web page
-                    # must add referer, or server will return a damn http error 403, 404
-                    # copy from javascript console network request headers of image
-                    'Referer': self.basePages[i],
-                    'User-Agent': pllc.useragentForWindowsBrowser,
-                }
-
-            # use GET way to request server
-            ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
-            img_request = urllib2.Request(url = img_url, headers = img_headers)
-            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-            urllib2.install_opener(opener)                          # must install new created opener
-
-            image_name = pllc.image_header + str(i)                 # image name
-
-            # pixiv website image format have jpg and png two format
-            img_type_flag = 0                                       # replace png format, reset last
-            try:
-                img_response = urllib2.urlopen(img_request, timeout = 30)
-            except Exception, e:
-                logContext = "check http error: " + str(e)
-                priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-                img_type_flag += 1                                  # replace jpg format
-                logContext = "this image maybe a manga comic or a jpg image"
-                priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-                img_request = urllib2.Request(
-                    url = img_url[0:-3] + 'jpg',                    # img_http
-                    ## data = json_login_data,                      # login cookie
-                    headers = img_headers
-                )
-                opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-                urllib2.install_opener(opener)                      # must install new created opener
-                img_response = urllib2.urlopen(img_request, timeout = 300) # request timeout set longer
-
-                if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
-                    logContext = 'get target image ok'
-                    priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-                    # image has two format: jpg
-                    with open(path + '/' + image_name + '.jpg', 'wb') as jpg:
-                        jpg.write(img_response.read())              # do not decode
-                    logContext = 'download no.%d finished' % i
-                    priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-            if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
-                logContext = 'get target image ok'
-                priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-                # image has two format: png
-                with open(path + '/' + image_name + '.png', 'wb') as png:
-                    png.write(img_response.read())                  # do not decode
-                logContext = 'download no.%d finished' % i
-                priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
     # class main call process
     def drtStartCrawler(self):
         # prepare works
@@ -202,7 +123,7 @@ class DailyRankTop:
         ids = self.CrawlTargetURLList(self, nbr)
         urls = self.BuildOriginalImageURL(self, ids, nbr)
         # save images
-        self.SaveImageBinData(self, urls, self.workdir)
+        priv_lib.PrivateLib().SaveImageBinData(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
         endtime = datetime.datetime.now()
         logContext = "elapsed time: %ds" % (endtime - starttime).seconds

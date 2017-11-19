@@ -159,6 +159,7 @@ def illustArtworkIndex(setid):
 # =======================================regex collection==========================================================
 rankURLRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
 imgThumbnailRegex = '<img src=".*?"'                                # many strings array
+nbrRegex = '\d+\.?\d*'                                              # cut number
 
 # illust artwork count mate
 def illustAWCntRegex(setid):

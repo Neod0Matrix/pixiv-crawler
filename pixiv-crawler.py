@@ -16,14 +16,14 @@ def main():
         print pllc.SHELLHEAD + "illustRepoAll mode"
         illust_repo.IllustRepoAll().iraStartCrawler()
     elif mode == 'h':
-        print pllc.SHELLHEAD + \
-              "code by </MATRIX>@Neod Anderjon\n" \
-              "MatPixivCrawler Help Page\n" \
-              "drt  ---     dailyRankTop mode\n" \
-              "ira  ---     illustRepoAll mode\n" \
-              "h    ---     help page\n"
+        print pllc.SHELLHEAD +                      \
+              "code by </MATRIX>@Neod Anderjon\n"   \
+              "MatPixivCrawler Help Page\n"         \
+              "drt  ---     dailyRankTop mode\n"    \
+              "ira  ---     illustRepoAll mode\n"   \
+              "help ---     help page\n"
     else:
-        print pllc.SHELLHEAD + "argv error\n"
+        print pllc.SHELLHEAD + "argv(s) error\n"
 
     return mode
 

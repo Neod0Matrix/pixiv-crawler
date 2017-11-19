@@ -19,6 +19,7 @@ class IllustRepoAll:
     @staticmethod
     def GetInputEssentialInfo(self):
         illustHomeFolder = pllc.SetOSHomeFolder() + self.illustInputID + '/'
+        self.workdir = illustHomeFolder
         illustLogFilePath = illustHomeFolder + 'PixivCrawlerLog.log'
         # create illust homefolder
         priv_lib.PrivateLib().MkDir(illustLogFilePath, illustHomeFolder)
@@ -34,10 +35,15 @@ class IllustRepoAll:
         response = priv_lib.PrivateLib().opener.open(request)
         web_src = response.read().decode('UTF-8')                   # read it, and decode with UTF-8
 
+        # mate id and max count parse
         pattern = re.compile(pllc.illustAWCntRegex(self.illustInputID), re.S)  # use regex, find dailyRank art works messages
         dataCapture = re.findall(pattern, web_src)                  # findall return a tuple include 5 members
 
-        maxCnt = string.atoi(dataCapture[0][-4:-1])                 # get illust max artwork count
+        # cut count from include parse
+        nbrPattern = re.compile(pllc.nbrRegex, re.S)
+        nbrMate = re.findall(nbrPattern, dataCapture[0])
+        maxCnt = string.atoi(nbrMate[1])                            # nbrMate[0] is input id, nbrMate[1] is max count
+
         # input want image count
         capCnt = string.atoi(raw_input(pllc.SHELLHEAD
                         + 'enter you want to crawl image count(must <= %d): ' % maxCnt))
@@ -76,12 +82,21 @@ class IllustRepoAll:
         pattern = re.compile(pllc.imgThumbnailRegex, re.S)          # use regex, find dailyRank art works messages
         urlCapture = re.findall(pattern, web_src)[1:20]             # findall return a tuple include 5 members
 
-        vaildWords = []
+        # cut artwork id list
+        nbrPattern = re.compile(pllc.nbrRegex, re.S)
+
+        imgOriginalhttps = []                                       # image original page url
+        self.basePages = []                                         # image basic page
         for i in urlCapture:
-            vaildWords.append(i[-47:-19])                           # get valid word from thumbnail url
+            vaildWord = i[-47:-19]                                  # cut vaild words
+            # init to png, then will change jpg
+            build_http = 'https://i.pximg.net/img-original/img/' + vaildWord + '_p0.png'
+            # build basic page use to request image
+            basePage = pllc.baseWebURL + re.findall(nbrPattern, vaildWord)[6]
+            imgOriginalhttps.append(build_http)                     # image url list
+            self.basePages.append(basePage)                         # basic page list
 
-        return vaildWords
-
+        return imgOriginalhttps
 
     def iraStartCrawler(self):
         # collect essential info
@@ -92,8 +107,9 @@ class IllustRepoAll:
         priv_lib.PrivateLib().CrawlerSignIn(logFilePath)
         # get capture image count
         crawCnt = self.CheckCrawlTargetCnt(self, logFilePath)
-        self.CrawlAllTargetURL(self, logFilePath)
-
+        urls = self.CrawlAllTargetURL(self, logFilePath)[:crawCnt]
+        # save images
+        priv_lib.PrivateLib().SaveImageBinData(urls, self.basePages, self.workdir, logFilePath)
         # stop log time
         endtime = datetime.datetime.now()
         logContext = "elapsed time: %ds" % (endtime - starttime).seconds
