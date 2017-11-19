@@ -28,9 +28,9 @@ def SetUserAgentHeader():
     # linux
     if os.name == 'posix':
         loginDataHeader = {
-            ## 'Accept': "application/json, text/javascript, */*; q=0.01",
-            ## 'Accept-Encoding': "gzip, deflate, br",
-            ## 'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
+            'Accept': "application/json, text/javascript, */*; q=0.01",
+            'Accept-Encoding': "gzip, deflate, br",
+            'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
             'Connection': "keep-alive",
             'Content-Length': reqSuccessCode,
             'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
@@ -44,9 +44,9 @@ def SetUserAgentHeader():
     # windows
     elif os.name == 'nt':
         loginDataHeader = {
-            ## 'Accept': "application/json, text/javascript, */*; q=0.01",
-            ## 'Accept-Encoding': "gzip, deflate, br",
-            ## 'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
+            'Accept': "application/json, text/javascript, */*; q=0.01",
+            'Accept-Encoding': "gzip, deflate, br",
+            'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
             'Connection': "keep-alive",
             'Content-Length': reqSuccessCode,
             'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
@@ -59,6 +59,39 @@ def SetUserAgentHeader():
         }
 
     return loginDataHeader
+
+# login mainpage
+def SetUserAgentForMainPage(referer):
+    # linux
+    if os.name == 'posix':
+        DataHeader = {
+            'Accept': "application/json, text/javascript, */*; q=0.01",
+            'Accept-Encoding': "br",
+            'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
+            'Cache-Control': "max-age=0",
+            'Connection': "keep-alive",
+            'DNT': "1",
+            'Host': "www.pixiv.net",
+            'Upgrade-Insecure-Requests': "1",
+            'Referer': referer,
+            'User-Agent': useragentForLinuxBrowser,
+        }
+    # windows
+    elif os.name == 'nt':
+        DataHeader = {
+            'Accept': "application/json, text/javascript, */*; q=0.01",
+            'Accept-Encoding': "br",
+            'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
+            'Cache-Control': "max-age=0",
+            'Connection': "keep-alive",
+            'DNT': "1",
+            'Host': "www.pixiv.net",
+            'Upgrade-Insecure-Requests': "1",
+            'Referer': referer,
+            'User-Agent': useragentForWindowsBrowser,
+        }
+
+    return DataHeader
 
 # login.cr read or manual input
 loginCrFile = 'login.cr'                                            # login info file
@@ -118,16 +151,21 @@ rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily&content=illust' # dail
 rankWebURL_R18 = 'https://www.pixiv.net/ranking.php?mode=daily_r18&content=illust&ref=rn-h-r18-3'
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
 illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
-illustArtworkIndex = 'http://www.pixiv.net/member_illust.php?id='   # artwork index
+
+# illust mainpage artwork index
+def illustArtworkIndex(setid):
+    return 'http://www.pixiv.net/member_illust.php?id=' + setid + '&type=all'
 
 # =======================================regex collection==========================================================
 rankURLRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
 imgThumbnailRegex = '<img src=".*?"'                                # many strings array
-imgs150x150Regex = ''
 
 # illust artwork count mate
 def illustAWCntRegex(setid):
     return 'eRegister" data-user-id="%s">.*?<' % setid
+
+def illustAWIndexRegex(setid):
+    return 'illust_id=' + setid + '"class'
 
 # ======================get format time, and get year-month-date to be a folder name===============================
 ymdRealTime = time.localtime()

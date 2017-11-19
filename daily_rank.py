@@ -196,7 +196,7 @@ class DailyRankTop:
         nbr = self.GetEssentialInfo(self, self.workdir, self.logpath)
         # log runtime
         starttime = datetime.datetime.now()
-        # sign in to pixiv
+        # check website can response crawler
         priv_lib.PrivateLib().CrawlerSignIn(self.logpath)
         # get ids and urls
         ids = self.CrawlTargetURLList(self, nbr)
@@ -205,7 +205,7 @@ class DailyRankTop:
         self.SaveImageBinData(self, urls, self.workdir)
         # stop log time
         endtime = datetime.datetime.now()
-        logContext = "time consuming: %ds" % (endtime - starttime).seconds
+        logContext = "elapsed time: %ds" % (endtime - starttime).seconds
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
         # finish
         priv_lib.PrivateLib().crawlerFinishWork(self.logpath)

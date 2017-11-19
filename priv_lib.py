@@ -14,7 +14,6 @@ class PrivateLib:
         # request sheet
         self.loginURL = pllc.hostWebURL                             # pixiv login page
         # javascript console's headers dict
-        # only use in linux's google chrome
         self.loginHeader = pllc.SetUserAgentHeader()                # mate linux and windows
         # use post way to request service
         self.postData = json.dumps(urllib.urlencode(pllc.postwayRegInfo))
@@ -52,7 +51,8 @@ class PrivateLib:
         request = urllib2.Request(self.loginURL, self.postData, self.loginHeader)
         # use new created opener(include cookies) to open, return server response sheet
         response = self.opener.open(request)
-        web_src = response.read().decode('utf-8')                   # read it, and decode with UTF-8
+        # sometimes src has some error-code, use decode utf8 and encode gbk to resolve
+        web_src = response.read().decode("UTF-8", "ignore").encode("GBK", "ignore")
 
         # http request situation code, ok is 200
         if response.getcode() == pllc.reqSuccessCode:
@@ -68,10 +68,8 @@ class PrivateLib:
         # logging info
         logContext = "crawler work finished, log time: " + pllc.excFinishTime
         self.LogCrawlerWork(logPath, logContext)
-        logContext = "\n"                                           # print a empty row
-        self.LogCrawlerWork(logPath, logContext)
         logContext = \
-            'copyright @' + pllc.__laboratory__ \
+            'copyright @' + pllc.__laboratory__ + ' ' + pllc.__organization__\
             + ' technology support\n' \
             'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n' \
             + pllc.__version__                                      # print version string
