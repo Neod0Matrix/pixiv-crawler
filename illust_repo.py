@@ -58,7 +58,7 @@ class IllustRepoAll:
 
         # input want image count
         capCnt = string.atoi(raw_input(pllc.SHELLHEAD
-                        + 'enter you want to crawl image count(must <= %d): ' % maxCnt))
+                        + 'enter you want to crawl image count(must <= %d, ever page 20 images): ' % maxCnt))
         # count error
         while (capCnt > maxCnt) or (capCnt <= 0):
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD
@@ -71,6 +71,11 @@ class IllustRepoAll:
     # craw illust artwork count
     @staticmethod
     def CrawlAllTargetURL(self, logPath):
+        # page request regular:
+        # no.1 referer: &type=all request url: &type=all&p=2
+        # no.2 referer: &type=all&p=2 request url: &type=all&p=3
+        # no.3 referer: &type=all&p=3 request url: &type=all&p=4
+        # ...
         urlTarget = pllc.illustArtworkIndex(self.illustInputID)     # get mainpage all 20 images url
 
         # build a mainpage request
@@ -112,7 +117,7 @@ class IllustRepoAll:
             self.basePages.append(basePage)                         # basic page list
 
         # log images info
-        logContext = 'illuster ' + self.illustName + ' id ' + self.illustInputID + ' artworks info: \n'
+        logContext = 'illuster ' + self.illustName + ' id ' + self.illustInputID + ' artworks info====>'
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
         for k, i in enumerate(self.imagesName):
             logContext = 'no.%d image: %s id: %s' % (k, i, artworkIDs[k])

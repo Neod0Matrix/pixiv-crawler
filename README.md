@@ -8,8 +8,8 @@ License
 Update
 ======
 
-    Version: v2p0_LTE 
-    Last Update Time: 20171120am0102
+    Version: v2p1_LTE 
+    Last Update Time: 20171120am0125
     
     This python crawler is built to crawl pixiv images
     It have two mode: dailyRankTop and illustRepoAll 
@@ -42,5 +42,8 @@ Problems that may arise
     just wait for a second and ok
     
     Pixiv website will often change the image URL, please use the lastest results from javascript console
-
-
+    
+    Because Pixiv set an author of all the artworks into each page shows up to 20 images, 
+    so that if crawler crawls more than 20 images, it must request different URL pages several times, 
+    which is ... damn it!
+    So this version can only be done here, thank you for your support and fork
