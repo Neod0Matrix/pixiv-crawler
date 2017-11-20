@@ -8,8 +8,8 @@ License
 Update
 ======
 
-    Version: v2p4_LTE 
-    Last Update Time: 20171120pm2136
+    Version: v2p5_LTE 
+    Last Update Time: 20171120pm2327
     
     This python crawler is built to crawl pixiv images
     It have two mode: dailyRankTop and illustRepoAll 
@@ -40,6 +40,10 @@ Problems that may arise
     If you frequently use the crawler to request resources from the server, 
     then after some time the server may throw you 10060 error, 
     just wait for a second and ok
+    
+    ira mode you need input that illuster id ,not image id
+    crawler log image will rename to array number + image id, 
+    you can use this id to find original image in Pixiv website
     
     Pixiv website will often change the image URL, please use the lastest results from javascript console
     

@@ -81,8 +81,8 @@ class PrivateLib:
 
             # pixiv website image format have jpg and png two format
             img_type_flag = 0                                       # replace png format, reset last
-            illust_id = img_url[57:][:-7]                           # cut id from url
-            image_name = str(i) + '-' + illust_id                   # image name
+            img_id = img_url[57:][:-7]                              # cut id from url
+            image_name = str(i) + '-' + img_id                      # image name
             try:
                 img_response = urllib2.urlopen(img_request, timeout=60)
             except Exception, e:

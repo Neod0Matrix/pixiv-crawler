@@ -40,7 +40,7 @@ class IllustRepoAll:
 
         # mate illust name
         illustNamePattern = re.compile(pllc.illustNameRegex, re.S)
-        self.illustName = re.findall(illustNamePattern, web_src)[0][-5:] # get illust id name
+        self.illustName = re.findall(illustNamePattern, web_src)[0][18:][:-1]
 
         # mate images name
         imagesNamePattern = re.compile(pllc.imagesNameRegex, re.S)
@@ -119,7 +119,7 @@ class IllustRepoAll:
             self.basePages.append(basePage)                         # basic page list
 
         # log images info
-        logContext = 'illuster ' + self.illustName + ' id ' + self.illustInputID + ' artworks info====>'
+        logContext = 'illuster: ' + self.illustName + ' id: ' + self.illustInputID + ' artworks info====>'
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
         for k, i in enumerate(self.imagesName[:nbr]):
             logContext = 'no.%d image: %s id: %s url: %s' % (k, i, artworkIDs[k], imgOriginalhttps[k])
