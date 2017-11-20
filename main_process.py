@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # code by </MATRIX>@Neod Anderjon
 # =====================================================================
-# this python script is built to call fuction or class
+# this python script is built to run main process
 
 import pllc, daily_rank, illust_repo
 

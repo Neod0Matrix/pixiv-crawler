@@ -9,7 +9,7 @@ Update
 ======
 
     Version: v2p1_LTE 
-    Last Update Time: 20171120pm1457
+    Last Update Time: 20171120pm1509
     
     This python crawler is built to crawl pixiv images
     It have two mode: dailyRankTop and illustRepoAll 
@@ -32,7 +32,7 @@ Run
     First config your local folder in pllc.py
     Then:
     Linux / Windows
-    $ python pixiv-crawler.py
+    $ python main_process.py
 
 Problems that may arise
 ======

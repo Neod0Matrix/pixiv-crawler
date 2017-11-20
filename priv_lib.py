@@ -72,65 +72,40 @@ class PrivateLib:
         self.LogCrawlerWork(logPath, logContext)
 
         for i, img_url in enumerate(img_urls):
-            if os.name == 'posix':
-                img_headers = {
-                    'Accept': "image/webp,image/*,*/*;q=0.8",
-                    'Accept-Encoding': "gzip, deflate, sdch",
-                    'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
-                    'Connection': "keep-alive",
-                    # 'Host': img_url[8:9] + '.pixiv.net',          # host from last web page
-                    # must add referer, or server will return a damn http error 403, 404
-                    # copy from javascript console network request headers of image
-                    'Referer': base_pages[i],  # request basic page
-                    'User-Agent': pllc.useragentForLinuxBrowser,
-                }
-            elif os.name == 'nt':
-                img_headers = {
-                    'Accept': "image/webp,image/*,*/*;q=0.8",
-                    'Accept-Encoding': "gzip, deflate, sdch",
-                    'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
-                    'Connection': "keep-alive",
-                    # 'Host': img_url[8:9] + '.pixiv.net', # host from last web page
-                    # must add referer, or server will return a damn http error 403, 404
-                    # copy from javascript console network request headers of image
-                    'Referer': base_pages[i],
-                    'User-Agent': pllc.useragentForWindowsBrowser,
-                }
-
+            img_headers = pllc.SetImageRequestHeader(base_pages[i])
             # use GET way to request server
             ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
             img_request = urllib2.Request(url=img_url, headers=img_headers)
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-            urllib2.install_opener(opener)  # must install new created opener
-
-            image_name = pllc.image_header + str(i)  # image name
+            urllib2.install_opener(opener)                          # must install new created opener
 
             # pixiv website image format have jpg and png two format
-            img_type_flag = 0  # replace png format, reset last
+            img_type_flag = 0                                       # replace png format, reset last
+            image_name = pllc.image_header + str(i)                 # image name
             try:
                 img_response = urllib2.urlopen(img_request, timeout=30)
             except Exception, e:
                 logContext = "check http error: " + str(e)
                 self.LogCrawlerWork(logPath, logContext)
                 img_type_flag += 1  # replace jpg format
-                logContext = "this image maybe a manga comic or a jpg image"
+                logContext = "this image may be a manga comic or a jpg image"
                 self.LogCrawlerWork(logPath, logContext)
 
                 img_request = urllib2.Request(
-                    url=img_url[0:-3] + 'jpg',  # img_http
+                    url=img_url[0:-3] + 'jpg',                      # img_http
                     ## data = json_login_data,                      # login cookie
                     headers=img_headers
                 )
                 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-                urllib2.install_opener(opener)  # must install new created opener
-                img_response = urllib2.urlopen(img_request, timeout=300)  # request timeout set longer
+                urllib2.install_opener(opener)                      # must install new created opener
+                img_response = urllib2.urlopen(img_request, timeout=300) # request timeout set longer
 
                 if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
                     logContext = 'get target image ok'
                     self.LogCrawlerWork(logPath, logContext)
                     # image has two format: jpg
                     with open(path + '/' + image_name + '.jpg', 'wb') as jpg:
-                        jpg.write(img_response.read())  # do not decode
+                        jpg.write(img_response.read())              # do not decode
                     logContext = 'download no.%d finished' % i
                     self.LogCrawlerWork(logPath, logContext)
 
@@ -140,7 +115,7 @@ class PrivateLib:
 
                 # image has two format: png
                 with open(path + '/' + image_name + '.png', 'wb') as png:
-                    png.write(img_response.read())  # do not decode
+                    png.write(img_response.read())                  # do not decode
                 logContext = 'download no.%d finished' % i
                 self.LogCrawlerWork(logPath, logContext)
 

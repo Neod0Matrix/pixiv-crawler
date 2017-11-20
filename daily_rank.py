@@ -42,7 +42,7 @@ class DailyRankTop:
         response = priv_lib.PrivateLib().opener.open(request)
         web_src = response.read().decode('UTF-8')                   # get webpage src
 
-        pattern = re.compile(pllc.rankURLRegex, re.S)               # use regex, find dailyRank art works messages
+        pattern = re.compile(pllc.rankTitleRegex, re.S)             # use regex, find dailyRank art works messages
         dataCapture = re.findall(pattern, web_src)                  # findall return a tuple include 5 members
         for i in dataCapture:
             print i[0], i[1], i[2], i[3], i[4]                      # list all members
