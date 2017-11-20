@@ -5,11 +5,10 @@
 # this python script is built to get a illust all repo images
 
 import urllib2, cookielib, re                                       # crawler depends
-import datetime, string, sys
+import datetime, string
 import pllc, priv_lib                                               # local lib
 
-reload(sys)
-sys.setdefaultencoding('UTF-8')
+pllc.EncodeDecodeResolve()
 
 # create a class for pixiv dailyRank top
 class IllustRepoAll:
@@ -110,7 +109,7 @@ class IllustRepoAll:
             # init to png, then will change jpg
             build_http = 'https://i.pximg.net/img-original/img/' + vaildWord + '_p0.png'
             # build basic page use to request image
-            img_id = re.findall(nbrPattern, vaildWord)[6]
+            img_id = re.findall(nbrPattern, vaildWord)[6]           # no.6 member is id
             basePage = pllc.baseWebURL + img_id
             artworkIDs.append(img_id)                               # image id list
             imgOriginalhttps.append(build_http)                     # image url list

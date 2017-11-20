@@ -5,11 +5,10 @@
 # this python script is built to get pixiv dailyRank top images
 
 import urllib2, re                                                  # crawler depends
-import datetime, string, sys
+import datetime, string
 import pllc, priv_lib                                               # local lib
 
-reload(sys)
-sys.setdefaultencoding('UTF-8')
+pllc.EncodeDecodeResolve()
 
 # create a class for pixiv dailyRank top
 class DailyRankTop:

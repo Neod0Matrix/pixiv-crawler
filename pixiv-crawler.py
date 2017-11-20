@@ -4,10 +4,9 @@
 # =====================================================================
 # this python script is built to call fuction or class
 
-import pllc, daily_rank, illust_repo, sys
+import pllc, daily_rank, illust_repo
 
-reload(sys)
-sys.setdefaultencoding('UTF-8')
+pllc.EncodeDecodeResolve()
 
 # main fuction
 def main():

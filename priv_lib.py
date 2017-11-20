@@ -8,8 +8,7 @@ import urllib, urllib2, cookielib, os, json                         # crawler de
 import sys
 import pllc                                                         # messages
 
-reload(sys)
-sys.setdefaultencoding('UTF-8')
+pllc.EncodeDecodeResolve()
 
 # create a class for pixiv dailyRank top
 class PrivateLib:
@@ -154,13 +153,13 @@ class PrivateLib:
             'copyright @' + pllc.__laboratory__ + ' ' + pllc.__organization__\
             + ' technology support\n' \
             'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n' \
-            + pllc.__version__                                      # print version string
+            + 'version: ' + pllc.__version__
         self.LogCrawlerWork(logPath, logContext)
 
         # open filebox to watch result
         if os.name == 'posix':
             os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
-            exit()                                                  # after open folder exit process
+            sys.exit(1)                                             # after open folder exit process
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

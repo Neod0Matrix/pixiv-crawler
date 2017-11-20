@@ -1,24 +1,28 @@
 #! /usr/bin/env python2.7
 # -*- coding: utf-8 -*-
-# this test script is written to log pixiv login data in linux chrome env
-# pllc is pixiv login linux chrome
 # code by </MATRIX>@Neod Anderjon
 # =====================================================================
+# this test script is written to handle datas and some info
 
 # projrct info
 __author__          = 'Neod Anderjon'                               # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v0p8_LTE'                                    # version string
+__version__         = 'v2p1_LTE'                                    # version string
 
 import time, os, linecache, sys                                     # name folder and files
-
-reload(sys)
-sys.setdefaultencoding('UTF-8')
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
 # ==============================================pixiv login data====================================================
+
+# resolve encode/decode question for gbk encode webpage
+def EncodeDecodeResolve():
+    reload(sys)
+    sys.setdefaultencoding('UTF-8')
+
+EncodeDecodeResolve()
+
 reqSuccessCode = 200
 # user-agent, chrome version ignore
 useragentForLinuxBrowser = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) " \
