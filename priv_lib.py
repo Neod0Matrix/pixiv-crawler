@@ -67,12 +67,12 @@ class PrivateLib:
         return web_src
 
     # save get images
-    def SaveImageBinData(self, img_urls, base_pages, path, logPath):
+    def SaveImageBinData(self, img_urls, base_pages, imgPath, logPath):
         logContext = 'start to download target======>'
         self.LogCrawlerWork(logPath, logContext)
 
         for i, img_url in enumerate(img_urls):
-            img_headers = pllc.SetImageRequestHeader(base_pages[i])
+            img_headers = pllc.SetImageRequestHeader(base_pages[i]) # reset headers with basic pages
             # use GET way to request server
             ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
             img_request = urllib2.Request(url=img_url, headers=img_headers)
@@ -92,8 +92,7 @@ class PrivateLib:
                 self.LogCrawlerWork(logPath, logContext)
 
                 img_request = urllib2.Request(
-                    url=img_url[0:-3] + 'jpg',                      # img_http
-                    ## data = json_login_data,                      # login cookie
+                    url=img_url[0:-3] + 'jpg',                      # change to jpg format tail
                     headers=img_headers
                 )
                 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
@@ -104,7 +103,7 @@ class PrivateLib:
                     logContext = 'get target image ok'
                     self.LogCrawlerWork(logPath, logContext)
                     # image has two format: jpg
-                    with open(path + '/' + image_name + '.jpg', 'wb') as jpg:
+                    with open(imgPath + '/' + image_name + '.jpg', 'wb') as jpg:
                         jpg.write(img_response.read())              # do not decode
                     logContext = 'download no.%d finished' % i
                     self.LogCrawlerWork(logPath, logContext)
@@ -114,7 +113,7 @@ class PrivateLib:
                 self.LogCrawlerWork(logPath, logContext)
 
                 # image has two format: png
-                with open(path + '/' + image_name + '.png', 'wb') as png:
+                with open(imgPath + '/' + image_name + '.png', 'wb') as png:
                     png.write(img_response.read())                  # do not decode
                 logContext = 'download no.%d finished' % i
                 self.LogCrawlerWork(logPath, logContext)
