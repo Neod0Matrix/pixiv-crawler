@@ -108,15 +108,13 @@ class IllustRepoAll:
         pattern = re.compile(pllc.imgThumbnailRegex, re.S)          # use regex, find dailyRank art works messages
         urlCapture = re.findall(pattern, web_src)[1:21]             # findall return a tuple include 5 members
 
-        print urlCapture
-
         return urlCapture
 
     @staticmethod
     def PackAllPageURL(self, nbr, logPath):
         # calcus nbr need request count
         if nbr <= 20:
-            needPagecnt = nbr
+            needPagecnt = 1                                         # nbr <= 20, request once
         else:
             needPagecnt = (nbr / 20) + 1                            # calcus need request count
 
