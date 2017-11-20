@@ -8,16 +8,15 @@ import pllc, daily_rank, illust_repo
 
 pllc.EncodeDecodeResolve()
 
-# main fuction
-def main():
+if __name__ == '__main__':
     mode = raw_input(pllc.SHELLHEAD + 'select a mode: ')
     if mode == 'drt':
-        print pllc.SHELLHEAD + "dailyRankTop mode"
+        print pllc.SHELLHEAD + "check mode: dailyRankTop"
         daily_rank.DailyRankTop().drtStartCrawler()
     elif mode == 'ira':
-        print pllc.SHELLHEAD + "illustRepoAll mode"
+        print pllc.SHELLHEAD + "check mode: illustRepoAll"
         illust_repo.IllustRepoAll().iraStartCrawler()
-    elif mode == 'h':
+    elif mode == 'help':
         print pllc.SHELLHEAD +                      \
               "code by </MATRIX>@Neod Anderjon\n"   \
               "MatPixivCrawler Help Page\n"         \
@@ -26,11 +25,6 @@ def main():
               "help ---     help page\n"
     else:
         print pllc.SHELLHEAD + "argv(s) error\n"
-
-    return mode
-
-if __name__ == '__main__':
-    main()
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

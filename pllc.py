@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon'                               # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v2p3_LTE'                                    # version string
+__version__         = 'v2p6_LTE'                                    # version string
 
 import time, os, linecache, sys                                     # name folder and files
 
@@ -187,9 +187,9 @@ rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily&content=illust' # dail
 rankWebURL_R18 = 'https://www.pixiv.net/ranking.php?mode=daily_r18&content=illust&ref=rn-h-r18-3'
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
 illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
-# illust mainpage artwork index url build
-def illustArtworkIndex(setid):
-    return 'http://www.pixiv.net/member_illust.php?id=' + setid + '&type=all'
+mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust main page
+mainPagemiddle = '&type=all'                                        # url middle word
+mainPagetail = '&p='                                                # url tail word
 
 # =======================================regex collection==========================================================
 rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
