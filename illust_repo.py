@@ -5,7 +5,7 @@
 # this python script is built to get a illust all repo images
 
 import urllib2, cookielib, re                                       # crawler depends
-import datetime, string
+import datetime, string, sys
 import pllc, priv_lib                                               # local lib
 
 pllc.EncodeDecodeResolve()
@@ -36,7 +36,7 @@ class IllustRepoAll:
         # build http request
         request = urllib2.Request(cnt_url)
         response = priv_lib.PrivateLib().opener.open(request)
-        web_src = response.read().decode('UTF-8')                   # read it, and decode with UTF-8
+        web_src = response.read().decode("UTF-8", "ignore")
 
         # mate illust name
         illustNamePattern = re.compile(pllc.illustNameRegex, re.S)
@@ -44,7 +44,8 @@ class IllustRepoAll:
 
         # mate images name
         imagesNamePattern = re.compile(pllc.imagesNameRegex, re.S)
-        self.imagesName = re.findall(imagesNamePattern, web_src)[1:][5:][:-8] # get images name list
+        origName = re.findall(imagesNamePattern, web_src)
+        self.imagesName = origName[1:21]
 
         # mate id and max count parse
         pattern = re.compile(pllc.illustAWCntRegex(self.illustInputID), re.S)
@@ -69,15 +70,15 @@ class IllustRepoAll:
 
     # craw illust artwork count
     @staticmethod
-    def CrawlAllTargetURL(self, logPath):
+    def CrawlAllTargetURL(self, nbr, logPath):
         # page request regular:
         # no.1 referer: &type=all request url: &type=all&p=2
         # no.2 referer: &type=all&p=2 request url: &type=all&p=3
         # no.3 referer: &type=all&p=3 request url: &type=all&p=4
         # ...
-        urlTarget = pllc.illustArtworkIndex(self.illustInputID)     # get mainpage all 20 images url
 
         # build a mainpage request
+        urlTarget = pllc.illustArtworkIndex(self.illustInputID)     # get mainpage all 20 images url
         mainPageHeader = pllc.SetUserAgentForMainPage(urlTarget)
         request = urllib2.Request(url=urlTarget, headers=mainPageHeader)
 
@@ -87,19 +88,21 @@ class IllustRepoAll:
         urllib2.install_opener(opener)
 
         # open webpage, get web src, try two way
-        # response = opener.open(request)
+        ## response = opener.open(request)
         response = urllib2.urlopen(request, timeout=300)
-        # web_src = response.read().decode("UTF-8", "ignore").encode("GBK", "ignore")
-        web_src = response.read().decode("UTF-8")
+        ## web_src = response.read().decode("UTF-8", "ignore").encode("GBK", "ignore")
+        web_src = response.read().decode("UTF-8", "ignore")
         if response.getcode() == pllc.reqSuccessCode:
             logContext = "mainpage response successed"
-            priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
+        else:
+            logContext = "mainpage response timeout, failed"
+            exit()                                                  # response fail, exit program
+        priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
         pattern = re.compile(pllc.imgThumbnailRegex, re.S)          # use regex, find dailyRank art works messages
-        urlCapture = re.findall(pattern, web_src)[1:20]             # findall return a tuple include 5 members
+        urlCapture = re.findall(pattern, web_src)[1:21]             # findall return a tuple include 5 members
 
-        # cut artwork id list
-        nbrPattern = re.compile(pllc.nbrRegex, re.S)
+        nbrPattern = re.compile(pllc.nbrRegex, re.S)                # cut artwork id list
 
         artworkIDs = []                                             # images id list
         imgOriginalhttps = []                                       # image original page url
@@ -118,11 +121,11 @@ class IllustRepoAll:
         # log images info
         logContext = 'illuster ' + self.illustName + ' id ' + self.illustInputID + ' artworks info====>'
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
-        for k, i in enumerate(self.imagesName):
-            logContext = 'no.%d image: %s id: %s' % (k, i, artworkIDs[k])
+        for k, i in enumerate(self.imagesName[:nbr]):
+            logContext = 'no.%d image: %s id: %s url: %s' % (k, i, artworkIDs[k], imgOriginalhttps[k])
             priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
-        return imgOriginalhttps
+        return imgOriginalhttps[:nbr]                               # only return need number
 
     def iraStartCrawler(self):
         # collect essential info
@@ -133,7 +136,7 @@ class IllustRepoAll:
         priv_lib.PrivateLib().CrawlerSignIn(logFilePath)
         # get capture image count
         crawCnt = self.CheckCrawlTargetCnt(self, logFilePath)
-        urls = self.CrawlAllTargetURL(self, logFilePath)[:crawCnt]
+        urls = self.CrawlAllTargetURL(self, crawCnt, logFilePath)
         # save images
         priv_lib.PrivateLib().SaveImageBinData(urls, self.basePages, self.workdir, logFilePath)
         # stop log time

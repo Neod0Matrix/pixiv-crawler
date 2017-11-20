@@ -55,7 +55,7 @@ class PrivateLib:
         # use new created opener(include cookies) to open, return server response sheet
         response = self.opener.open(request)
         # sometimes src has some error-code, use decode utf8 and encode gbk to resolve
-        web_src = response.read().decode("UTF-8", "ignore").encode("GBK", "ignore")
+        web_src = response.read().decode("UTF-8", "ignore")
 
         # http request situation code, ok is 200
         if response.getcode() == pllc.reqSuccessCode:
@@ -81,15 +81,16 @@ class PrivateLib:
 
             # pixiv website image format have jpg and png two format
             img_type_flag = 0                                       # replace png format, reset last
-            image_name = pllc.image_header + str(i)                 # image name
+            illust_id = img_url[57:][:-7]                           # cut id from url
+            image_name = str(i) + '-' + illust_id                   # image name
             try:
-                img_response = urllib2.urlopen(img_request, timeout=30)
+                img_response = urllib2.urlopen(img_request, timeout=60)
             except Exception, e:
-                logContext = "check http error: " + str(e)
-                self.LogCrawlerWork(logPath, logContext)
+                ## logContext = "check http error: " + str(e)
+                ## self.LogCrawlerWork(logPath, logContext)
                 img_type_flag += 1  # replace jpg format
-                logContext = "this image may be a manga comic or a jpg image"
-                self.LogCrawlerWork(logPath, logContext)
+                ## logContext = "this image may be a manga comic or a jpg image"
+                ## self.LogCrawlerWork(logPath, logContext)
 
                 img_request = urllib2.Request(
                     url=img_url[0:-3] + 'jpg',                      # change to jpg format tail
@@ -100,16 +101,16 @@ class PrivateLib:
                 img_response = urllib2.urlopen(img_request, timeout=300) # request timeout set longer
 
                 if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
-                    logContext = 'get target image ok'
+                    logContext = 'capture target jpg image ok'
                     self.LogCrawlerWork(logPath, logContext)
                     # image has two format: jpg
                     with open(imgPath + '/' + image_name + '.jpg', 'wb') as jpg:
                         jpg.write(img_response.read())              # do not decode
-                    logContext = 'download no.%d finished' % i
+                    logContext = 'download no.%d image finished' % i
                     self.LogCrawlerWork(logPath, logContext)
 
             if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
-                logContext = 'get target image ok'
+                logContext = 'capture target png image ok'
                 self.LogCrawlerWork(logPath, logContext)
 
                 # image has two format: png

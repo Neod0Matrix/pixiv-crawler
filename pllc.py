@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon'                               # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v2p2_LTE'                                    # version string
+__version__         = 'v2p3_LTE'                                    # version string
 
 import time, os, linecache, sys                                     # name folder and files
 
@@ -196,7 +196,7 @@ rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user
 imgThumbnailRegex = '<img src=".*?"'                                # many strings array
 nbrRegex = '\d+\.?\d*'                                              # mate any number
 illustNameRegex = 'r:title" content=".*? '                          # mate illust name
-imagesNameRegex = 'alt="(.*?)"></a></'                              # mate images name
+imagesNameRegex = '" alt="(.*?)"'                                   # mate images name
 # illust artwork count mate
 def illustAWCntRegex(setid):
     return 'eRegister" data-user-id="%s">.*?<' % setid

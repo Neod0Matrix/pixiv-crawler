@@ -40,7 +40,7 @@ class DailyRankTop:
         rank_url = pllc.rankWebURL
         request = urllib2.Request(rank_url)
         response = priv_lib.PrivateLib().opener.open(request)
-        web_src = response.read().decode('UTF-8')                   # get webpage src
+        web_src = response.read().decode("UTF-8", "ignore")
 
         pattern = re.compile(pllc.rankTitleRegex, re.S)             # use regex, find dailyRank art works messages
         dataCapture = re.findall(pattern, web_src)                  # findall return a tuple include 5 members
@@ -52,10 +52,9 @@ class DailyRankTop:
         infos = 'top ' + str(img_nbr) + ' messages:\n'
         # findall class max get 50 memebr from list
         for i in dataCapture[:img_nbr]:
-            infos += '------------no.%s-----------\n' % i[0]  # artwork title
+            # rewrite info content to file
+            infos += '------------no.%s-----------\n' % i[0]        # artwork title
             infos += 'name: %s\nilluster: %s\nid: %s\n' % (i[1], i[2], i[4])
-
-        # save info in a text
         with open(pllc.illustInfoFilePath, 'w+') as text:
             text.write(infos.encode('UTF-8'))
 
@@ -79,21 +78,23 @@ class DailyRankTop:
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
             response = priv_lib.PrivateLib().opener.open(urllib2.Request(url)) # get original image page source code
-            web_src = response.read().decode('UTF-8')               # decode to utf-8
+            web_src = response.read().decode("UTF-8", "ignore")
 
             # use thumbnail info to get key info, then build original image url
             try:
                 start_mate = 2                                      # 20171116pm2052 test value set to 2
-                build_id = 0                                      # start is 0
+                build_id = 0                                        # start is 0
                 # because pixiv will often change website model format, use mate to get correct image
                 # must have a verify way
                 while build_id != ilu_ids[index]:
                     # cut to get a https address
-                    img_https = re.compile(pllc.imgThumbnailRegex, re.S).findall(web_src)[start_mate][10:-1]
+                    imgPattern = re.compile(pllc.imgThumbnailRegex, re.S)
+                    img_https = re.findall(imgPattern, web_src)[start_mate][10:-1]
                     # cut to get a http address
                     img_http = img_https[0:4] + img_https[4:]
                     # default is png, after handle jpg
-                    img_original_http = 'https://i.pximg.net/img-original/img' + img_http[44:-18] + '_p0.png'
+                    img_original_http \
+                        = 'https://i.pximg.net/img-original/img' + img_http[44:-18] + '_p0.png' # default set to png
                     build_id = img_original_http[-15:-7]
 
                     start_mate = start_mate + 1                     # continue to next element
