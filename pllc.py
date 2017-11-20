@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon'                               # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v2p1_LTE'                                    # version string
+__version__         = 'v2p2_LTE'                                    # version string
 
 import time, os, linecache, sys                                     # name folder and files
 
