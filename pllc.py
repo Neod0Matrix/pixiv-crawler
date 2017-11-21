@@ -193,7 +193,7 @@ mainPagetail = '&p='                                                # url tail w
 
 # =======================================regex collection==========================================================
 rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
-imgThumbnailRegex = '<img src=".*?"'                                # many strings array
+rankVWRegex = 'r/img/.*?_'                                          # from dailyRank page gather vaild words
 nbrRegex = '\d+\.?\d*'                                              # mate any number
 illustNameRegex = 'r:title" content=".*? '                          # mate illust name
 imagesNameRegex = '" alt="(.*?)"'                                   # mate images name

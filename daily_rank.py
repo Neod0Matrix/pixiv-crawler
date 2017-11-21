@@ -33,7 +33,7 @@ class DailyRankTop:
 
     # crawl dailyRank list
     @staticmethod
-    def CrawlTargetURLList(self, img_nbr):
+    def GatherTargetList(self, img_nbr):
         logContext = 'crawl rank list======>'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
@@ -42,13 +42,27 @@ class DailyRankTop:
         response = priv_lib.PrivateLib().opener.open(request)
         web_src = response.read().decode("UTF-8", "ignore")
 
-        pattern = re.compile(pllc.rankTitleRegex, re.S)             # use regex, find dailyRank art works messages
-        dataCapture = re.findall(pattern, web_src)                  # findall return a tuple include 5 members
+        infoPattern = re.compile(pllc.rankTitleRegex, re.S)         # use regex, find dailyRank art works messages
+        dataCapture = re.findall(infoPattern, web_src)              # findall return a tuple include 5 members
+
+        # build original image url
+        vwPattern = re.compile(pllc.rankVWRegex, re.S)              # gather vaild word
+        vwCapture = re.findall(vwPattern, web_src)
+        targetURL =[]
+        for i in vwCapture:
+            i = 'https://i.pximg.net/img-original/img/' + i[6:][:-1] + '_p0.png' # default set to png
+            logContext = i
+            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+            targetURL.append(i)
+        logContext = 'daily-rank original images target gather successed'
+        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+        # gather all of info
         for i in dataCapture:
             print i[0], i[1], i[2], i[3], i[4]                      # list all members
         logContext =  'daily-rank page request successed, get the info of pictures and authors'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
+        # save info as another file
         infos = 'top ' + str(img_nbr) + ' messages:\n'
         # findall class max get 50 memebr from list
         for i in dataCapture[:img_nbr]:
@@ -58,61 +72,10 @@ class DailyRankTop:
         with open(pllc.illustInfoFilePath, 'w+') as text:
             text.write(infos.encode('UTF-8'))
 
-        # i[4] is illust id
-        return [i[4] for i in dataCapture]
+        aw_ids = [i[4] for i in dataCapture]
+        self.basePages = [pllc.baseWebURL + str(i) for i in aw_ids] # every picture url address: base_url address + picture_id
 
-    # get the pages urls
-    @staticmethod
-    def BuildOriginalImageURL(self, ilu_ids, img_nbr):
-        img_urls = []                                               # create a list to storage urls, init to empty
-
-        self.basePages = [pllc.baseWebURL + str(i) for i in ilu_ids]     # every picture url address: base_url address + picture_id
-
-        logContext = 'collect some url info======>'
-        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-        # ergodic all id page, first 100
-        for index, url in enumerate(self.basePages[:img_nbr]):           # select download picture number
-            # print url # every url of id page
-            logContext = 'locking no.%d picture page' % index
-            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-            response = priv_lib.PrivateLib().opener.open(urllib2.Request(url)) # get original image page source code
-            web_src = response.read().decode("UTF-8", "ignore")
-
-            # use thumbnail info to get key info, then build original image url
-            try:
-                start_mate = 2                                      # 20171116pm2052 test value set to 2
-                build_id = 0                                        # start is 0
-                # because pixiv will often change website model format, use mate to get correct image
-                # must have a verify way
-                while build_id != ilu_ids[index]:
-                    # cut to get a https address
-                    imgPattern = re.compile(pllc.imgThumbnailRegex, re.S)
-                    img_https = re.findall(imgPattern, web_src)[start_mate][10:-1]
-                    # cut to get a http address
-                    img_http = img_https[0:4] + img_https[4:]
-                    # default is png, after handle jpg
-                    img_original_http \
-                        = 'https://i.pximg.net/img-original/img' + img_http[44:-18] + '_p0.png' # default set to png
-                    build_id = img_original_http[-15:-7]
-
-                    start_mate = start_mate + 1                     # continue to next element
-
-                # check match result
-                logContext = 'no.%d image web address: ' % index + img_original_http
-                priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-                logContext = 'illust pixiv id: ' + build_id
-                priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-            # I don't suggest get manga, so I forbidden it
-            except AttributeError:                                  # turn to manga comic, jump
-                img_original_http = ''                              # set to empty, jump
-                logContext = 'this maybe a manga comic, jump out'
-                priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-            img_urls.append(img_original_http)                      # put into a list
-
-        return img_urls
+        return targetURL[:img_nbr]                                  # only return need image number
 
     # class main call process
     def drtStartCrawler(self):
@@ -123,8 +86,7 @@ class DailyRankTop:
         # check website can response crawler
         priv_lib.PrivateLib().CrawlerSignIn(self.logpath)
         # get ids and urls
-        ids = self.CrawlTargetURLList(self, nbr)
-        urls = self.BuildOriginalImageURL(self, ids, nbr)
+        urls = self.GatherTargetList(self, nbr)
         # save images
         priv_lib.PrivateLib().SaveImageBinData(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
