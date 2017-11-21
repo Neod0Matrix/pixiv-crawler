@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon'                               # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v2p6_LTE'                                    # version string
+__version__         = 'v2p7_LTE'                                    # version string
 
 import time, os, linecache, sys                                     # name folder and files
 
@@ -190,11 +190,14 @@ illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust hom
 mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust main page
 mainPagemiddle = '&type=all'                                        # url middle word
 mainPagetail = '&p='                                                # url tail word
+imgOriginalheader = 'https://i.pximg.net/img-original/img'          # original image https url header
+imgOriginaltail = '_p0.png'                                         # original image https url tail, default set to png
 
 # =======================================regex collection==========================================================
 rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
 rankVWRegex = 'r/img/.*?_'                                          # from dailyRank page gather vaild words
 nbrRegex = '\d+\.?\d*'                                              # mate any number
+imgThumbnailRegex = '<img src="(.*?)"'                              # mate thumbnail image
 illustNameRegex = 'r:title" content=".*? '                          # mate illust name
 imagesNameRegex = '" alt="(.*?)"'                                   # mate images name
 # illust artwork count mate
@@ -222,9 +225,6 @@ privateFolder = SetOSHomeFolder() + '%s-%s-%s' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
 # crawler work log
 logFilePath = privateFolder + '/PixivCrawlerLog-%s-%s-%s.log' \
-            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
-# illuster info
-illustInfoFilePath = privateFolder + '/PixivCrawlerTopInfo-%s-%s-%s.info' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
 # time log
 excFinishTime = '%s-%s-%s %s:%s:%s' \

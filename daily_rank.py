@@ -49,30 +49,24 @@ class DailyRankTop:
         vwPattern = re.compile(pllc.rankVWRegex, re.S)              # gather vaild word
         vwCapture = re.findall(vwPattern, web_src)
         targetURL =[]
-        for i in vwCapture:
-            i = 'https://i.pximg.net/img-original/img/' + i[6:][:-1] + '_p0.png' # default set to png
+        # only log need count of image
+        for i in vwCapture[:img_nbr]:
+            i = pllc.imgOriginalheader + i[5:][:-1] + pllc.imgOriginaltail
             logContext = i
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
             targetURL.append(i)
         logContext = 'daily-rank original images target gather successed'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-        # gather all of info
-        for i in dataCapture:
-            print i[0], i[1], i[2], i[3], i[4]                      # list all members
-        logContext =  'daily-rank page request successed, get the info of pictures and authors'
+
+        logContext = 'top ' + str(img_nbr) + ' info======>'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-        # save info as another file
-        infos = 'top ' + str(img_nbr) + ' messages:\n'
-        # findall class max get 50 memebr from list
         for i in dataCapture[:img_nbr]:
-            # rewrite info content to file
-            infos += '------------no.%s-----------\n' % i[0]        # artwork title
-            infos += 'name: %s\nilluster: %s\nid: %s\n' % (i[1], i[2], i[4])
-        with open(pllc.illustInfoFilePath, 'w+') as text:
-            text.write(infos.encode('UTF-8'))
+            logContext = '------------no.%s-----------' % i[0]      # artwork array
+            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+            logContext = 'name: %s illuster: %s id: %s' % (i[1], i[2], i[4])
+            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
-        aw_ids = [i[4] for i in dataCapture]
+        aw_ids = [i[4] for i in dataCapture[:img_nbr]]
         self.basePages = [pllc.baseWebURL + str(i) for i in aw_ids] # every picture url address: base_url address + picture_id
 
         return targetURL[:img_nbr]                                  # only return need image number

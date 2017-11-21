@@ -128,10 +128,10 @@ class IllustRepoAll:
         artworkIDs = []                                             # images id list
         imgOriginalhttps = []                                       # image original page url
         self.basePages = []                                         # image basic page
-        for i in allURLcollection:
-            vaildWord = i[-47:-19]                                  # cut vaild words
+        for i in allURLcollection[:nbr]:
+            vaildWord = i[-47:-18]                                  # cut vaild words
             # init to png, then will change jpg
-            build_http = 'https://i.pximg.net/img-original/img/' + vaildWord + '_p0.png'
+            build_http = pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail
             # build basic page use to request image
             img_id = re.findall(nbrPattern, vaildWord)[6]           # no.6 member is id
             basePage = pllc.baseWebURL + img_id
