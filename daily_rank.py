@@ -4,7 +4,7 @@
 # =====================================================================
 # this python script is built to get pixiv dailyRank top images
 
-import urllib2, re                                                  # crawler depends
+import urllib2, re, cookielib                                       # crawler depends
 import datetime, string
 import pllc, priv_lib                                               # local lib
 
@@ -34,12 +34,18 @@ class DailyRankTop:
     # crawl dailyRank list
     @staticmethod
     def GatherTargetList(self, img_nbr):
-        logContext = 'crawl rank list======>'
+        logContext = 'gather rank list======>'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
-        rank_url = pllc.rankWebURL
+        rank_url = pllc.rankWebURL                              # ordinary rank
         request = urllib2.Request(rank_url)
         response = priv_lib.PrivateLib().opener.open(request)
+        if response.getcode() == pllc.reqSuccessCode:
+            logContext = 'website response successed'
+        else:
+            # response failed, you need to check network status
+            logContext = 'website response fatal, return code %d' % response.getcode()
+        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
 
         # gather info of artworks
@@ -53,7 +59,7 @@ class DailyRankTop:
         # only log need count of image
         for i in vwCapture[:img_nbr]:
             i = pllc.imgOriginalheader + i[5:][:-1] + pllc.imgOriginaltail
-            logContext = i
+            logContext = 'log request https url: ' + i
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
             targetURL.append(i)
         logContext = 'daily-rank original images target gather successed'
@@ -62,7 +68,7 @@ class DailyRankTop:
         logContext = 'top ' + str(img_nbr) + ' info======>'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
         for i in dataCapture[:img_nbr]:
-            logContext = '------------no.%s-----------' % i[0]      # artwork array
+            logContext = '------------no.%s-----------' % i[0] # artwork array
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
             logContext = 'name: %s illuster: %s id: %s' % (i[1], i[2], i[4])
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)

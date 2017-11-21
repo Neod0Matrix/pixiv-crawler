@@ -50,11 +50,9 @@ class PrivateLib:
 
     # first try to request website link
     def CrawlerSignIn(self, logPath):
-        # request to server, include url, headers, sheet, request way is post
+        # test self.opener work
         request = urllib2.Request(self.loginURL, self.postData, self.loginHeader)
-        response = self.opener.open(request)                        # use global opener module
-        web_src = response.read().decode("UTF-8", "ignore")
-
+        response = self.opener.open(request)
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'website response successed'
@@ -62,8 +60,6 @@ class PrivateLib:
             # response failed, you need to check network status
             logContext = 'website response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
-
-        return web_src
 
     # save get images
     def SaveImageBinData(self, img_urls, base_pages, imgPath, logPath):

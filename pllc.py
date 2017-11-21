@@ -129,6 +129,39 @@ def SetImageRequestHeader(referer):
 
     return img_headers
 
+# dailyRank r18 headers
+def dailyRankR18Headers():
+    # linux
+    if os.name == 'posix':
+        r18Headers = {
+            'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+            'Accept-Encoding': "gzip, deflate, br",
+            'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
+            'Connection': "keep-alive",
+            'Content-Length': reqSuccessCode,
+            'DNT': "1",
+            'Host': "www.pixiv.net",
+            'Upgrade-Insecure-Requests': "1",
+            'Referer': rankWebURL,
+            'User-Agent': useragentForLinuxBrowser,
+        }
+    # windows
+    elif os.name == 'nt':
+        r18Headers = {
+            'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+            'Accept-Encoding': "gzip, deflate, br",
+            'Accept-Language': "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2",
+            'Connection': "keep-alive",
+            'Content-Length': reqSuccessCode,
+            'DNT': "1",
+            'Host': "www.pixiv.net",
+            'Upgrade-Insecure-Requests': "1",
+            'Referer': rankWebURL,
+            'User-Agent': useragentForWindowsBrowser,
+        }
+
+    return r18Headers
+
 # login.cr read or manual input
 loginCrFile = 'login.cr'                                            # login info file
 # =================================
@@ -184,7 +217,7 @@ getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]
 # maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
 hostWebURL = 'http://www.pixiv.net/'
 rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily&content=illust' # dailyRank
-rankWebURL_R18 = 'https://www.pixiv.net/ranking.php?mode=daily_r18&content=illust&ref=rn-h-r18-3'
+rankWebURL_R18 = 'http://www.pixiv.net/ranking.php?mode=daily_r18&content=illust' # r18 dailyRank
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
 illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
 mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust main page

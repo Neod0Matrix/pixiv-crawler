@@ -93,11 +93,9 @@ class IllustRepoAll:
         cookieHandler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
         opener = urllib2.build_opener(cookieHandler)
         urllib2.install_opener(opener)
-
         # open webpage, get web src, try two way
         ## response = opener.open(request)
         response = urllib2.urlopen(request, timeout=300)
-        web_src = response.read().decode("UTF-8", "ignore")
         if response.getcode() == pllc.reqSuccessCode:
             logContext = "mainpage %d response successed" % array
         else:
@@ -105,6 +103,7 @@ class IllustRepoAll:
             exit()                                                  # response fail, exit program
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
+        web_src = response.read().decode("UTF-8", "ignore")
         pattern = re.compile(pllc.imgThumbnailRegex, re.S)          # use regex, find dailyRank art works messages
         urlCapture = re.findall(pattern, web_src)[1:21]             # findall return a tuple include 5 members
 
