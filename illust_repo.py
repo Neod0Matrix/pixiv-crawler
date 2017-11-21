@@ -16,13 +16,13 @@ class IllustRepoAll:
     def __init__(self):
         priv_lib.PrivateLib().__init__()
         # global illust id
-        self.illustInputID = raw_input(pllc.SHELLHEAD + 'enter you want to crawl illuster id: ')
+        self.illustInputID \
+            = raw_input(pllc.SHELLHEAD + 'enter you want to crawl illuster id: ')
 
     @staticmethod
     def GetInputEssentialInfo(self):
         illustHomeFolder = pllc.SetOSHomeFolder() + self.illustInputID + '/'
-        self.workdir = illustHomeFolder
-        self.infoPath = illustHomeFolder + 'images.info'
+        self.workdir = illustHomeFolder                             # setting global work directory
         illustLogFilePath = illustHomeFolder + 'PixivCrawlerLog.log'
         # create illust homefolder
         priv_lib.PrivateLib().MkDir(illustLogFilePath, illustHomeFolder)

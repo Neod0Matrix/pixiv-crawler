@@ -16,8 +16,8 @@ class DailyRankTop:
     def __init__(self):
         priv_lib.PrivateLib().__init__()
         # class inner global var
-        self.workdir = pllc.privateFolder
-        self.logpath = pllc.logFilePath
+        self.workdir = pllc.privateFolder                           # setting global work directory
+        self.logpath = pllc.logFilePath                             # setting global log path
 
     # get input image count
     @staticmethod
@@ -42,13 +42,14 @@ class DailyRankTop:
         response = priv_lib.PrivateLib().opener.open(request)
         web_src = response.read().decode("UTF-8", "ignore")
 
-        infoPattern = re.compile(pllc.rankTitleRegex, re.S)         # use regex, find dailyRank art works messages
-        dataCapture = re.findall(infoPattern, web_src)              # findall return a tuple include 5 members
+        # gather info of artworks
+        infoPattern = re.compile(pllc.rankTitleRegex, re.S)
+        dataCapture = re.findall(infoPattern, web_src)
 
         # build original image url
-        vwPattern = re.compile(pllc.rankVWRegex, re.S)              # gather vaild word
+        vwPattern = re.compile(pllc.rankVWRegex, re.S)
         vwCapture = re.findall(vwPattern, web_src)
-        targetURL =[]
+        targetURL = []
         # only log need count of image
         for i in vwCapture[:img_nbr]:
             i = pllc.imgOriginalheader + i[5:][:-1] + pllc.imgOriginaltail

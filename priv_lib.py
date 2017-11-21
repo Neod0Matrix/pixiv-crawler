@@ -15,13 +15,13 @@ class PrivateLib:
     # class include init process
     def __init__(self):
         # request sheet
-        self.loginURL = pllc.hostWebURL                             # pixiv login page
+        self.loginURL = pllc.hostWebURL                             # pixiv website home page
         # javascript console's headers dict
-        self.loginHeader = pllc.SetUserAgentHeader()                # mate linux and windows
+        self.loginHeader = pllc.SetUserAgentHeader()                # build request headers
         # use post way to request service
         self.postData = json.dumps(urllib.urlencode(pllc.postwayRegInfo))
         # get local cookie, create a opener for pixiv class
-        self.cookie = cookielib.LWPCookieJar()                      # use last sheet to create a cookie-module
+        self.cookie = cookielib.LWPCookieJar()                      # build cookie module
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie)
         self.opener = urllib2.build_opener(self.cookieHandler)
 
@@ -52,15 +52,14 @@ class PrivateLib:
     def CrawlerSignIn(self, logPath):
         # request to server, include url, headers, sheet, request way is post
         request = urllib2.Request(self.loginURL, self.postData, self.loginHeader)
-        # use new created opener(include cookies) to open, return server response sheet
-        response = self.opener.open(request)
-        # sometimes src has some error-code, use decode utf8 and encode gbk to resolve
+        response = self.opener.open(request)                        # use global opener module
         web_src = response.read().decode("UTF-8", "ignore")
 
-        # http request situation code, ok is 200
+        # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'website response successed'
         else:
+            # response failed, you need to check network status
             logContext = 'website response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
 
@@ -104,8 +103,9 @@ class PrivateLib:
                     logContext = 'capture target jpg image ok'
                     self.LogCrawlerWork(logPath, logContext)
                     # image has two format: jpg
+                    # image is bin data, don't decode it, just read() ok
                     with open(imgPath + '/' + image_name + '.jpg', 'wb') as jpg:
-                        jpg.write(img_response.read())              # do not decode
+                        jpg.write(img_response.read())
                     logContext = 'download no.%d image finished' % i
                     self.LogCrawlerWork(logPath, logContext)
 
@@ -115,7 +115,7 @@ class PrivateLib:
 
                 # image has two format: png
                 with open(imgPath + '/' + image_name + '.png', 'wb') as png:
-                    png.write(img_response.read())                  # do not decode
+                    png.write(img_response.read())
                 logContext = 'download no.%d finished' % i
                 self.LogCrawlerWork(logPath, logContext)
 
