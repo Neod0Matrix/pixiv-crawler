@@ -8,8 +8,8 @@ License
 Update
 ======
 
-    Version: v3p3_LTE 
-    Last Update Time: 20171122pm2115
+    Version: v3p4_LTE 
+    Last Update Time: 20171123am0133
     
     This python crawler is built to crawl pixiv images
     It have two mode: dailyRankTop and illustRepoAll 
@@ -55,13 +55,12 @@ Problems that may arise
     
     Because Pixiv set an author of all the artworks into each page shows up to 20 images, 
     so that if crawler crawls more than 20 images, it must request different URL pages several times, 
-    which is ... damn it!
-    I try to request others page, but server give the same page...hehe
+    which is ... fxxk
     
     Remember delete login.cr info before push or commit issue
     
-    About pixiv dailyRank R18, I try to build new headers to request, but server give me a 403 error, 
-    I can't understand it
-    
-    If you can resolve the two question: mainpage request only first page and daily-rank r18 403 error,
-    you will crawl all of Pixiv website artworks with this crawler
+    Two question: mainpage request only first page and daily-rank r18 403 error,
+    their reason are same: login website failed, you can try this: unlogin your account 
+    from Pixiv, then use browser visit this two url, R18 will return a 403 error, 
+    mainpage 2 will return first page
+    Damn it

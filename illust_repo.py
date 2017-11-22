@@ -76,33 +76,37 @@ class IllustRepoAll:
         # no.2 referer: &type=all&p=2 request url: &type=all&p=3
         # no.3 referer: &type=all&p=3 request url: &type=all&p=4
         # ...
-        page1urlTarget = pllc.mainPage + self.illustInputID + pllc.mainPagemiddle
+        step1url = pllc.mainPage + self.illustInputID + pllc.mainPagemiddle
         if array == 1:
-            urlTarget = page1urlTarget
-            referer = page1urlTarget
+            urlTarget = step1url
+            referer = step1url
         elif array == 2:
-            urlTarget = page1urlTarget + pllc.mainPagetail + str(array)
-            referer = page1urlTarget
+            urlTarget = step1url + pllc.mainPagetail + str(array)
+            referer = step1url
         else:
-            urlTarget = page1urlTarget + pllc.mainPagetail + str(array)
-            referer = page1urlTarget + pllc.mainPagetail + str(array - 1)
+            urlTarget = step1url + pllc.mainPagetail + str(array)
+            referer = step1url + pllc.mainPagetail + str(array - 1)
         mainPageHeader = pllc.MainpageRequestHeaders(referer)
         request = urllib2.Request(url=urlTarget, headers=mainPageHeader)
-
         # build and install opener
-        cookieHandler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
-        opener = urllib2.build_opener(cookieHandler)
+        cookie = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
+        opener = urllib2.build_opener(cookie)
         urllib2.install_opener(opener)
-        response = urllib2.urlopen(request, timeout=300)
+
+        priv_lib.PrivateLib().CrawlerSignIn(logPath)
+
+        response = opener.open(request, timeout=300)
+        # response = urllib2.urlopen(request, timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = "mainpage %d response successed" % array
         else:
             logContext = "mainpage %d response timeout, failed" % array
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
+        # each page cut thumbnail image url
         web_src = response.read().decode("UTF-8", "ignore")
-        pattern = re.compile(pllc.imgThumbnailRegex, re.S)          # use regex, find dailyRank art works messages
-        urlCapture = re.findall(pattern, web_src)[1:21]             # findall return a tuple include 5 members
+        pattern = re.compile(pllc.imgThumbnailRegex, re.S)
+        urlCapture = re.findall(pattern, web_src)[1:21]
 
         return urlCapture
 

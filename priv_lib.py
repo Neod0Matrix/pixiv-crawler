@@ -5,6 +5,7 @@
 # this python script is built to create a private library use in this crawler
 
 import urllib, urllib2, cookielib, os, json                         # crawler depends
+import time
 import pllc                                                         # messages
 
 pllc.EncodeDecodeResolve()
@@ -114,8 +115,9 @@ class PrivateLib:
 
     # work over
     def crawlerFinishWork(self, logPath):
-        # logging info
-        logContext = "crawler work finished, log time: " + pllc.ymdhms
+        rtc = time.localtime()
+        ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
+        logContext = "crawler work finished, log time: " + ymdhms
         self.LogCrawlerWork(logPath, logContext)
         logContext = \
             'copyright @' + pllc.__laboratory__ + ' ' + pllc.__organization__   \

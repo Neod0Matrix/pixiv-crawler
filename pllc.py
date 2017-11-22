@@ -165,15 +165,14 @@ def R18DailyRankRequestHeaders():
 # mainpage
 def MainpageRequestHeaders(referer):
     baseHeaders = {
-        'Accept': accept,
+        'Accept': accept2,
         'Accept-Encoding': acceptEncoding2,
         'Accept-Language': acceptLanguage,
-        'Cache-Control': "max-age=0",
         'Connection': connection,
-        'DNT': "1",
+        'DNT': 1,
         'Host': wwwHost,
-        'Upgrade-Insecure-Requests': "1",
         'Referer': referer,
+        'Upgrade-Insecure-Requests': 1,
     }
     buildHeaders = {}
     # linux
@@ -232,7 +231,6 @@ def illustAWCntRegex(setid):
 # real time clock
 rtc = time.localtime()
 ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
-ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
 
 # define os gui file manager
 def OSFileManager():
