@@ -21,7 +21,8 @@ Platform
 
     Linux x86_64 kernel or Windows NT
     Python: 2.7+
-    Python-module need: urllib, urllib2, cookielib, re, os, json
+    Python crawler regular-module depend: urllib, urllib2, cookielib, re, json
+    others are essential module, python will auto-install
     You need to use browser's javascript console to check your system user-agent
     All needed data in pllc.py, please check all then run pixiv-crawler.py
 
@@ -42,6 +43,10 @@ Problems that may arise
     If you frequently use the crawler to request resources from the server, 
     then after some time the server may throw you 10060 error, 
     just wait for a second and ok
+    
+    If your test network environment has been dns-polluted, I suggest you 
+    fix your PC dns-server to a pure server
+    In China, such as 115.159.146.99 from https://aixyz.com/
     
     ira mode you need input that illuster id ,not image id
     crawler log image will rename to array number + image id, 
