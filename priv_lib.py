@@ -22,7 +22,8 @@ class PrivateLib:
         urllib2.install_opener(self.opener)                         # install this pack
 
     # work log save
-    def LogCrawlerWork(self, logPath, logInfo):
+    @staticmethod
+    def LogCrawlerWork(logPath, logInfo):
         # this log file must be a new file
         logFile = open(logPath, 'a+')                               # add context to file option 'a+'
         print pllc.SHELLHEAD + logInfo                              # with shell header
@@ -76,17 +77,20 @@ class PrivateLib:
             image_name = str(i) + '-' + img_id                      # image name
             try:
                 img_response = urllib2.urlopen(img_request, timeout=60)
+            # http error because only use png format to build url
+            # after except error, url will be changed to jpg format
             except Exception, e:
                 ## logContext = "check http error: " + str(e)
                 ## self.LogCrawlerWork(logPath, logContext)
-                img_type_flag += 1  # replace jpg format
                 ## logContext = "this image may be a manga comic or a jpg image"
                 ## self.LogCrawlerWork(logPath, logContext)
-
+                img_type_flag += 1
+                chajpgurl = img_url[0:-3] + 'jpg'                   # replace to jpg format
                 img_request = urllib2.Request(
-                    url=img_url[0:-3] + 'jpg',                      # change to jpg format tail
+                    url=chajpgurl,
                     headers=img_headers
                 )
+                # rebuild opener
                 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
                 urllib2.install_opener(opener)                      # must install new created opener
                 img_response = urllib2.urlopen(img_request, timeout=300) # request timeout set longer
@@ -94,21 +98,18 @@ class PrivateLib:
                 if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
                     logContext = 'capture target jpg image ok'
                     self.LogCrawlerWork(logPath, logContext)
-                    # image has two format: jpg
-                    # image is bin data, don't decode it, just read() ok
                     with open(imgPath + '/' + image_name + '.jpg', 'wb') as jpg:
                         jpg.write(img_response.read())
                     logContext = 'download no.%d image finished' % i
                     self.LogCrawlerWork(logPath, logContext)
 
+            # no http error, image is png format, continue request
             if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
                 logContext = 'capture target png image ok'
                 self.LogCrawlerWork(logPath, logContext)
-
-                # image has two format: png
                 with open(imgPath + '/' + image_name + '.png', 'wb') as png:
                     png.write(img_response.read())
-                logContext = 'download no.%d finished' % i
+                logContext = 'download no.%d image finished' % i
                 self.LogCrawlerWork(logPath, logContext)
 
     # work over

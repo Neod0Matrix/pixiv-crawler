@@ -28,6 +28,7 @@ class DailyRankTop:
         imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
         logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % imgCnt
         priv_lib.PrivateLib().LogCrawlerWork(lp, logContext)
+        self.reqImageCnt = imgCnt
 
         return imgCnt
 
@@ -48,33 +49,28 @@ class DailyRankTop:
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
 
-        # gather info of artworks
-        infoPattern = re.compile(pllc.rankTitleRegex, re.S)
-        dataCapture = re.findall(infoPattern, web_src)
-
-        logContext = 'top ' + str(img_nbr) + ' info======>'
-        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-        for i in dataCapture[:img_nbr]:
-            logContext = '------------no.%s-----------' % i[0]  # artwork array
-            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-            logContext = 'name: %s illustrator: %s id: %s' % (i[1], i[2], i[4])
-            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-        aw_ids = [i[4] for i in dataCapture[:img_nbr]]
-        self.basePages = [pllc.baseWebURL + str(i) for i in aw_ids] # every picture url address: base_url address + picture_id
-
         # build original image url
         vwPattern = re.compile(pllc.rankVWRegex, re.S)
         vwCapture = re.findall(vwPattern, web_src)
         targetURL = []
-        # only log need count of image
         for i in vwCapture[:img_nbr]:
             i = pllc.imgOriginalheader + i[5:][:-1] + pllc.imgOriginaltail
-            logContext = 'build original image request https url: ' + i
-            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
             targetURL.append(i)
-        logContext = 'daily-rank original images target gather successed'
+
+        # gather info of artworks
+        infoPattern = re.compile(pllc.rankTitleRegex, re.S)
+        dataCapture = re.findall(infoPattern, web_src)
+        logContext = 'top ' + str(img_nbr) + ' info======>'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+        aw_ids = []
+        self.basePages = []
+        for k, i in enumerate(dataCapture[:img_nbr]):
+            logContext = '------------no.%s-----------' % i[0]  # artwork array
+            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+            logContext = 'name: %s illustrator: %s id: %s url: %s' % (i[1], i[2], i[4], targetURL[k])
+            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+            aw_ids.append(i[4])
+            self.basePages.append(pllc.baseWebURL + i[4])           # every picture url address: base_url address + picture_id
 
         return targetURL[:img_nbr]                                  # only return need image number
 
