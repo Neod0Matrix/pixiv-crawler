@@ -63,7 +63,7 @@ class IllustRepoAll:
         while (capCnt > maxCnt) or (capCnt <= 0):
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD
                         + 'error, input count must <= %d and not 0: ' % maxCnt))
-        logContext = "check gather illuster id:" + self.illustInputID + " image(s):%d" % capCnt
+        logContext = "check gather illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
         return capCnt

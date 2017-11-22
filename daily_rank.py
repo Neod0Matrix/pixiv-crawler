@@ -58,7 +58,7 @@ class DailyRankTop:
         for i in dataCapture[:img_nbr]:
             logContext = '------------no.%s-----------' % i[0]  # artwork array
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-            logContext = 'name: %s illuster: %s id: %s' % (i[1], i[2], i[4])
+            logContext = 'name: %s illustrator: %s id: %s' % (i[1], i[2], i[4])
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
         aw_ids = [i[4] for i in dataCapture[:img_nbr]]

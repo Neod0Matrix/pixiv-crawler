@@ -41,16 +41,16 @@ xRequestwith = "XMLHttpRequest"
 # ========================================some use url address=====================================================
 # maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
 
-accountHost = "accounts.pixiv.net"
-originHost = "http://accounts.pixiv.net"
-loginReferer = "http://www.pixiv.net/login.php?return_to=0"
 wwwHost = "www.pixiv.net"                                           # only can set into host
 hostWebURL = 'http://www.pixiv.net/'
-rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily'          # dailyRank
-rankWebURL_R18 = 'http://www.pixiv.net/ranking.php?mode=daily_r18&ref=rn-h-r18-3' # r18 dailyRank
-baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
-illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
-mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust main page
+accountHost = "accounts.pixiv.net"
+originHost = "http://accounts.pixiv.net"
+loginReferer = hostWebURL + "login.php?return_to=0"                 # login referer
+rankWebURL = hostWebURL + 'ranking.php?mode=daily'                  # dailyRank
+rankWebURL_R18 = hostWebURL + 'ranking.php?mode=daily_r18'          # r18 dailyRank
+baseWebURL = hostWebURL + 'member_illust.php?mode=medium&illust_id=' # basic format
+illustHomeURL = hostWebURL + 'member.php?id='                       # illust home page
+mainPage = hostWebURL + 'member_illust.php?id='                     # illust main page
 mainPagemiddle = '&type=all'                                        # url middle word
 mainPagetail = '&p='                                                # url tail word
 # request universal original image constant words
@@ -60,7 +60,7 @@ imgOriginaltail = '_p0.png'                                         # original i
 # init
 def InitLoginHeaders():
     baseHeaders = {
-        'Accept': accept,
+        'Accept': accept2,
         'Accept-Encoding': acceptEncoding,
         'Accept-Language': acceptLanguage,
         'Connection': connection,

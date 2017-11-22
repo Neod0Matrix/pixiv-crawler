@@ -9,7 +9,7 @@ Update
 ======
 
     Version: v3p0_LTE 
-    Last Update Time: 20171122pm1320
+    Last Update Time: 20171122pm1334
     
     This python crawler is built to crawl pixiv images
     It have two mode: dailyRankTop and illustRepoAll 
@@ -30,12 +30,14 @@ Run
 
     * git clone https://github.com/Neod0Matrix/pixiv-crawler.git
     First config your local folder in pllc.py and login.cr
-    Then:
-    Linux / Windows
-    $ python main_process.py
+
+Linux / Windows
+> $ python main_process.py
 
 Problems that may arise
 ======
+
+    May the good network with you
 
     If you frequently use the crawler to request resources from the server, 
     then after some time the server may throw you 10060 error, 
@@ -54,7 +56,8 @@ Problems that may arise
     
     Remember delete login.cr info before push or commit issue
     
-    May the good network with you
-    
     About pixiv dailyRank R18, I try to build new headers to request, but server give me a 403 error, 
     I can't understand it
+    
+    If you can resolve the two question: mainpage request only first page and daily-rank r18 403 error,
+    you will crawl all of Pixiv website artworks with this crawler
