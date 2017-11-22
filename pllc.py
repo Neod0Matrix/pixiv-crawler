@@ -94,9 +94,11 @@ workDir = SetOSHomeFolder()
 
 privateFolder = workDir + '%s-%s-%s' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
-# crawler work log
-logFilePath = privateFolder + '/PixivCrawlerLog-%s-%s-%s.log' \
+
+logFileName = '/CrawlerWork[%s-%s-%s].log' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+# crawler work log
+logFilePath = privateFolder + logFileName
 # time log
 excFinishTime = '%s-%s-%s %s:%s:%s' \
             % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]), str(ymdRealTime[3]), str(ymdRealTime[4]), str(ymdRealTime[5]))

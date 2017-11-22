@@ -21,9 +21,9 @@ class IllustRepoAll:
 
     @staticmethod
     def GetInputEssentialInfo(self):
-        illustHomeFolder = pllc.SetOSHomeFolder() + self.illustInputID + '/'
+        illustHomeFolder = pllc.SetOSHomeFolder() + self.illustInputID
         self.workdir = illustHomeFolder                             # setting global work directory
-        illustLogFilePath = illustHomeFolder + 'PixivCrawlerLog.log'
+        illustLogFilePath = illustHomeFolder + pllc.logFileName
         # create illust homefolder
         priv_lib.PrivateLib().MkDir(illustLogFilePath, illustHomeFolder)
 
