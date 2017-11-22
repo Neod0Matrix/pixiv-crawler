@@ -24,7 +24,6 @@ Platform
     Python crawler regular-module depend: urllib, urllib2, cookielib, re, json
     others are essential module, python will auto-install
     You need to use browser's javascript console to check your system user-agent
-    All needed data in pllc.py, please check all then run pixiv-crawler.py
 
 Run
 ======
