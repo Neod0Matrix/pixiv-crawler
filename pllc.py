@@ -38,6 +38,56 @@ connection = "keep-alive"
 contentType = "application/x-www-form-urlencoded; charset=UTF-8"
 xRequestwith = "XMLHttpRequest"
 
+# login user info file
+loginCrFile = 'login.cr'
+# =================================
+# [login]
+# <mail>
+# <passwd>
+# =================================
+def LoginInfoLoad():
+    loginFilePath = os.getcwd() + '/' + loginCrFile                 # get local dir path
+    isLoginCrExisted = os.path.exists(loginFilePath)
+    if isLoginCrExisted:
+        userMailBox = linecache.getline(loginFilePath, 2)           # row 2, usernamemail
+        userPassword = linecache.getline(loginFilePath, 3)          # row 3, password
+        # empty file
+        if userMailBox == '' or userPassword == '':
+            print SHELLHEAD + "login.cr file invaild, please input your login info"
+            userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
+            userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
+        else:
+            print SHELLHEAD + "please check your info:\n" + userMailBox + userPassword # no log in log file
+            check = raw_input(SHELLHEAD + "Yes or No?: ")
+            # user judge info are error
+            if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
+                print SHELLHEAD + "you can write new info"
+                userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
+                userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
+    # no login.cr file
+    else:
+        print SHELLHEAD + "cannot find login.cr file, please input your login info"
+        userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
+        userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
+
+    return userMailBox, userPassword
+
+# GET way need info
+loginInfo = LoginInfoLoad()
+getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]
+# POST way to login
+postwayRegInfo = {
+            'mode': 'login', # this mode login my chrome browser has no
+            'pixiv_id': loginInfo[0],
+            'pass': loginInfo[1],
+            ## 'captcha': "",
+            ## 'g_recaptcha_response': "",
+            ## 'source': "pc",
+            ## 'ref': "wwwtop_accounts_index",
+            'return_to': 'http://www.pixiv.net/',
+            'skip': 1 # this skip parameter my chrome has no
+        }
+
 # ========================================some use url address=====================================================
 # maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
 
@@ -179,8 +229,10 @@ def illustAWCntRegex(setid):
 
 # ======================get format time, and get year-month-date to be a folder name===============================
 
-ymdRealTime = time.localtime()
-image_header = '%s-%s-%s-' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+# real time clock
+rtc = time.localtime()
+ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
+ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
 
 # define os gui file manager
 def OSFileManager():
@@ -205,66 +257,10 @@ def SetOSHomeFolder ():
 
 workDir = SetOSHomeFolder()
 
-privateFolder = workDir + '%s-%s-%s' \
-            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
-
-logFileName = '/CrawlerWork[%s-%s-%s].log' \
-            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
-# crawler work log
+# private directory
+privateFolder = workDir + '%s' % ymd
+logFileName = '/CrawlerWork[%s].log' % ymd
 logFilePath = privateFolder + logFileName
-# time log
-excFinishTime = '%s-%s-%s %s:%s:%s' \
-            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]), str(ymdRealTime[3]), str(ymdRealTime[4]), str(ymdRealTime[5]))
-
-# login user info file
-loginCrFile = 'login.cr'
-# =================================
-# [login]
-# <mail>
-# <passwd>
-# =================================
-def LoginInfoLoad():
-    loginFilePath = os.getcwd() + '/' + loginCrFile                 # get local dir path
-    isLoginCrExisted = os.path.exists(loginFilePath)
-    if isLoginCrExisted:
-        userMailBox = linecache.getline(loginFilePath, 2)           # row 2, usernamemail
-        userPassword = linecache.getline(loginFilePath, 3)          # row 3, password
-        # empty file
-        if userMailBox == '' or userPassword == '':
-            print SHELLHEAD + "login.cr file invaild, please input your login info"
-            userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
-            userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
-        else:
-            print SHELLHEAD + "please check your info:\n" + userMailBox + userPassword # no log in log file
-            check = raw_input(SHELLHEAD + "Yes or No?: ")
-            # check error
-            if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
-                print SHELLHEAD + "you can write new info"
-                userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
-                userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
-    # no login.cr file
-    else:
-        print SHELLHEAD + "cannot find login.cr file, please input your login info"
-        userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
-        userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
-
-    return userMailBox, userPassword
-
-# GET way need info
-loginInfo = LoginInfoLoad()
-getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]
-# POST way to login
-postwayRegInfo = {
-            'mode': 'login', # this mode login my chrome browser has no
-            'pixiv_id': loginInfo[0],
-            'pass': loginInfo[1],
-            ## 'captcha': "",
-            ## 'g_recaptcha_response': "",
-            ## 'source': "pc",
-            ## 'ref': "wwwtop_accounts_index",
-            'return_to': 'http://www.pixiv.net/',
-            'skip': 1 # this skip parameter my chrome has no
-        }
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

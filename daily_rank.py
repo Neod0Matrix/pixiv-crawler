@@ -65,7 +65,7 @@ class DailyRankTop:
         aw_ids = []
         self.basePages = []
         for k, i in enumerate(dataCapture[:img_nbr]):
-            logContext = '------------no.%s-----------' % i[0]  # artwork array
+            logContext = '------------no.%s-----------' % i[0]      # artwork array
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
             logContext = 'name: %s illustrator: %s id: %s url: %s' % (i[1], i[2], i[4], targetURL[k])
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)

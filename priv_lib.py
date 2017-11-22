@@ -115,16 +115,15 @@ class PrivateLib:
     # work over
     def crawlerFinishWork(self, logPath):
         # logging info
-        logContext = "crawler work finished, log time: " + pllc.excFinishTime
+        logContext = "crawler work finished, log time: " + pllc.ymdhms
         self.LogCrawlerWork(logPath, logContext)
         logContext = \
-            'copyright @' + pllc.__laboratory__ + ' ' + pllc.__organization__\
-            + ' technology support\n' \
-            'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n' \
+            'copyright @' + pllc.__laboratory__ + ' ' + pllc.__organization__   \
+            + ' technology support\n'                                           \
+            'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n'   \
             + 'version: ' + pllc.__version__
         self.LogCrawlerWork(logPath, logContext)
-
-        # open filebox to watch result
+        # open file-manager to check result
         os.system(pllc.OSFileManager() + ' ' + pllc.workDir)
 
 # =====================================================================
