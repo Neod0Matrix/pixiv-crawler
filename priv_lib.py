@@ -14,16 +14,13 @@ pllc.EncodeDecodeResolve()
 class PrivateLib:
     # class include init process
     def __init__(self):
-        # request sheet
         self.loginURL = pllc.hostWebURL                             # pixiv website home page
-        # javascript console's headers dict
         self.loginHeader = pllc.InitLoginHeaders()                  # build request headers
-        # use post way to request service
-        self.postData = json.dumps(urllib.urlencode(pllc.postwayRegInfo))
-        # get local cookie, create a opener for pixiv class
+        self.postData = json.dumps(urllib.urlencode(pllc.postwayRegInfo)) # add post way
         self.cookie = cookielib.LWPCookieJar()                      # build cookie module
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie)
-        self.opener = urllib2.build_opener(self.cookieHandler)
+        self.opener = urllib2.build_opener(self.cookieHandler)      # build opener pack
+        urllib2.install_opener(self.opener)                         # install this pack
 
     # work log save
     def LogCrawlerWork(self, logPath, logInfo):
@@ -130,7 +127,7 @@ class PrivateLib:
         # open filebox to watch result
         if os.name == 'posix':
             os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
-            sys.exit(1)                                             # after open folder exit process
+            exit()
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

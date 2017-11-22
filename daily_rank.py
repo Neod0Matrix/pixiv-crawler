@@ -37,8 +37,8 @@ class DailyRankTop:
         logContext = 'gather rank list======>'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
 
-        rank_url = pllc.rankWebURL                              # ordinary rank
-        request = urllib2.Request(rank_url)
+        page_url = pllc.rankWebURL
+        request = urllib2.Request(url=page_url)
         response = priv_lib.PrivateLib().opener.open(request)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'website response successed'
@@ -47,10 +47,22 @@ class DailyRankTop:
             logContext = 'website response fatal, return code %d' % response.getcode()
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
+        print web_src
 
         # gather info of artworks
         infoPattern = re.compile(pllc.rankTitleRegex, re.S)
         dataCapture = re.findall(infoPattern, web_src)
+
+        logContext = 'top ' + str(img_nbr) + ' info======>'
+        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+        for i in dataCapture[:img_nbr]:
+            logContext = '------------no.%s-----------' % i[0]  # artwork array
+            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+            logContext = 'name: %s illuster: %s id: %s' % (i[1], i[2], i[4])
+            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
+
+        aw_ids = [i[4] for i in dataCapture[:img_nbr]]
+        self.basePages = [pllc.baseWebURL + str(i) for i in aw_ids] # every picture url address: base_url address + picture_id
 
         # build original image url
         vwPattern = re.compile(pllc.rankVWRegex, re.S)
@@ -59,22 +71,11 @@ class DailyRankTop:
         # only log need count of image
         for i in vwCapture[:img_nbr]:
             i = pllc.imgOriginalheader + i[5:][:-1] + pllc.imgOriginaltail
-            logContext = 'log request https url: ' + i
+            logContext = 'build original image request https url: ' + i
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
             targetURL.append(i)
         logContext = 'daily-rank original images target gather successed'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-        logContext = 'top ' + str(img_nbr) + ' info======>'
-        priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-        for i in dataCapture[:img_nbr]:
-            logContext = '------------no.%s-----------' % i[0] # artwork array
-            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-            logContext = 'name: %s illuster: %s id: %s' % (i[1], i[2], i[4])
-            priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-
-        aw_ids = [i[4] for i in dataCapture[:img_nbr]]
-        self.basePages = [pllc.baseWebURL + str(i) for i in aw_ids] # every picture url address: base_url address + picture_id
 
         return targetURL[:img_nbr]                                  # only return need image number
 

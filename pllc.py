@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon'                               # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v2p9_LTE'                                    # version string
+__version__         = 'v3p0_LTE'                                    # version string
 
 import time, os, linecache, sys                                     # name folder and files
 
@@ -30,26 +30,24 @@ useragentForLinuxBrowser = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (
 useragentForWindowsBrowser = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)" \
                             " Chrome/60.0.3112.90 Safari/537.36"
 accept = "application/json, text/javascript, */*; q=0.01"
+accept2 = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
 acceptEncoding = "gzip, deflate, br"
-acceptEncoding2 = "br"
+acceptEncoding2 = "br"                                              # no use gzip, transfer speed down, but will not error
 acceptLanguage = "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2"
 connection = "keep-alive"
 contentType = "application/x-www-form-urlencoded; charset=UTF-8"
 xRequestwith = "XMLHttpRequest"
 
+# ========================================some use url address=====================================================
+# maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
+
 accountHost = "accounts.pixiv.net"
 originHost = "http://accounts.pixiv.net"
 loginReferer = "http://www.pixiv.net/login.php?return_to=0"
-wwwHost = "www.pixiv.net"
-
-# login user info file
-loginCrFile = 'login.cr'
-
-# ========================================some use url address=====================================================
-# maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
+wwwHost = "www.pixiv.net"                                           # only can set into host
 hostWebURL = 'http://www.pixiv.net/'
-rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily&content=illust' # dailyRank
-rankWebURL_R18 = 'http://www.pixiv.net/ranking.php?mode=daily_r18&content=illust' # r18 dailyRank
+rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily'          # dailyRank
+rankWebURL_R18 = 'http://www.pixiv.net/ranking.php?mode=daily_r18&ref=rn-h-r18-3' # r18 dailyRank
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
 illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
 mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust main page
@@ -58,52 +56,6 @@ mainPagetail = '&p='                                                # url tail w
 # request universal original image constant words
 imgOriginalheader = 'https://i.pximg.net/img-original/img'          # original image https url header
 imgOriginaltail = '_p0.png'                                         # original image https url tail, default set to png
-
-# =======================================regex collection==========================================================
-
-rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
-rankVWRegex = 'r/img/.*?_'                                          # from dailyRank page gather vaild words
-nbrRegex = '\d+\.?\d*'                                              # mate any number
-imgThumbnailRegex = '<img src="(.*?)"'                              # mate thumbnail image
-illustNameRegex = 'r:title" content=".*? '                          # mate illust name
-imagesNameRegex = '" alt="(.*?)"'                                   # mate images name
-# illust artwork count mate
-def illustAWCntRegex(setid):
-    return 'eRegister" data-user-id="%s">.*?<' % setid
-
-# ======================get format time, and get year-month-date to be a folder name===============================
-
-ymdRealTime = time.localtime()
-image_header = '%s-%s-%s-' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
-
-fileManager = 'nautilus'                                            # define linux gui file manager
-
-# set os platform to set folder format
-def SetOSHomeFolder ():
-    homeFolder = ''
-    # linux
-    if os.name == 'posix':
-        homeFolder = '/home/neod-anderjon/LTEProjects/pixiv_collection/'
-    # windows
-    elif os.name == 'nt':
-        homeFolder = 'E:/pixiv_collection/'
-
-    return homeFolder
-
-workDir = SetOSHomeFolder()
-
-privateFolder = workDir + '%s-%s-%s' \
-            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
-
-logFileName = '/CrawlerWork[%s-%s-%s].log' \
-            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
-# crawler work log
-logFilePath = privateFolder + logFileName
-# time log
-excFinishTime = '%s-%s-%s %s:%s:%s' \
-            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]), str(ymdRealTime[3]), str(ymdRealTime[4]), str(ymdRealTime[5]))
-
-# =================================build request use headers fuction=========================================
 
 # init
 def InitLoginHeaders():
@@ -119,6 +71,32 @@ def InitLoginHeaders():
         ## 'Upgrade-Insecure-Requests': "1",
         'Referer': loginReferer,
         'X-Requested-With': xRequestwith,
+    }
+    buildHeaders = {}
+    # linux
+    if os.name == 'posix':
+        buildHeaders = dict(baseHeaders.items() + {
+            'User-Agent': useragentForLinuxBrowser,
+        }.items())
+    # windows
+    elif os.name == 'nt':
+        buildHeaders = dict(baseHeaders.items() + {
+            'User-Agent': useragentForWindowsBrowser,
+        }.items())
+
+    return buildHeaders
+
+# r18 daily-rank
+def R18DailyRankRequestHeaders():
+    baseHeaders = {
+        'Accept': accept2,
+        'Accept-Encoding': acceptEncoding,
+        'Accept-Language': acceptLanguage,
+        'Cache-Control': "max-age=0",
+        'Connection': connection,
+        'DNT': "1",
+        'Host': wwwHost,
+        'Upgrade-Insecure-Requests': "1",
     }
     buildHeaders = {}
     # linux
@@ -187,6 +165,52 @@ def OriginalImageRequestHeaders(referer):
 
     return buildHeaders
 
+# =======================================regex collection==========================================================
+
+rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
+rankVWRegex = 'r/img/.*?_'                                          # from dailyRank page gather vaild words
+nbrRegex = '\d+\.?\d*'                                              # mate any number
+imgThumbnailRegex = '<img src="(.*?)"'                              # mate thumbnail image
+illustNameRegex = 'r:title" content=".*? '                          # mate illust name
+imagesNameRegex = '" alt="(.*?)"'                                   # mate images name
+# illust artwork count mate
+def illustAWCntRegex(setid):
+    return 'eRegister" data-user-id="%s">.*?<' % setid
+
+# ======================get format time, and get year-month-date to be a folder name===============================
+
+ymdRealTime = time.localtime()
+image_header = '%s-%s-%s-' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+
+fileManager = 'nautilus'                                            # define linux gui file manager
+
+# set os platform to set folder format
+def SetOSHomeFolder ():
+    homeFolder = ''
+    # linux
+    if os.name == 'posix':
+        homeFolder = '/home/neod-anderjon/LTEProjects/pixiv_collection/'
+    # windows
+    elif os.name == 'nt':
+        homeFolder = 'E:/pixiv_collection/'
+
+    return homeFolder
+
+workDir = SetOSHomeFolder()
+
+privateFolder = workDir + '%s-%s-%s' \
+            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+
+logFileName = '/CrawlerWork[%s-%s-%s].log' \
+            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
+# crawler work log
+logFilePath = privateFolder + logFileName
+# time log
+excFinishTime = '%s-%s-%s %s:%s:%s' \
+            % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]), str(ymdRealTime[3]), str(ymdRealTime[4]), str(ymdRealTime[5]))
+
+# login user info file
+loginCrFile = 'login.cr'
 # =================================
 # [login]
 # <mail>
