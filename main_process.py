@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 # -*- coding: utf-8 -*-
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)
 # =====================================================================
 # this python script is built to run main process
 
@@ -27,4 +27,4 @@ if __name__ == '__main__':
         print pllc.SHELLHEAD + "argv(s) error\n"
 
 # =====================================================================
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)

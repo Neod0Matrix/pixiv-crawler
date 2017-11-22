@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 # -*- coding: utf-8 -*-
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)
 # =====================================================================
 # this python script is built to get a illust all repo images
 
@@ -58,11 +58,11 @@ class IllustRepoAll:
 
         # input want image count
         capCnt = string.atoi(raw_input(pllc.SHELLHEAD
-                + 'enter you want to crawl image count(must <= %d, ever page 20 images): ' % maxCnt))
+                + 'enter you want to crawl image count(must <= %d, each page only 20 images): ' % maxCnt))
         # count error
         while (capCnt > maxCnt) or (capCnt <= 0):
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD
-                        + 'error, input count must <= %d and not 0: ' % maxCnt))
+                + 'error, input count must <= %d and not 0: ' % maxCnt))
         logContext = "check gather illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
@@ -93,14 +93,11 @@ class IllustRepoAll:
         cookieHandler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
         opener = urllib2.build_opener(cookieHandler)
         urllib2.install_opener(opener)
-        # open webpage, get web src, try two way
-        ## response = opener.open(request)
         response = urllib2.urlopen(request, timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = "mainpage %d response successed" % array
         else:
             logContext = "mainpage %d response timeout, failed" % array
-            exit()                                                  # response fail, exit program
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
 
         web_src = response.read().decode("UTF-8", "ignore")
@@ -139,7 +136,7 @@ class IllustRepoAll:
             self.basePages.append(basePage)                         # basic page list
 
         # log images info
-        logContext = 'illuster: ' + self.illustName + ' id: ' + self.illustInputID + ' artworks info====>'
+        logContext = 'illustrator: ' + self.illustName + ' id: ' + self.illustInputID + ' artworks info====>'
         priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
         for k, i in enumerate(self.imagesName[:nbr]):
             logContext = 'no.%d image: %s id: %s url: %s' % (k, i, artworkIDs[k], imgOriginalhttps[k])
@@ -167,4 +164,4 @@ class IllustRepoAll:
         priv_lib.PrivateLib().crawlerFinishWork(logFilePath)
 
 # =====================================================================
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)

@@ -1,14 +1,14 @@
 #! /usr/bin/env python2
 # -*- coding: utf-8 -*-
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)
 # =====================================================================
 # this test script is written to handle datas and some info
 
 # projrct info
-__author__          = 'Neod Anderjon'                               # author signature
+__author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v3p2_LTE'                                    # version string
+__version__         = 'v3p3_LTE'                                    # version string
 
 import time, os, linecache, sys                                     # name folder and files
 
@@ -16,7 +16,7 @@ SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux
 
 # ==============================================pixiv login info====================================================
 
-# resolve encode/decode question for gbk encode webpage
+# resolve encode/decode question
 def EncodeDecodeResolve():
     reload(sys)
     sys.setdefaultencoding('UTF-8')
@@ -263,4 +263,4 @@ logFileName = '/CrawlerWork[%s].log' % ymd
 logFilePath = privateFolder + logFileName
 
 # =====================================================================
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)

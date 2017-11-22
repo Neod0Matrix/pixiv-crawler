@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 # -*- coding: utf-8 -*-
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)
 # =====================================================================
 # this python script is built to get pixiv dailyRank top images
 
@@ -54,16 +54,16 @@ class DailyRankTop:
         vwCapture = re.findall(vwPattern, web_src)
         targetURL = []
         for i in vwCapture[:img_nbr]:
-            i = pllc.imgOriginalheader + i[5:][:-1] + pllc.imgOriginaltail
-            targetURL.append(i)
+            vaildWord = i[5:][:-1]                                  # pixiv may change its position sometimes
+            targetURL.append(pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail)
 
         # gather info of artworks
         infoPattern = re.compile(pllc.rankTitleRegex, re.S)
         dataCapture = re.findall(infoPattern, web_src)
         logContext = 'top ' + str(img_nbr) + ' info======>'
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
-        aw_ids = []
-        self.basePages = []
+        aw_ids = []                                                 # artwork id
+        self.basePages = []                                         # request original image need referer
         for k, i in enumerate(dataCapture[:img_nbr]):
             logContext = '------------no.%s-----------' % i[0]      # artwork array
             priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
@@ -72,7 +72,7 @@ class DailyRankTop:
             aw_ids.append(i[4])
             self.basePages.append(pllc.baseWebURL + i[4])           # every picture url address: base_url address + picture_id
 
-        return targetURL[:img_nbr]                                  # only return need image number
+        return targetURL
 
     # class main call process
     def drtStartCrawler(self):
@@ -94,4 +94,4 @@ class DailyRankTop:
         priv_lib.PrivateLib().crawlerFinishWork(self.logpath)
 
 # =====================================================================
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)

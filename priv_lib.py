@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 # -*- coding: utf-8 -*-
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)
 # =====================================================================
 # this python script is built to create a private library use in this crawler
 
@@ -127,4 +127,4 @@ class PrivateLib:
         os.system(pllc.OSFileManager() + ' ' + pllc.workDir)
 
 # =====================================================================
-# code by </MATRIX>@Neod Anderjon
+# code by </MATRIX>@Neod Anderjon(LeaderN)
