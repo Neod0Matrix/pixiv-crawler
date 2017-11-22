@@ -8,8 +8,8 @@ License
 Update
 ======
 
-    Version: v3p0_LTE 
-    Last Update Time: 20171122pm1404
+    Version: v3p1_LTE 
+    Last Update Time: 20171122pm1841
     
     This python crawler is built to crawl pixiv images
     It have two mode: dailyRankTop and illustRepoAll 
@@ -20,7 +20,7 @@ Platform
 ======
 
     Linux x86_64 kernel or Windows NT
-    Python: 2.7+
+    Python: 2.7+(2.6 maybe too old, not support 3.x)
     Python crawler regular-module depend: urllib, urllib2, cookielib, re, json
     others are essential module, python will auto-install
     You need to use browser's javascript console to check your system user-agent

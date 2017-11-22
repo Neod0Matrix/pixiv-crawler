@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.7
+#! /usr/bin/env python2
 # -*- coding: utf-8 -*-
 # code by </MATRIX>@Neod Anderjon
 # =====================================================================
@@ -47,7 +47,6 @@ class DailyRankTop:
             logContext = 'website response fatal, return code %d' % response.getcode()
         priv_lib.PrivateLib().LogCrawlerWork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
-        print web_src
 
         # gather info of artworks
         infoPattern = re.compile(pllc.rankTitleRegex, re.S)

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.7
+#! /usr/bin/env python2
 # -*- coding: utf-8 -*-
 # code by </MATRIX>@Neod Anderjon
 # =====================================================================
@@ -124,9 +124,7 @@ class PrivateLib:
         self.LogCrawlerWork(logPath, logContext)
 
         # open filebox to watch result
-        if os.name == 'posix':
-            os.system(pllc.fileManager + ' ' + pllc.SetOSHomeFolder())
-            exit()
+        os.system(pllc.OSFileManager() + ' ' + pllc.workDir)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.7
+#! /usr/bin/env python2
 # -*- coding: utf-8 -*-
 # code by </MATRIX>@Neod Anderjon
 # =====================================================================
@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon'                               # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v3p0_LTE'                                    # version string
+__version__         = 'v3p1_LTE'                                    # version string
 
 import time, os, linecache, sys                                     # name folder and files
 
@@ -182,17 +182,24 @@ def illustAWCntRegex(setid):
 ymdRealTime = time.localtime()
 image_header = '%s-%s-%s-' % (str(ymdRealTime[0]), str(ymdRealTime[1]), str(ymdRealTime[2]))
 
-fileManager = 'nautilus'                                            # define linux gui file manager
+# define os gui file manager
+def OSFileManager():
+    fm = ''
+    if os.name == 'posix':
+        fm = 'nautilus'
+    elif os.name == 'nt':
+        fm = 'explorer'
+    return fm
 
 # set os platform to set folder format
 def SetOSHomeFolder ():
     homeFolder = ''
     # linux
     if os.name == 'posix':
-        homeFolder = '/home/neod-anderjon/LTEProjects/pixiv_collection/'
+        homeFolder = '/home/neod-anderjon/Pictures/Crawler/'
     # windows
     elif os.name == 'nt':
-        homeFolder = 'E:/pixiv_collection/'
+        homeFolder = 'E:\\Workstation_Files\\Pictures\\Comic\\IllustratorDesign\\Crawler\\'
 
     return homeFolder
 
@@ -228,7 +235,7 @@ def LoginInfoLoad():
             userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
             userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
         else:
-            print SHELLHEAD + "please check your info:\n" + userMailBox + userPassword
+            print SHELLHEAD + "please check your info:\n" + userMailBox + userPassword # no log in log file
             check = raw_input(SHELLHEAD + "Yes or No?: ")
             # check error
             if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
