@@ -43,7 +43,7 @@ xRequestwith = "XMLHttpRequest"
 
 wwwHost = "www.pixiv.net"                                           # only can set into host
 hostWebURL = 'http://www.pixiv.net/'
-accountHost = "accounts.pixiv.net"
+accountHost = "accounts.pixiv.net"                                  # account login
 originHost = "http://accounts.pixiv.net"
 loginReferer = hostWebURL + "login.php?return_to=0"                 # login referer
 rankWebURL = hostWebURL + 'ranking.php?mode=daily'                  # dailyRank

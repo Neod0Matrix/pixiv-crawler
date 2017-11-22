@@ -5,7 +5,7 @@
 # this python script is built to get a illust all repo images
 
 import urllib2, cookielib, re                                       # crawler depends
-import datetime, string, sys
+import datetime, string
 import pllc, priv_lib                                               # local lib
 
 pllc.EncodeDecodeResolve()

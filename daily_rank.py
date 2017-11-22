@@ -4,7 +4,7 @@
 # =====================================================================
 # this python script is built to get pixiv dailyRank top images
 
-import urllib2, re, cookielib                                       # crawler depends
+import urllib2, re                                                  # crawler depends
 import datetime, string
 import pllc, priv_lib                                               # local lib
 
