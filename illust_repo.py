@@ -86,7 +86,7 @@ class IllustRepoAll:
         else:
             urlTarget = page1urlTarget + pllc.mainPagetail + str(array)
             referer = page1urlTarget + pllc.mainPagetail + str(array - 1)
-        mainPageHeader = pllc.SetUserAgentForMainPage(referer)
+        mainPageHeader = pllc.MainpageRequestHeaders(referer)
         request = urllib2.Request(url=urlTarget, headers=mainPageHeader)
 
         # build and install opener

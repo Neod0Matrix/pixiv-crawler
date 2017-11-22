@@ -17,7 +17,7 @@ class PrivateLib:
         # request sheet
         self.loginURL = pllc.hostWebURL                             # pixiv website home page
         # javascript console's headers dict
-        self.loginHeader = pllc.SetUserAgentHeader()                # build request headers
+        self.loginHeader = pllc.InitLoginHeaders()                  # build request headers
         # use post way to request service
         self.postData = json.dumps(urllib.urlencode(pllc.postwayRegInfo))
         # get local cookie, create a opener for pixiv class
@@ -67,7 +67,7 @@ class PrivateLib:
         self.LogCrawlerWork(logPath, logContext)
 
         for i, img_url in enumerate(img_urls):
-            img_headers = pllc.SetImageRequestHeader(base_pages[i]) # reset headers with basic pages
+            img_headers = pllc.OriginalImageRequestHeaders(base_pages[i]) # reset headers with basic pages
             # use GET way to request server
             ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
             img_request = urllib2.Request(url=img_url, headers=img_headers)
