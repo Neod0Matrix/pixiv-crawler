@@ -4,35 +4,57 @@
 # =====================================================================
 # this python script is built to create a private library use in this crawler
 
-import urllib, urllib2, cookielib, os, json                         # crawler depends
-import time, re
+import urllib2, cookielib, os                                       # crawler depends
+import time
 import pllc                                                         # messages
 
 pllc.EncodeDecodeResolve()
 
 # create a class for pixiv dailyRank top
 class PrivateLib:
-    # class include init process
+    # help page
+    """
+        #################################################################################
+        #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                   #
+        #    MatPixivCrawler Help Page                                                  #
+        #    1.drt  ---     dailyRankTop, crawl Pixiv daily-rank top N artwork(s)       #
+        #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all artwork(s)   #
+        #    help   ---     print this help page                                        #
+        #################################################################################
+    """
     def __init__(self):
+        """
+            class init and create some self var
+            here build a sample opener
+        """
         self.loginURL = pllc.originHost                             # login account page
         self.loginHeader = pllc.InitLoginHeaders()                  # build request headers
-        self.postData = pllc.postData                               # add post way
-        self.getData = pllc.getData                                 # add get way
         self.cookie = cookielib.LWPCookieJar()                      # build cookie module
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie)
         self.opener = urllib2.build_opener(self.cookieHandler)      # build opener pack
         urllib2.install_opener(self.opener)                         # install this pack
 
-    # work log save
     @staticmethod
     def LogCrawlerWork(logPath, logInfo):
+        """
+            universal work log save
+            its save path define in pllc.py and use here
+            :param logPath: log save path
+            :param logInfo: log save content
+            :return:        none
+        """
         # this log file must be a new file
         logFile = open(logPath, 'a+')                               # add context to file option 'a+'
         print pllc.SHELLHEAD + logInfo                              # with shell header
         print >> logFile, pllc.SHELLHEAD + logInfo                  # write to log
 
-    # create a file directory to save pictures
     def MkDir(self, logPath, folder):
+        """
+            create a crawler work directory
+            :param logPath: log save path
+            :param folder:  folder create path
+            :return:        folder create path
+        """
         # create a folder to save picture
         isFolderExisted = os.path.exists(folder)
         if not isFolderExisted:
@@ -47,10 +69,14 @@ class PrivateLib:
 
         return folder
 
-    # camouflage browser to login
     def CamouflageLogin(self, logPath):
+        """
+            camouflage browser to login
+            :param logPath: log save path
+            :return:        none
+        """
         # login init need to commit post data to Pixiv
-        request = urllib2.Request(self.loginURL, self.postData, self.loginHeader)
+        request = urllib2.Request(self.loginURL, pllc.postData, self.loginHeader)
         response = self.opener.open(request)
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
@@ -60,8 +86,15 @@ class PrivateLib:
             logContext = 'login response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
 
-    # save get images
     def SaveImageBinData(self, img_urls, base_pages, imgPath, logPath):
+        """
+            download target image(s)
+            :param img_urls:    image urls list
+            :param base_pages:  referer basic pages list
+            :param imgPath:     image save path
+            :param logPath:     log save path
+            :return:            none
+        """
         logContext = 'start to download target======>'
         self.LogCrawlerWork(logPath, logContext)
 
@@ -113,8 +146,12 @@ class PrivateLib:
                 logContext = 'download no.%d image finished' % i
                 self.LogCrawlerWork(logPath, logContext)
 
-    # work finished
     def crawlerFinishWork(self, logPath):
+        """
+            work finished log
+            :param logPath: log save path
+            :return:        none
+        """
         rtc = time.localtime()
         ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
         logContext = "crawler work finished, log time: " + ymdhms

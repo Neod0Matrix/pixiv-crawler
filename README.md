@@ -8,8 +8,8 @@ License
 Update
 ======
 
-    Version: v3p7_LTE 
-    Last Update Time: 20171123pm1920
+    Version: v3p8_LTE 
+    Last Update Time: 20171124am0228
     
     This python crawler is built to crawl pixiv images
     It have two mode: dailyRankTop and illustRepoAll 
@@ -61,7 +61,5 @@ Problems that may arise
     Remember delete login.cr info before push or commit issue
     
     Two question: mainpage request only first page and daily-rank r18 403 error,
-    their reason are same: login website failed, server give you a no-login guest page
-    This guest mode not support R18 daily-rank and more 20 illustrator artworks watch
-    So we need to reslove this problem
+    their reason are same: login website failed
     

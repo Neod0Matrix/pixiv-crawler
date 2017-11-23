@@ -11,18 +11,27 @@ import pllc, priv_lib                                               # local lib
 pp = priv_lib.PrivateLib()
 pllc.EncodeDecodeResolve()
 
-# create a class for pixiv dailyRank top
 class DailyRankTop:
-    # class include init process
+    """
+        Pixiv website has a daily-rank top, ordinary and R18
+        this class include fuction will gather all of that top
+    """
     def __init__(self):
+        """class include init process"""
         pp.__init__()
         # class inner global var
         self.workdir = pllc.privateFolder                           # setting global work directory
         self.logpath = pllc.logFilePath                             # setting global log path
 
-    # get input image count
     @staticmethod
     def GetEssentialInfo(self, wd, lp):
+        """
+            get input image count
+            :param self:    self class
+            :param wd:      work directory
+            :param lp:      log save path
+            :return:        crawl images count
+        """
         # first create folder
         pp.MkDir(lp, wd)
         # select ordinary top or r18 top
@@ -54,9 +63,15 @@ class DailyRankTop:
 
         return imgCnt
 
-    # crawl dailyRank list
     @staticmethod
     def GatherTargetList(self, ormode, img_nbr):
+        """
+            crawl dailyRank list
+            :param self:    self class
+            :param ormode:  oridinary mode or R18 mode
+            :param img_nbr: images request count
+            :return:        original images urls list
+        """
         logContext = 'gather rank list======>'
         pp.LogCrawlerWork(self.logpath, logContext)
 
@@ -64,12 +79,12 @@ class DailyRankTop:
         if ormode == 'o':
             page_url = pllc.rankWebURL
             request = urllib2.Request(url=page_url,
-                                      data=pp.getData)
+                                      data=pllc.getData)
         elif ormode == 'r':
             page_url = pllc.rankWebURL_R18
             r18_headers = pllc.R18DailyRankRequestHeaders()
             request = urllib2.Request(url=page_url,
-                                      data=pp.getData,
+                                      data=pllc.getData,
                                       headers=r18_headers)
         else:
             print pllc.SHELLHEAD + "argv(s) error\n"
@@ -111,8 +126,11 @@ class DailyRankTop:
 
         return targetURL
 
-    # class main call process
     def drtStartCrawler(self):
+        """
+            class main call process
+            :return:    none
+        """
         # prepare works
         nbr = self.GetEssentialInfo(self, self.workdir, self.logpath)
         # log runtime

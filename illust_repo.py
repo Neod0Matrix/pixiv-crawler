@@ -11,10 +11,13 @@ import pllc, priv_lib                                               # local lib
 pp = priv_lib.PrivateLib()
 pllc.EncodeDecodeResolve()
 
-# create a class for pixiv dailyRank top
 class IllustRepoAll:
-    # class include init process
+    """
+        every illustrator in Pixiv has own mainpage
+        this class include fuction will crawl all of those page all images
+    """
     def __init__(self):
+        """class include init process"""
         pp.__init__()
         # global illust id
         self.illustInputID \
@@ -22,6 +25,11 @@ class IllustRepoAll:
 
     @staticmethod
     def GetInputEssentialInfo(self):
+        """
+            setting some essential info
+            :param self:    self class
+            :return:        log save path
+        """
         illustHomeFolder = pllc.SetOSHomeFolder() + self.illustInputID
         self.workdir = illustHomeFolder                             # setting global work directory
         illustLogFilePath = illustHomeFolder + pllc.logFileName
@@ -30,13 +38,18 @@ class IllustRepoAll:
 
         return illustLogFilePath
 
-    # craw illust artwork count
     @staticmethod
     def GatherIndexInfo(self, logPath):
+        """
+            crawler need to know how many images do you want
+            :param self:    self class
+            :param logPath: log save path
+            :return:        request images count
+        """
         cnt_url = pllc.illustHomeURL + self.illustInputID           # get illust artwork count mainpage url
         # build http request
         request = urllib2.Request(url=cnt_url,
-                                  data=pp.getData)
+                                  data=pllc.getData)
         response = pp.opener.open(request, timeout=300)
         web_src = response.read().decode("UTF-8", "ignore")
 
@@ -70,14 +83,19 @@ class IllustRepoAll:
 
         return capCnt
 
-    # craw illust artwork count
     @staticmethod
     def CrawlAllTargetURL(self, array, logPath):
-        # page request regular:
-        # no.1 referer: &type=all request url: &type=all&p=2
-        # no.2 referer: &type=all&p=2 request url: &type=all&p=3
-        # no.3 referer: &type=all&p=3 request url: &type=all&p=4
-        # ...
+        """
+            crawl all target url about images
+            page request regular:
+            no.1 referer: &type=all request url: &type=all&p=2
+            no.2 referer: &type=all&p=2 request url: &type=all&p=3
+            no.3 referer: &type=all&p=3 request url: &type=all&p=4
+            :param self:    self class
+            :param array:   count cut to every 20 images from each page, they have an array
+            :param logPath: log save path
+            :return:        use regex to mate web src thumbnail images url
+        """
         step1url = pllc.mainPage + self.illustInputID + pllc.mainPagemiddle
         if array == 1:
             urlTarget = step1url
@@ -90,7 +108,7 @@ class IllustRepoAll:
             referer = step1url + pllc.mainPagetail + str(array - 1)
         mainPageHeader = pllc.MainpageRequestHeaders(referer)
         request = urllib2.Request(url=urlTarget,
-                                  data=pp.getData,
+                                  data=pllc.getData,
                                   headers=mainPageHeader)
         # build and install opener
         cookie = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
@@ -114,6 +132,13 @@ class IllustRepoAll:
 
     @staticmethod
     def PackAllPageURL(self, nbr, logPath):
+        """
+            package all gather url
+            :param self:    self class
+            :param nbr:     package images count
+            :param logPath: log save path
+            :return:        build original images urls list
+        """
         # calcus nbr need request count
         if nbr <= 20:
             needPagecnt = 1                                         # nbr <= 20, request once
@@ -151,6 +176,10 @@ class IllustRepoAll:
         return imgOriginalhttps
 
     def iraStartCrawler(self):
+        """
+            include this class run logic
+            :return:    none
+        """
         # collect essential info
         logFilePath = self.GetInputEssentialInfo(self)
         # log runtime

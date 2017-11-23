@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v3p7_LTE'
+__version__         = 'v3p8_LTE'
 
 import urllib2, re, urllib, json                                    # post data build
 import time, os, linecache, sys                                     # name folder and files
@@ -18,25 +18,28 @@ SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux
 
 # ==============================================pixiv login info====================================================
 
-# resolve encode/decode question
 def EncodeDecodeResolve():
+    """
+        use reload sys to resolve python damn encode question
+        :return:    none
+    """
     reload(sys)
     sys.setdefaultencoding('UTF-8')
-
 EncodeDecodeResolve()                                               # run once just ok
 
-# login user info file, must be ran firstly
-loginCrFile = 'login.cr'
-# .cr file example:
-# =================================
-# [login]
-# <mail>
-# <passwd>
-# =================================
 def LoginInfoLoad():
-    print '###########################[pixiv-crawler(MatPixivCrawler) %s]###########################' % __version__
-
-    loginFilePath = os.getcwd() + '/' + loginCrFile                 # get local dir path
+    """
+        get user input username and password
+        login.cr file example:
+        =================================
+        [login]
+        <mail>
+        <passwd>
+        =================================
+        :return:    username, password
+    """
+    print '###########################[pixiv-crawler(MatPixivCrawler) %s]###########################\n' % __version__
+    loginFilePath = os.getcwd() + '/' + 'login.cr'                  # get local dir path
     isLoginCrExisted = os.path.exists(loginFilePath)
     if isLoginCrExisted:
         userMailBox = linecache.getline(loginFilePath, 2)           # row 2, usernamemail
@@ -47,8 +50,9 @@ def LoginInfoLoad():
             userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
             userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ')
         else:
-            print SHELLHEAD + "please check your info:\n" + userMailBox + userPassword # no log in log file
-            check = raw_input(SHELLHEAD + "Yes or No?: ")
+            check = raw_input(SHELLHEAD + "please check your info:\n"
+                                          "    username: %s    password: %s"
+                                          "Yes or No?: " % (userMailBox, userPassword))
             # user judge info are error
             if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
                 print SHELLHEAD + "you can write new info"
@@ -61,7 +65,6 @@ def LoginInfoLoad():
         userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ')
 
     return userMailBox, userPassword
-
 loginInfo = LoginInfoLoad()                                         # call once
 
 # ========================================some use url address=====================================================
@@ -103,8 +106,11 @@ connection = "keep-alive"
 contentType = "application/x-www-form-urlencoded; charset=UTF-8"
 xRequestwith = "XMLHttpRequest"
 
-# init
 def InitLoginHeaders():
+    """
+        first login to Pixiv, use POST way
+        :return:    build headers
+    """
     baseHeaders = {
         'Accept': accept,
         'Accept-Encoding': acceptEncoding,
@@ -132,8 +138,11 @@ def InitLoginHeaders():
 
     return buildHeaders
 
-# r18 daily-rank
 def R18DailyRankRequestHeaders():
+    """
+        r18 daily-rank page request headers
+        :return:    build headers
+    """
     baseHeaders = {
         'Accept': accept2,
         'Accept-Encoding': acceptEncoding,
@@ -159,8 +168,12 @@ def R18DailyRankRequestHeaders():
 
     return buildHeaders
 
-# mainpage
 def MainpageRequestHeaders(referer):
+    """
+        illustrator private mainpage request headers
+        :param referer: headers need a last page referer
+        :return:        build headers
+    """
     baseHeaders = {
         'Accept': accept2,
         'Accept-Encoding': acceptEncoding2,
@@ -187,6 +200,11 @@ def MainpageRequestHeaders(referer):
 
 # original image
 def OriginalImageRequestHeaders(referer):
+    """
+        original image request headers
+        :param referer: headers need a last page referer
+        :return:        build headers
+    """
     baseHeaders = {
         'Accept': "image/webp,image/*,*/*;q=0.8",
         'Accept-Encoding': "gzip, deflate, sdch",
@@ -230,8 +248,11 @@ def illustAWCntRegex(setid):
 getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]    # priv_lib will first init it
 getData = json.dumps(urllib.urlencode(getwayRegInfo))               # call once
 
-# POST way build dict
 def postKeyGather():
+    """
+        POST way login need post-key
+        :return:    post way request data
+    """
     # build basic dict
     postwayRegInfo = {
             'pixiv_id': loginInfo[0],
@@ -255,7 +276,6 @@ def postKeyGather():
     post_data = json.dumps(urllib.urlencode(post_dict))
 
     return post_data
-
 postData = postKeyGather()                                          # call once
 
 # ======================get format time, and get year-month-date to be a folder name===============================
@@ -264,8 +284,11 @@ postData = postKeyGather()                                          # call once
 rtc = time.localtime()
 ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
 
-# define os gui file manager
 def OSFileManager():
+    """
+        define os gui file manager
+        :return:    file manager name
+    """
     fm = ''
     if os.name == 'posix':
         fm = 'nautilus'
@@ -273,8 +296,11 @@ def OSFileManager():
         fm = 'explorer'
     return fm
 
-# set os platform to set folder format
 def SetOSHomeFolder ():
+    """
+        set os platform to set folder format
+        :return:    platform work directory
+    """
     homeFolder = ''
     # linux
     if os.name == 'posix':
@@ -284,7 +310,6 @@ def SetOSHomeFolder ():
         homeFolder = 'E:\\Workstation_Files\\Pictures\\Comic\\IllustratorDesign\\Crawler\\'
 
     return homeFolder
-
 workDir = SetOSHomeFolder()                                         # call once
 
 # private directory
