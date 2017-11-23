@@ -60,7 +60,7 @@ class IllustRepoAll:
 
         # input want image count
         capCnt = string.atoi(raw_input(pllc.SHELLHEAD
-                + 'enter you want to crawl image count(must <= %d, each page at most 20 images): ' % maxCnt))
+                + 'enter you want to crawl image count(all repo have %d, each page at most 20 images): ' % maxCnt))
         # count error
         while (capCnt > maxCnt) or (capCnt <= 0):
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD

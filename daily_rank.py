@@ -30,19 +30,22 @@ class DailyRankTop:
         ormode = raw_input(pllc.SHELLHEAD + 'select ordinary top or r18 top(tap "o" or "r"): ')
         logContext = ''
         imgCnt = ''
+        # setting max count, base on request web src
+        ordinaryMaxcnt = 50
+        r18MaxCnt = 100
         if ormode == 'o':
             # input a string for request image number
-            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
+            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is %d): ' % ordinaryMaxcnt))
             while imgCnt > 50:
-                print pllc.SHELLHEAD + 'input error, daily-rank top at most 50'
-                imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter again(max is 50): '))
+                print pllc.SHELLHEAD + 'input error, daily-rank top at most %d' % ordinaryMaxcnt
+                imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter again(max is %d): ' % ordinaryMaxcnt))
             logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % imgCnt
         elif ormode == 'r':
             # input a string for request image number
-            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank R18 top images count(max is 100): '))
+            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank R18 top images count(max is %d): ' % r18MaxCnt))
             while imgCnt > 100:
-                print pllc.SHELLHEAD + 'input error, daily-rank R18 top at most 100'
-                imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter again(max is 100): '))
+                print pllc.SHELLHEAD + 'input error, daily-rank R18 top at most %d' % r18MaxCnt
+                imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter again(max is %d): ' % r18MaxCnt))
             logContext = 'this python auto-crawler work to crawle pixiv website daily top R18 %d images' % imgCnt
         pp.LogCrawlerWork(lp, logContext)
         # set to global var
@@ -57,52 +60,42 @@ class DailyRankTop:
         logContext = 'gather rank list======>'
         pp.LogCrawlerWork(self.logpath, logContext)
 
-        dataCapture = []
-        targetURL = []
+        request = ''
         if ormode == 'o':
             page_url = pllc.rankWebURL
             request = urllib2.Request(url=page_url,
                                       data=pp.getData)
-            response = pp.opener.open(request, timeout=300)
-            ## response = urllib2.urlopen(request, timeout=300)
-            if response.getcode() == pllc.reqSuccessCode:
-                logContext = 'website response successed'
-            else:
-                # response failed, you need to check network status
-                logContext = 'website response fatal, return code %d' % response.getcode()
-            pp.LogCrawlerWork(self.logpath, logContext)
-            web_src = response.read().decode("UTF-8", "ignore")
-
-            # build original image url
-            vwPattern = re.compile(pllc.rankVWRegex, re.S)
-            vwCapture = re.findall(vwPattern, web_src)
-            targetURL = []
-            for i in vwCapture[:img_nbr]:
-                vaildWord = i[5:][:-1]                                  # pixiv may change its position sometimes
-                targetURL.append(pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail)
-
-            # gather info of artworks
-            infoPattern = re.compile(pllc.rankTitleRegex, re.S)
-            dataCapture = re.findall(infoPattern, web_src)
         elif ormode == 'r':
             page_url = pllc.rankWebURL_R18
             r18_headers = pllc.R18DailyRankRequestHeaders()
             request = urllib2.Request(url=page_url,
                                       data=pp.getData,
                                       headers=r18_headers)
-            response = pp.opener.open(request, timeout=300)
-            ## response = urllib2.urlopen(request, timeout=300)
-            if response.getcode() == pllc.reqSuccessCode:
-                logContext = 'website response successed'
-            else:
-                # response failed, you need to check network status
-                logContext = 'website response fatal, return code %d' % response.getcode()
-            pp.LogCrawlerWork(self.logpath, logContext)
-            web_src = response.read().decode("UTF-8", "ignore")
-            print web_src
         else:
             print pllc.SHELLHEAD + "argv(s) error\n"
             exit()
+
+        response = pp.opener.open(request, timeout=300)
+        ## response = urllib2.urlopen(request, timeout=300)
+        if response.getcode() == pllc.reqSuccessCode:
+            logContext = 'website response successed'
+        else:
+            # response failed, you need to check network status
+            logContext = 'website response fatal, return code %d' % response.getcode()
+        pp.LogCrawlerWork(self.logpath, logContext)
+        web_src = response.read().decode("UTF-8", "ignore")
+
+        # build original image url
+        vwPattern = re.compile(pllc.rankVWRegex, re.S)
+        vwCapture = re.findall(vwPattern, web_src)
+        targetURL = []
+        for i in vwCapture[:img_nbr]:
+            vaildWord = i[5:][:-1]  # pixiv may change its position sometimes
+            targetURL.append(pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail)
+
+        # gather info of artworks
+        infoPattern = re.compile(pllc.rankTitleRegex, re.S)
+        dataCapture = re.findall(infoPattern, web_src)
 
         logContext = 'top ' + str(img_nbr) + ' info======>'
         pp.LogCrawlerWork(self.logpath, logContext)
