@@ -8,8 +8,9 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v3p3_LTE'                                    # version string
+__version__         = 'v3p4_LTE'                                    # version string
 
+import urllib2, re, urllib, json                                    # post data build
 import time, os, linecache, sys                                     # name folder and files
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
@@ -72,26 +73,13 @@ def LoginInfoLoad():
 
     return userMailBox, userPassword
 
-# GET way need info
-loginInfo = LoginInfoLoad()
-getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]
-# POST way to login
-postwayRegInfo = {
-            'mode': 'login', # this mode login my chrome browser has no
-            'pixiv_id': loginInfo[0],
-            'pass': loginInfo[1],
-            ## 'captcha': "",
-            ## 'g_recaptcha_response': "",
-            ## 'source': "pc",
-            ## 'ref': "wwwtop_accounts_index",
-            'return_to': 'http://www.pixiv.net/',
-            'skip': 1 # this skip parameter my chrome has no
-        }
+loginInfo = LoginInfoLoad()                                         # call once
 
 # ========================================some use url address=====================================================
 # maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
 
 wwwHost = "www.pixiv.net"                                           # only can set into host
+postKeyGeturl = 'http://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index'
 hostWebURL = 'http://www.pixiv.net/'
 accountHost = "accounts.pixiv.net"                                  # account login
 originHost = "http://accounts.pixiv.net"
@@ -216,6 +204,7 @@ def OriginalImageRequestHeaders(referer):
 
 # =======================================regex collection==========================================================
 
+postKeyRegex = 'key".*?"(.*?)"'                                     # mate post key
 rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
 rankVWRegex = 'r/img/.*?_'                                          # from dailyRank page gather vaild words
 nbrRegex = '\d+\.?\d*'                                              # mate any number
@@ -225,6 +214,38 @@ imagesNameRegex = '" alt="(.*?)"'                                   # mate image
 # illust artwork count mate
 def illustAWCntRegex(setid):
     return 'eRegister" data-user-id="%s">.*?<' % setid
+# ======================================login need word build================================================
+# http request have more way, here try GET and POST, Pixiv use GET
+
+# GET way need info
+getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]
+getData = json.dumps(urllib.urlencode(getwayRegInfo))               # call once
+
+# POST way build dict
+def postKeyGather():
+    postwayRegInfo = {
+            'mode': 'login',
+            'pixiv_id': loginInfo[0],
+            'pass': loginInfo[1],
+            'captcha': "",
+            'g_recaptcha_response': "",
+            'source': "pc",
+            'return_to': hostWebURL,
+        }
+    request = urllib2.Request(postKeyGeturl)
+    response = urllib2.urlopen(request)
+    # mate post key
+    web_src = response.read().decode("UTF-8", "ignore")
+    postPattern = re.compile(postKeyRegex, re.S)
+    postKey = re.findall(postPattern, web_src)[0]
+    # build total post data
+    postKeydict = {'post_key': postKey}
+    post_dict = dict(postwayRegInfo.items() + postKeydict.items())
+    post_data = json.dumps(urllib.urlencode(post_dict))
+
+    return post_data
+
+postData = postKeyGather()                                          # call once
 
 # ======================get format time, and get year-month-date to be a folder name===============================
 

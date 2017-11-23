@@ -8,13 +8,14 @@ import urllib2, cookielib, re                                       # crawler de
 import datetime, string
 import pllc, priv_lib                                               # local lib
 
+pp = priv_lib.PrivateLib()
 pllc.EncodeDecodeResolve()
 
 # create a class for pixiv dailyRank top
 class IllustRepoAll:
     # class include init process
     def __init__(self):
-        priv_lib.PrivateLib().__init__()
+        pp.__init__()
         # global illust id
         self.illustInputID \
             = raw_input(pllc.SHELLHEAD + 'enter you want to crawl illuster id: ')
@@ -25,7 +26,7 @@ class IllustRepoAll:
         self.workdir = illustHomeFolder                             # setting global work directory
         illustLogFilePath = illustHomeFolder + pllc.logFileName
         # create illust homefolder
-        priv_lib.PrivateLib().MkDir(illustLogFilePath, illustHomeFolder)
+        pp.MkDir(illustLogFilePath, illustHomeFolder)
 
         return illustLogFilePath
 
@@ -34,8 +35,9 @@ class IllustRepoAll:
     def GatherIndexInfo(self, logPath):
         cnt_url = pllc.illustHomeURL + self.illustInputID           # get illust artwork count mainpage url
         # build http request
-        request = urllib2.Request(cnt_url)
-        response = priv_lib.PrivateLib().opener.open(request)
+        request = urllib2.Request(url=cnt_url,
+                                  data=pp.getData)
+        response = pp.opener.open(request, timeout=300)
         web_src = response.read().decode("UTF-8", "ignore")
 
         # mate illust name
@@ -64,7 +66,7 @@ class IllustRepoAll:
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD
                 + 'error, input count must <= %d and not 0: ' % maxCnt))
         logContext = "check gather illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
-        priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
+        pp.LogCrawlerWork(logPath, logContext)
 
         return capCnt
 
@@ -87,13 +89,15 @@ class IllustRepoAll:
             urlTarget = step1url + pllc.mainPagetail + str(array)
             referer = step1url + pllc.mainPagetail + str(array - 1)
         mainPageHeader = pllc.MainpageRequestHeaders(referer)
-        request = urllib2.Request(url=urlTarget, headers=mainPageHeader)
+        request = urllib2.Request(url=urlTarget,
+                                  data=pp.getData,
+                                  headers=mainPageHeader)
         # build and install opener
         cookie = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
         opener = urllib2.build_opener(cookie)
         urllib2.install_opener(opener)
 
-        priv_lib.PrivateLib().CrawlerSignIn(logPath)
+        pp.CrawlerSignIn(logPath)
 
         response = opener.open(request, timeout=300)
         # response = urllib2.urlopen(request, timeout=300)
@@ -101,7 +105,7 @@ class IllustRepoAll:
             logContext = "mainpage %d response successed" % array
         else:
             logContext = "mainpage %d response timeout, failed" % array
-        priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
+        pp.LogCrawlerWork(logPath, logContext)
 
         # each page cut thumbnail image url
         web_src = response.read().decode("UTF-8", "ignore")
@@ -141,10 +145,10 @@ class IllustRepoAll:
 
         # log images info
         logContext = 'illustrator: ' + self.illustName + ' id: ' + self.illustInputID + ' artworks info====>'
-        priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
+        pp.LogCrawlerWork(logPath, logContext)
         for k, i in enumerate(self.imagesName[:nbr]):
             logContext = 'no.%d image: %s id: %s url: %s' % (k, i, artworkIDs[k], imgOriginalhttps[k])
-            priv_lib.PrivateLib().LogCrawlerWork(logPath, logContext)
+            pp.LogCrawlerWork(logPath, logContext)
 
         return imgOriginalhttps
 
@@ -154,18 +158,18 @@ class IllustRepoAll:
         # log runtime
         starttime = datetime.datetime.now()
         # check website can response crawler
-        priv_lib.PrivateLib().CrawlerSignIn(logFilePath)
+        pp.CrawlerSignIn(logFilePath)
         # get capture image count
         crawCnt = self.GatherIndexInfo(self, logFilePath)
         urls = self.PackAllPageURL(self, crawCnt, logFilePath)
         # save images
-        priv_lib.PrivateLib().SaveImageBinData(urls, self.basePages, self.workdir, logFilePath)
+        pp.SaveImageBinData(urls, self.basePages, self.workdir, logFilePath)
         # stop log time
         endtime = datetime.datetime.now()
         logContext = "elapsed time: %ds" % (endtime - starttime).seconds
-        priv_lib.PrivateLib().LogCrawlerWork(logFilePath, logContext)
+        pp.LogCrawlerWork(logFilePath, logContext)
         # finish
-        priv_lib.PrivateLib().crawlerFinishWork(logFilePath)
+        pp.crawlerFinishWork(logFilePath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

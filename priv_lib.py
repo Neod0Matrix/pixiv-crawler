@@ -5,7 +5,7 @@
 # this python script is built to create a private library use in this crawler
 
 import urllib, urllib2, cookielib, os, json                         # crawler depends
-import time
+import time, re
 import pllc                                                         # messages
 
 pllc.EncodeDecodeResolve()
@@ -16,7 +16,8 @@ class PrivateLib:
     def __init__(self):
         self.loginURL = pllc.hostWebURL                             # pixiv website home page
         self.loginHeader = pllc.InitLoginHeaders()                  # build request headers
-        self.postData = json.dumps(urllib.urlencode(pllc.postwayRegInfo)) # add post way
+        self.postData = pllc.postData                               # add post way
+        self.getData = pllc.getData                                 # add get way
         self.cookie = cookielib.LWPCookieJar()                      # build cookie module
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie)
         self.opener = urllib2.build_opener(self.cookieHandler)      # build opener pack
@@ -49,7 +50,7 @@ class PrivateLib:
     # first try to request website link
     def CrawlerSignIn(self, logPath):
         # test self.opener work
-        request = urllib2.Request(self.loginURL, self.postData, self.loginHeader)
+        request = urllib2.Request(self.loginURL, self.getData, self.loginHeader)
         response = self.opener.open(request)
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
@@ -68,7 +69,8 @@ class PrivateLib:
             img_headers = pllc.OriginalImageRequestHeaders(base_pages[i]) # reset headers with basic pages
             # use GET way to request server
             ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
-            img_request = urllib2.Request(url=img_url, headers=img_headers)
+            img_request = urllib2.Request(url=img_url,
+                                          headers=img_headers)
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
             urllib2.install_opener(opener)                          # must install new created opener
 
@@ -77,14 +79,12 @@ class PrivateLib:
             img_id = img_url[57:][:-7]                              # cut id from url
             image_name = str(i) + '-' + img_id                      # image name
             try:
-                img_response = urllib2.urlopen(img_request, timeout=60)
+                img_response = urllib2.urlopen(img_request, timeout=300)
             # http error because only use png format to build url
             # after except error, url will be changed to jpg format
             except Exception, e:
-                ## logContext = "check http error: " + str(e)
-                ## self.LogCrawlerWork(logPath, logContext)
-                ## logContext = "this image may be a manga comic or a jpg image"
-                ## self.LogCrawlerWork(logPath, logContext)
+                logContext = str(e) + ": image format need to change"
+                self.LogCrawlerWork(logPath, logContext)
                 img_type_flag += 1
                 chajpgurl = img_url[0:-3] + 'jpg'                   # replace to jpg format
                 img_request = urllib2.Request(
