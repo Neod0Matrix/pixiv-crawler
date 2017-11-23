@@ -60,7 +60,7 @@ class IllustRepoAll:
 
         # input want image count
         capCnt = string.atoi(raw_input(pllc.SHELLHEAD
-                + 'enter you want to crawl image count(must <= %d, each page only 20 images): ' % maxCnt))
+                + 'enter you want to crawl image count(must <= %d, each page at most 20 images): ' % maxCnt))
         # count error
         while (capCnt > maxCnt) or (capCnt <= 0):
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD
@@ -96,8 +96,6 @@ class IllustRepoAll:
         cookie = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
         opener = urllib2.build_opener(cookie)
         urllib2.install_opener(opener)
-
-        pp.CrawlerSignIn(logPath)
 
         response = opener.open(request, timeout=300)
         # response = urllib2.urlopen(request, timeout=300)
@@ -158,7 +156,7 @@ class IllustRepoAll:
         # log runtime
         starttime = datetime.datetime.now()
         # check website can response crawler
-        pp.CrawlerSignIn(logFilePath)
+        pp.CamouflageLogin(logFilePath)
         # get capture image count
         crawCnt = self.GatherIndexInfo(self, logFilePath)
         urls = self.PackAllPageURL(self, crawCnt, logFilePath)

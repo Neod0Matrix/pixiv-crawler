@@ -14,7 +14,7 @@ pllc.EncodeDecodeResolve()
 class PrivateLib:
     # class include init process
     def __init__(self):
-        self.loginURL = pllc.hostWebURL                             # pixiv website home page
+        self.loginURL = pllc.originHost                             # login account page
         self.loginHeader = pllc.InitLoginHeaders()                  # build request headers
         self.postData = pllc.postData                               # add post way
         self.getData = pllc.getData                                 # add get way
@@ -47,17 +47,17 @@ class PrivateLib:
 
         return folder
 
-    # first try to request website link
-    def CrawlerSignIn(self, logPath):
-        # test self.opener work
-        request = urllib2.Request(self.loginURL, self.getData, self.loginHeader)
+    # camouflage browser to login
+    def CamouflageLogin(self, logPath):
+        # login init need to commit post data to Pixiv
+        request = urllib2.Request(self.loginURL, self.postData, self.loginHeader)
         response = self.opener.open(request)
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
-            logContext = 'website response successed'
+            logContext = 'login response successed'
         else:
             # response failed, you need to check network status
-            logContext = 'website response fatal, return code %d' % response.getcode()
+            logContext = 'login response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
 
     # save get images
@@ -77,13 +77,13 @@ class PrivateLib:
             # pixiv website image format have jpg and png two format
             img_type_flag = 0                                       # replace png format, reset last
             img_id = img_url[57:][:-7]                              # cut id from url
-            image_name = str(i) + '-' + img_id                      # image name
+            image_name = str(i) + '-' + img_id                      # image name, pixiv image name img_id + '_p0'
             try:
                 img_response = urllib2.urlopen(img_request, timeout=300)
             # http error because only use png format to build url
             # after except error, url will be changed to jpg format
             except Exception, e:
-                logContext = str(e) + ": image format need to change"
+                logContext = str(e) + ", image format need to change"
                 self.LogCrawlerWork(logPath, logContext)
                 img_type_flag += 1
                 chajpgurl = img_url[0:-3] + 'jpg'                   # replace to jpg format
@@ -113,20 +113,18 @@ class PrivateLib:
                 logContext = 'download no.%d image finished' % i
                 self.LogCrawlerWork(logPath, logContext)
 
-    # work over
+    # work finished
     def crawlerFinishWork(self, logPath):
         rtc = time.localtime()
         ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
         logContext = "crawler work finished, log time: " + ymdhms
         self.LogCrawlerWork(logPath, logContext)
         logContext = \
-            'copyright @' + pllc.__laboratory__ + ' ' + pllc.__organization__   \
+            pllc.__laboratory__ + ' ' + pllc.__organization__   \
             + ' technology support\n'                                           \
-            'code by ' + pllc.__organization__ + '@' + pllc.__author__ + '\n'   \
-            + 'version: ' + pllc.__version__
+            'Code by ' + pllc.__organization__ + '@' + pllc.__author__
         self.LogCrawlerWork(logPath, logContext)
-        # open file-manager to check result
-        os.system(pllc.OSFileManager() + ' ' + pllc.workDir)
+        os.system(pllc.OSFileManager() + ' ' + pllc.workDir)        # open file-manager to check result
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

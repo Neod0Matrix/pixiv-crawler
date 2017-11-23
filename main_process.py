@@ -25,6 +25,7 @@ if __name__ == '__main__':
               "help ---     print this help page\n"
     else:
         print pllc.SHELLHEAD + "argv(s) error\n"
+        exit()
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

@@ -1,15 +1,15 @@
 License
 ======
     
-    Copyright @2017 T.WKVER </MATRIX>
+    Copyright (c) 2017 @T.WKVER </MATRIX>
     Code by </MATRIX>@Neod Anderjon(LeaderN)
     Thanks to fork and watch my project
 
 Update
 ======
 
-    Version: v3p4_LTE 
-    Last Update Time: 20171123pm1519
+    Version: v3p6_LTE 
+    Last Update Time: 20171123pm1740
     
     This python crawler is built to crawl pixiv images
     It have two mode: dailyRankTop and illustRepoAll 
@@ -28,6 +28,7 @@ Platform
 Run
 ======
 
+- [pixiv-crawler](https://github.com/Neod0Matrix/pixiv-crawler)
     * git clone https://github.com/Neod0Matrix/pixiv-crawler.git
     First config your local folder in pllc.py and login.cr
 
@@ -63,4 +64,6 @@ Problems that may arise
     their reason are same: login website failed, you can try this: unlogin your account 
     from Pixiv, then use browser visit this two url, R18 will return a 403 error, 
     mainpage 2 will return first page
-    Damn it
+    
+    Pixiv use POST way to handle login, use GET way to handle others request
+    

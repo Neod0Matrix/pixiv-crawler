@@ -25,43 +25,85 @@ class DailyRankTop:
     def GetEssentialInfo(self, wd, lp):
         # first create folder
         pp.MkDir(lp, wd)
-        # input a string for request image number, transfer string to number
-        imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
-        logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % imgCnt
+        # select ordinary top or r18 top
+        # transfer ascii string to number
+        ormode = raw_input(pllc.SHELLHEAD + 'select ordinary top or r18 top(tap "o" or "r"): ')
+        logContext = ''
+        imgCnt = ''
+        if ormode == 'o':
+            # input a string for request image number
+            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is 50): '))
+            while imgCnt > 50:
+                print pllc.SHELLHEAD + 'input error, daily-rank top at most 50'
+                imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter again(max is 50): '))
+            logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % imgCnt
+        elif ormode == 'r':
+            # input a string for request image number
+            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank R18 top images count(max is 100): '))
+            while imgCnt > 100:
+                print pllc.SHELLHEAD + 'input error, daily-rank R18 top at most 100'
+                imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter again(max is 100): '))
+            logContext = 'this python auto-crawler work to crawle pixiv website daily top R18 %d images' % imgCnt
         pp.LogCrawlerWork(lp, logContext)
+        # set to global var
         self.reqImageCnt = imgCnt
+        self.drt_mode = ormode
 
         return imgCnt
 
     # crawl dailyRank list
     @staticmethod
-    def GatherTargetList(self, img_nbr):
+    def GatherTargetList(self, ormode, img_nbr):
         logContext = 'gather rank list======>'
         pp.LogCrawlerWork(self.logpath, logContext)
 
-        page_url = pllc.rankWebURL
-        request = urllib2.Request(url=page_url,
-                                  data=pp.getData)
-        response = pp.opener.open(request, timeout=300)
-        if response.getcode() == pllc.reqSuccessCode:
-            logContext = 'website response successed'
-        else:
-            # response failed, you need to check network status
-            logContext = 'website response fatal, return code %d' % response.getcode()
-        pp.LogCrawlerWork(self.logpath, logContext)
-        web_src = response.read().decode("UTF-8", "ignore")
-
-        # build original image url
-        vwPattern = re.compile(pllc.rankVWRegex, re.S)
-        vwCapture = re.findall(vwPattern, web_src)
+        dataCapture = []
         targetURL = []
-        for i in vwCapture[:img_nbr]:
-            vaildWord = i[5:][:-1]                                  # pixiv may change its position sometimes
-            targetURL.append(pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail)
+        if ormode == 'o':
+            page_url = pllc.rankWebURL
+            request = urllib2.Request(url=page_url,
+                                      data=pp.getData)
+            response = pp.opener.open(request, timeout=300)
+            ## response = urllib2.urlopen(request, timeout=300)
+            if response.getcode() == pllc.reqSuccessCode:
+                logContext = 'website response successed'
+            else:
+                # response failed, you need to check network status
+                logContext = 'website response fatal, return code %d' % response.getcode()
+            pp.LogCrawlerWork(self.logpath, logContext)
+            web_src = response.read().decode("UTF-8", "ignore")
 
-        # gather info of artworks
-        infoPattern = re.compile(pllc.rankTitleRegex, re.S)
-        dataCapture = re.findall(infoPattern, web_src)
+            # build original image url
+            vwPattern = re.compile(pllc.rankVWRegex, re.S)
+            vwCapture = re.findall(vwPattern, web_src)
+            targetURL = []
+            for i in vwCapture[:img_nbr]:
+                vaildWord = i[5:][:-1]                                  # pixiv may change its position sometimes
+                targetURL.append(pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail)
+
+            # gather info of artworks
+            infoPattern = re.compile(pllc.rankTitleRegex, re.S)
+            dataCapture = re.findall(infoPattern, web_src)
+        elif ormode == 'r':
+            page_url = pllc.rankWebURL_R18
+            r18_headers = pllc.R18DailyRankRequestHeaders()
+            request = urllib2.Request(url=page_url,
+                                      data=pp.getData,
+                                      headers=r18_headers)
+            response = pp.opener.open(request, timeout=300)
+            ## response = urllib2.urlopen(request, timeout=300)
+            if response.getcode() == pllc.reqSuccessCode:
+                logContext = 'website response successed'
+            else:
+                # response failed, you need to check network status
+                logContext = 'website response fatal, return code %d' % response.getcode()
+            pp.LogCrawlerWork(self.logpath, logContext)
+            web_src = response.read().decode("UTF-8", "ignore")
+            print web_src
+        else:
+            print pllc.SHELLHEAD + "argv(s) error\n"
+            exit()
+
         logContext = 'top ' + str(img_nbr) + ' info======>'
         pp.LogCrawlerWork(self.logpath, logContext)
         aw_ids = []                                                 # artwork id
@@ -83,9 +125,9 @@ class DailyRankTop:
         # log runtime
         starttime = datetime.datetime.now()
         # check website can response crawler
-        pp.CrawlerSignIn(self.logpath)
+        pp.CamouflageLogin(self.logpath)
         # get ids and urls
-        urls = self.GatherTargetList(self, nbr)
+        urls = self.GatherTargetList(self, self.drt_mode, nbr)
         # save images
         pp.SaveImageBinData(urls, self.basePages, self.workdir, self.logpath)
         # stop log time

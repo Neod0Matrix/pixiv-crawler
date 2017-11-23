@@ -8,10 +8,11 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v3p4_LTE'                                    # version string
+__version__         = 'v3p6_LTE'
 
 import urllib2, re, urllib, json                                    # post data build
 import time, os, linecache, sys                                     # name folder and files
+import getpass                                                      # user and passwd input
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
@@ -23,6 +24,69 @@ def EncodeDecodeResolve():
     sys.setdefaultencoding('UTF-8')
 
 EncodeDecodeResolve()                                               # run once just ok
+
+# login user info file, must be ran firstly
+loginCrFile = 'login.cr'
+# .cr file example:
+# =================================
+# [login]
+# <mail>
+# <passwd>
+# =================================
+def LoginInfoLoad():
+    print '###########################[pixiv-crawler(MatPixivCrawler) %s]###########################' % __version__
+
+    loginFilePath = os.getcwd() + '/' + loginCrFile                 # get local dir path
+    isLoginCrExisted = os.path.exists(loginFilePath)
+    if isLoginCrExisted:
+        userMailBox = linecache.getline(loginFilePath, 2)           # row 2, usernamemail
+        userPassword = linecache.getline(loginFilePath, 3)          # row 3, password
+        # empty file
+        if userMailBox == '' or userPassword == '':
+            print SHELLHEAD + "login.cr file invaild, please input your login info"
+            userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
+            userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ')
+        else:
+            print SHELLHEAD + "please check your info:\n" + userMailBox + userPassword # no log in log file
+            check = raw_input(SHELLHEAD + "Yes or No?: ")
+            # user judge info are error
+            if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
+                print SHELLHEAD + "you can write new info"
+                userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
+                userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ')
+    # no login.cr file
+    else:
+        print SHELLHEAD + "cannot find login.cr file, please input your login info"
+        userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
+        userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ')
+
+    return userMailBox, userPassword
+
+loginInfo = LoginInfoLoad()                                         # call once
+
+# ========================================some use url address=====================================================
+# login request must be https proxy format, request page or image must be http proxy
+
+# login and request image https proxy
+wwwHost = "www.pixiv.net"                                           # only can set into host
+hostWebURL = 'https://www.pixiv.net/'
+accountHost = "accounts.pixiv.net"                                  # account login
+postKeyGeturl = 'https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index'
+login_ref = 'wwwtop_accounts_index'                                 # post data include
+originHost = "https://accounts.pixiv.net/api/login?lang=en"         # login request url
+# request universal original image constant words
+imgOriginalheader = 'https://i.pximg.net/img-original/img'          # original image https url header
+imgOriginaltail = '_p0.png'                                         # original image https url tail, default set to png
+# page request http proxy
+rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily'          # dailyRank
+rankWebURL_R18 = 'http://www.pixiv.net/ranking.php?mode=daily_r18'  # r18 dailyRank
+baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
+illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
+mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust main page
+mainPagemiddle = '&type=all'                                        # url middle word
+mainPagetail = '&p='                                                # url tail word
+
+# ==================================http request headers include data============================================
 
 reqSuccessCode = 200
 # login headers info dict
@@ -39,75 +103,19 @@ connection = "keep-alive"
 contentType = "application/x-www-form-urlencoded; charset=UTF-8"
 xRequestwith = "XMLHttpRequest"
 
-# login user info file
-loginCrFile = 'login.cr'
-# =================================
-# [login]
-# <mail>
-# <passwd>
-# =================================
-def LoginInfoLoad():
-    loginFilePath = os.getcwd() + '/' + loginCrFile                 # get local dir path
-    isLoginCrExisted = os.path.exists(loginFilePath)
-    if isLoginCrExisted:
-        userMailBox = linecache.getline(loginFilePath, 2)           # row 2, usernamemail
-        userPassword = linecache.getline(loginFilePath, 3)          # row 3, password
-        # empty file
-        if userMailBox == '' or userPassword == '':
-            print SHELLHEAD + "login.cr file invaild, please input your login info"
-            userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
-            userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
-        else:
-            print SHELLHEAD + "please check your info:\n" + userMailBox + userPassword # no log in log file
-            check = raw_input(SHELLHEAD + "Yes or No?: ")
-            # user judge info are error
-            if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
-                print SHELLHEAD + "you can write new info"
-                userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
-                userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
-    # no login.cr file
-    else:
-        print SHELLHEAD + "cannot find login.cr file, please input your login info"
-        userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(e-mailbox), must can be a R18: ')
-        userPassword = raw_input(SHELLHEAD + 'enter your id password: ')
-
-    return userMailBox, userPassword
-
-loginInfo = LoginInfoLoad()                                         # call once
-
-# ========================================some use url address=====================================================
-# maybe pixiv use https proxy, but here must write http proxy, or not you will have httplib.BadStatusLine: '' error
-
-wwwHost = "www.pixiv.net"                                           # only can set into host
-postKeyGeturl = 'http://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index'
-hostWebURL = 'http://www.pixiv.net/'
-accountHost = "accounts.pixiv.net"                                  # account login
-originHost = "http://accounts.pixiv.net"
-loginReferer = hostWebURL + "login.php?return_to=0"                 # login referer
-rankWebURL = hostWebURL + 'ranking.php?mode=daily'                  # dailyRank
-rankWebURL_R18 = hostWebURL + 'ranking.php?mode=daily_r18'          # r18 dailyRank
-baseWebURL = hostWebURL + 'member_illust.php?mode=medium&illust_id=' # basic format
-illustHomeURL = hostWebURL + 'member.php?id='                       # illust home page
-mainPage = hostWebURL + 'member_illust.php?id='                     # illust main page
-mainPagemiddle = '&type=all'                                        # url middle word
-mainPagetail = '&p='                                                # url tail word
-# request universal original image constant words
-imgOriginalheader = 'https://i.pximg.net/img-original/img'          # original image https url header
-imgOriginaltail = '_p0.png'                                         # original image https url tail, default set to png
-
 # init
 def InitLoginHeaders():
     baseHeaders = {
-        'Accept': accept2,
+        'Accept': accept,
         'Accept-Encoding': acceptEncoding,
         'Accept-Language': acceptLanguage,
         'Connection': connection,
-        'Content-Length': reqSuccessCode,
+        'Content-Length': "207",
         'Content-Type': contentType,
+        'DNT': "1",
         'Host': accountHost,
         'Origin': originHost,
-        ## 'Upgrade-Insecure-Requests': "1",
-        'Referer': loginReferer,
+        'Referer': postKeyGeturl,                                   # last page is request post-key page
         'X-Requested-With': xRequestwith,
     }
     buildHeaders = {}
@@ -134,6 +142,7 @@ def R18DailyRankRequestHeaders():
         'Connection': connection,
         'DNT': "1",
         'Host': wwwHost,
+        'Referer': "https://www.pixiv.net/ranking.php?mode=daily",  # https proxy string
         'Upgrade-Insecure-Requests': "1",
     }
     buildHeaders = {}
@@ -215,29 +224,31 @@ imagesNameRegex = '" alt="(.*?)"'                                   # mate image
 def illustAWCntRegex(setid):
     return 'eRegister" data-user-id="%s">.*?<' % setid
 # ======================================login need word build================================================
-# http request have more way, here try GET and POST, Pixiv use GET
+# http request have more way, Pixiv use POST way to login and request image, use GET way to request page
 
 # GET way need info
-getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]
+getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]    # priv_lib will first init it
 getData = json.dumps(urllib.urlencode(getwayRegInfo))               # call once
 
 # POST way build dict
 def postKeyGather():
+    # build basic dict
     postwayRegInfo = {
-            'mode': 'login',
             'pixiv_id': loginInfo[0],
-            'pass': loginInfo[1],
+            'password': loginInfo[1],
             'captcha': "",
             'g_recaptcha_response': "",
             'source': "pc",
+            'ref': login_ref,
             'return_to': hostWebURL,
         }
     request = urllib2.Request(postKeyGeturl)
-    response = urllib2.urlopen(request)
+    response = urllib2.urlopen(request, timeout=300)
     # mate post key
     web_src = response.read().decode("UTF-8", "ignore")
     postPattern = re.compile(postKeyRegex, re.S)
     postKey = re.findall(postPattern, web_src)[0]
+    print SHELLHEAD + 'get post-key: ' + postKey                    # display key
     # build total post data
     postKeydict = {'post_key': postKey}
     post_dict = dict(postwayRegInfo.items() + postKeydict.items())
@@ -274,12 +285,12 @@ def SetOSHomeFolder ():
 
     return homeFolder
 
-workDir = SetOSHomeFolder()
+workDir = SetOSHomeFolder()                                         # call once
 
 # private directory
-privateFolder = workDir + '%s' % ymd
-logFileName = '/CrawlerWork[%s].log' % ymd
-logFilePath = privateFolder + logFileName
+privateFolder = workDir + 'DailyRank_%s' % ymd                      # daily-rank use
+logFileName = '/CrawlerWork[%s].log' % ymd                          # universal name
+logFilePath = privateFolder + logFileName                           # daily-rank use
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
