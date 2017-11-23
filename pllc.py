@@ -90,9 +90,9 @@ mainPagetail = '&p='                                                # url tail w
 
 reqSuccessCode = 200
 # login headers info dict
-useragentForLinuxBrowser = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) " \
+userAgentLinux = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) " \
                            "Chrome/56.0.2924.87 Safari/537.36"
-useragentForWindowsBrowser = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)" \
+userAgentWindows = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)" \
                             " Chrome/60.0.3112.90 Safari/537.36"
 accept = "application/json, text/javascript, */*; q=0.01"
 accept2 = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
@@ -122,12 +122,12 @@ def InitLoginHeaders():
     # linux
     if os.name == 'posix':
         buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': useragentForLinuxBrowser,
+            'User-Agent': userAgentLinux,
         }.items())
     # windows
     elif os.name == 'nt':
         buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': useragentForWindowsBrowser,
+            'User-Agent': userAgentWindows,
         }.items())
 
     return buildHeaders
@@ -149,12 +149,12 @@ def R18DailyRankRequestHeaders():
     # linux
     if os.name == 'posix':
         buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': useragentForLinuxBrowser,
+            'User-Agent': userAgentLinux,
         }.items())
     # windows
     elif os.name == 'nt':
         buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': useragentForWindowsBrowser,
+            'User-Agent': userAgentWindows,
         }.items())
 
     return buildHeaders
@@ -175,12 +175,12 @@ def MainpageRequestHeaders(referer):
     # linux
     if os.name == 'posix':
         buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': useragentForLinuxBrowser,
+            'User-Agent': userAgentLinux,
         }.items())
     # windows
     elif os.name == 'nt':
         buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': useragentForWindowsBrowser,
+            'User-Agent': userAgentWindows,
         }.items())
 
     return buildHeaders
@@ -201,12 +201,12 @@ def OriginalImageRequestHeaders(referer):
     # linux
     if os.name == 'posix':
         buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': useragentForLinuxBrowser,
+            'User-Agent': userAgentLinux,
         }.items())
     # windows
     elif os.name == 'nt':
         buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': useragentForWindowsBrowser,
+            'User-Agent': userAgentWindows,
         }.items())
 
     return buildHeaders
