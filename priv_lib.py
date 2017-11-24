@@ -192,23 +192,7 @@ class PrivateLib:
             logContext = 'download no.%d image finished' % i
             self.LogCrawlerWork(logPath, logContext)
 
-    def WholeDownload(self, img_urls, base_pages, imgPath, logPath):
-        """
-            download target image(s)
-            :param img_urls:    image urls list
-            :param base_pages:  referer basic pages list
-            :param imgPath:     image save path
-            :param logPath:     log save path
-            :return:            none
-        """
-        logContext = 'start to download target======>'
-        self.LogCrawlerWork(logPath, logContext)
-
-        # process circult loop
-        for i, img_url in enumerate(img_urls):
-            self.SaveOneImage(i, img_url, base_pages, imgPath, logPath)
-
-    def MultiProcessDownload(self, urls, basePages, workdir, logpath):
+    def TargetImageDownload(self, urls, basePages, workdir, logpath):
         """
             multi-process download all image
             :param urls:        all original images urls
@@ -220,13 +204,16 @@ class PrivateLib:
         ## self.WholeDownload(urls, basePages, workdir, logpath) # easy download
         logContext = 'start to download target======>'
         self.LogCrawlerWork(logpath, logContext)
+
         lock = threading.Lock()                                     # object lock
         downloadProcess = ''
         for i, img_url in enumerate(urls):
+            # easy process run
+            ## self.SaveOneImage(i, img_url, basePages, workdir, logpath)
             # call threading module
             downloadProcess = MultiThread(lock, i, img_url, basePages, workdir, logpath)
             downloadProcess.start()
-        downloadProcess.join()
+        downloadProcess.join()                                      # father thread wait son thread end
         time.sleep(5)                                               # wait all process end
 
     def crawlerFinishWork(self, logPath):

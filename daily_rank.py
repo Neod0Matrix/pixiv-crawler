@@ -140,7 +140,7 @@ class DailyRankTop:
         # get ids and urls
         urls = self.GatherTargetList(self, self.drt_mode, nbr)
         # save images
-        pp.MultiProcessDownload(urls, self.basePages, self.workdir, self.logpath)
+        pp.TargetImageDownload(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
         endtime = datetime.datetime.now()
         logContext = "elapsed time: %ds" % (endtime - starttime).seconds

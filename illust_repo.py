@@ -178,7 +178,7 @@ class IllustRepoAll:
         crawCnt = self.GatherIndexInfo(self, self.logpath)
         urls = self.PackAllPageURL(self, crawCnt, self.logpath)
         # save images
-        pp.MultiProcessDownload(urls, self.basePages, self.workdir, self.logpath)
+        pp.TargetImageDownload(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
         endtime = datetime.datetime.now()
         logContext = "elapsed time: %ds" % (endtime - starttime).seconds
