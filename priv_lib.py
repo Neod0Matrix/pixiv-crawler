@@ -4,10 +4,11 @@
 # =====================================================================
 # this python script is built to create a private library use in this crawler
 
-import urllib2, cookielib, os, requests, urllib                     # crawler depends
+import urllib2, cookielib, os                                       # crawler depends
 import time, random
 import pllc                                                         # messages
 from bs4 import BeautifulSoup
+import threading                                                    # multi-process
 
 pllc.EncodeDecodeResolve()
 
@@ -38,7 +39,6 @@ class PrivateLib:
         self.opener = urllib2.build_opener(self.cookieHandler)      # build the opener
         ## self.opener.addheaders = self.loginHeader
         urllib2.install_opener(self.opener)                         # install it
-        self.proxy = self.ProxyServerCrawl()                        # choose a proxy server
 
     @staticmethod
     def LogCrawlerWork(logPath, logInfo):
@@ -75,32 +75,13 @@ class PrivateLib:
 
         return folder
 
-    def CamouflageLogin(self, logPath):
-        """
-            camouflage browser to login
-            :param logPath: log save path
-            :return:        none
-        """
-        # login init need to commit post data to Pixiv
-        request = urllib2.Request(self.loginURL, pllc.postData, self.loginHeader)
-        response = self.opener.open(request)
-        # try to test website response
-        if response.getcode() == pllc.reqSuccessCode:
-            logContext = 'login response successed'
-        else:
-            # response failed, you need to check network status
-            logContext = 'login response fatal, return code %d' % response.getcode()
-        self.LogCrawlerWork(logPath, logContext)
-        web_src = response.read().decode("UTF-8", "ignore")
-        print web_src
-
     @staticmethod
     def ProxyServerCrawl():
         """
             catch a proxy server when crwaler crawl many times website forbidden host ip
         :return:        proxy server ip dict
         """
-        req_ps_url = 'http://www.xicidaili.com/nn/'
+        req_ps_url = pllc.proxyServerRequestURL
         psHeaders = {}
         if os.name == 'posix':
             psHeaders = {'User-Agent': pllc.userAgentLinux}
@@ -116,7 +97,7 @@ class PrivateLib:
             # use beautifulsoup lib mate 'tr' word
             proxyRawwords = BeautifulSoup(web_src, 'lxml').find_all(pllc.proxyServerRegex)
         else:
-            logContext = 'crawl proxy failed, return code: %d' %response.getcode()
+            logContext = 'crawl proxy failed, return code: %d' % response.getcode()
         print logContext
         ip_list = []
         for i in range(1, len(proxyRawwords)):
@@ -133,7 +114,85 @@ class PrivateLib:
 
         return proxyServer
 
-    def SaveImageBinData(self, img_urls, base_pages, imgPath, logPath):
+    def CamouflageLogin(self, logPath):
+        """
+            camouflage browser to login
+            :param logPath: log save path
+            :return:        none
+        """
+        # login init need to commit post data to Pixiv
+        request = urllib2.Request(self.loginURL, pllc.postData, self.loginHeader)
+        response = self.opener.open(request)
+        # try to test website response
+        if response.getcode() == pllc.reqSuccessCode:
+            logContext = 'login response successed'
+        else:
+            # response failed, you need to check network status
+            logContext = 'login response fatal, return code %d' % response.getcode()
+        self.LogCrawlerWork(logPath, logContext)
+
+    def SaveOneImage(self, i, img_url, base_pages, imgPath, logPath):
+        """
+            download one target image
+            :param i:           image index
+            :param img_url:     image urls list
+            :param base_pages:  referer basic pages list
+            :param imgPath:     image save path
+            :param logPath:     log save path
+            :return:            none
+        """
+        img_headers = pllc.OriginalImageRequestHeaders(base_pages[i]) # reset headers with basic pages
+        # use GET way to request server
+        ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
+        img_request = urllib2.Request(url=img_url,
+                                      headers=img_headers)
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+        ## opener.addheaders = img_headers
+        urllib2.install_opener(opener)                              # must install new created opener
+
+        # pixiv website image format have jpg and png two format
+        img_type_flag = 0                                           # replace png format, reset last
+        img_id = img_url[57:][:-7]                                  # cut id from url
+        image_name = str(i) + '-' + img_id                          # image name, pixiv image name img_id + '_p0'
+        try:
+            img_response = urllib2.urlopen(img_request, timeout=300)
+            ## img_response = opener.open(img_url, timeout=300)
+        # http error because only use png format to build url
+        # after except error, url will be changed to jpg format
+        except Exception, e:
+            logContext = str(e) + ", image format need to change"
+            self.LogCrawlerWork(logPath, logContext)
+            img_type_flag += 1
+            chajpgurl = img_url[0:-3] + 'jpg'                       # replace to jpg format
+            img_request = urllib2.Request(
+                url=chajpgurl,
+                headers=img_headers
+            )
+            # rebuild opener
+            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+            ## opener.addheaders = img_headers
+            urllib2.install_opener(opener)                          # must install new created opener
+            img_response = urllib2.urlopen(img_request, timeout=300) # request timeout set longer
+            ## img_response = opener.open(img_url, timeout=300)
+
+            if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
+                logContext = 'capture target no.%d jpg image ok' % i
+                self.LogCrawlerWork(logPath, logContext)
+                with open(imgPath + '/' + image_name + '.jpg', 'wb') as jpg:
+                    jpg.write(img_response.read())
+                logContext = 'download no.%d image finished' % i
+                self.LogCrawlerWork(logPath, logContext)
+
+        # no http error, image is png format, continue request
+        if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
+            logContext = 'capture target no.%d png image ok' % i
+            self.LogCrawlerWork(logPath, logContext)
+            with open(imgPath + '/' + image_name + '.png', 'wb') as png:
+                png.write(img_response.read())
+            logContext = 'download no.%d image finished' % i
+            self.LogCrawlerWork(logPath, logContext)
+
+    def WholeDownload(self, img_urls, base_pages, imgPath, logPath):
         """
             download target image(s)
             :param img_urls:    image urls list
@@ -145,57 +204,30 @@ class PrivateLib:
         logContext = 'start to download target======>'
         self.LogCrawlerWork(logPath, logContext)
 
+        # process circult loop
         for i, img_url in enumerate(img_urls):
-            img_headers = pllc.OriginalImageRequestHeaders(base_pages[i]) # reset headers with basic pages
-            # use GET way to request server
-            ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
-            img_request = urllib2.Request(url=img_url,
-                                          headers=img_headers)
-            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-            ## opener.addheaders = img_headers
-            urllib2.install_opener(opener)                          # must install new created opener
+            self.SaveOneImage(i, img_url, base_pages, imgPath, logPath)
 
-            # pixiv website image format have jpg and png two format
-            img_type_flag = 0                                       # replace png format, reset last
-            img_id = img_url[57:][:-7]                              # cut id from url
-            image_name = str(i) + '-' + img_id                      # image name, pixiv image name img_id + '_p0'
-            try:
-                img_response = urllib2.urlopen(img_request, timeout=300)
-                ## img_response = opener.open(img_url, timeout=300)
-            # http error because only use png format to build url
-            # after except error, url will be changed to jpg format
-            except Exception, e:
-                logContext = str(e) + ", image format need to change"
-                self.LogCrawlerWork(logPath, logContext)
-                img_type_flag += 1
-                chajpgurl = img_url[0:-3] + 'jpg'                   # replace to jpg format
-                img_request = urllib2.Request(
-                    url=chajpgurl,
-                    headers=img_headers
-                )
-                # rebuild opener
-                opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-                ## opener.addheaders = img_headers
-                urllib2.install_opener(opener)                      # must install new created opener
-                img_response = urllib2.urlopen(img_request, timeout=300) # request timeout set longer
-                ## img_response = opener.open(img_url, timeout=300)
-
-                if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
-                    logContext = 'capture target jpg image ok'
-                    self.LogCrawlerWork(logPath, logContext)
-                    with open(imgPath + '/' + image_name + '.jpg', 'wb') as jpg:
-                        jpg.write(img_response.read())
-                    logContext = 'download no.%d image finished' % i
-                    self.LogCrawlerWork(logPath, logContext)
-
-            # no http error, image is png format, continue request
-            if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
-                logContext = 'capture target png image ok'
-                self.LogCrawlerWork(logPath, logContext)
-                with open(imgPath + '/' + image_name + '.png', 'wb') as png:
-                    png.write(img_response.read())
-                logContext = 'download no.%d image finished' % i
-                self.LogCrawlerWork(logPath, logContext)
+    def MultiProcessDownload(self, urls, basePages, workdir, logpath):
+        """
+            multi-process download all image
+            :param urls:        all original images urls
+            :param basePages:   all referer basic pages
+            :param workdir:     work directory
+            :param logpath:     log save path
+            :return:            none
+        """
+        ## self.WholeDownload(urls, basePages, workdir, logpath) # easy download
+        logContext = 'start to download target======>'
+        self.LogCrawlerWork(logpath, logContext)
+        lock = threading.Lock()                                     # object lock
+        downloadProcess = ''
+        for i, img_url in enumerate(urls):
+            # call threading module
+            downloadProcess = MultiThread(lock, i, img_url, basePages, workdir, logpath)
+            downloadProcess.start()
+        downloadProcess.join()
+        time.sleep(5)                                               # wait all process end
 
     def crawlerFinishWork(self, logPath):
         """
@@ -213,6 +245,40 @@ class PrivateLib:
             'Code by ' + pllc.__organization__ + '@' + pllc.__author__
         self.LogCrawlerWork(logPath, logContext)
         os.system(pllc.OSFileManager() + ' ' + pllc.workDir)        # open file-manager to check result
+
+class MultiThread(threading.Thread):
+    """
+        use rewrite threading module to accelerate download process
+    """
+    def __init__(self, lock, i, img_url, base_pages, imgPath, logPath):
+        """
+            commit class arguments
+            :param lock:        object lock
+            :param i:           image index
+            :param img_url:     image url
+            :param base_pages:  referer basic page
+            :param imgPath:     image save path
+            :param logPath:     log save path
+        """
+        threading.Thread.__init__(self)
+        self.lock       = lock
+        self.i          = i
+        self.img_url    = img_url
+        self.base_pages = base_pages
+        self.imgPath    = imgPath
+        self.logPath    = logPath
+
+    def run(self):
+        """
+            rewrite threading.thread run() way
+        :return:    none
+        """
+        download = PrivateLib().SaveOneImage
+        # cancel lock release will let multi-process change to easy process
+        ## self.lock.acquire()
+        # call Private_Lib().SaveOneImage() way to save one image
+        download(self.i, self.img_url, self.base_pages, self.imgPath, self.logPath)
+        ## self.lock.release()
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

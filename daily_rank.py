@@ -18,7 +18,6 @@ class DailyRankTop:
     """
     def __init__(self):
         """class include init process"""
-        pp.__init__()
         # class inner global var
         self.workdir = pllc.privateFolder                           # setting global work directory
         self.logpath = pllc.logFilePath                             # setting global log path
@@ -136,11 +135,12 @@ class DailyRankTop:
         # log runtime
         starttime = datetime.datetime.now()
         # check website can response crawler
+        pp.ProxyServerCrawl()
         pp.CamouflageLogin(self.logpath)
         # get ids and urls
         urls = self.GatherTargetList(self, self.drt_mode, nbr)
         # save images
-        pp.SaveImageBinData(urls, self.basePages, self.workdir, self.logpath)
+        pp.MultiProcessDownload(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
         endtime = datetime.datetime.now()
         logContext = "elapsed time: %ds" % (endtime - starttime).seconds

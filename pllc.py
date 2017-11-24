@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v3p9_LTE'
+__version__         = 'v4p0_LTE'
 
 import urllib2, re, urllib, json                                    # post data build
 import time, os, linecache, sys                                     # name folder and files
@@ -81,6 +81,7 @@ originHost = "https://accounts.pixiv.net/api/login?lang=en"         # login requ
 imgOriginalheader = 'https://i.pximg.net/img-original/img'          # original image https url header
 imgOriginaltail = '_p0.png'                                         # original image https url tail, default set to png
 # page request http proxy
+proxyServerRequestURL = 'http://www.xicidaili.com/nn/'              # proxy server get website
 rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily'          # dailyRank
 rankWebURL_R18 = 'http://www.pixiv.net/ranking.php?mode=daily_r18'  # r18 dailyRank
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format

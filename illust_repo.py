@@ -18,25 +18,12 @@ class IllustRepoAll:
     """
     def __init__(self):
         """class include init process"""
-        pp.__init__()
         # global illust id
-        self.illustInputID \
-            = raw_input(pllc.SHELLHEAD + 'enter you want to crawl illuster id: ')
-
-    @staticmethod
-    def GetInputEssentialInfo(self):
-        """
-            setting some essential info
-            :param self:    self class
-            :return:        log save path
-        """
-        illustHomeFolder = pllc.SetOSHomeFolder() + self.illustInputID
-        self.workdir = illustHomeFolder                             # setting global work directory
-        illustLogFilePath = illustHomeFolder + pllc.logFileName
-        # create illust homefolder
-        pp.MkDir(illustLogFilePath, illustHomeFolder)
-
-        return illustLogFilePath
+        self.illustInputID = raw_input(pllc.SHELLHEAD
+                + 'enter you want to crawl illuster id: ')
+        # work directory create
+        self.workdir = pllc.SetOSHomeFolder() + self.illustInputID
+        self.logpath = self.workdir + pllc.logFileName
 
     @staticmethod
     def GatherIndexInfo(self, logPath):
@@ -180,23 +167,24 @@ class IllustRepoAll:
             include this class run logic
             :return:    none
         """
-        # collect essential info
-        logFilePath = self.GetInputEssentialInfo(self)
+        # make dir
+        pp.MkDir(self.logpath, self.workdir)
         # log runtime
         starttime = datetime.datetime.now()
         # check website can response crawler
-        pp.CamouflageLogin(logFilePath)
+        pp.ProxyServerCrawl()
+        pp.CamouflageLogin(self.logpath)
         # get capture image count
-        crawCnt = self.GatherIndexInfo(self, logFilePath)
-        urls = self.PackAllPageURL(self, crawCnt, logFilePath)
+        crawCnt = self.GatherIndexInfo(self, self.logpath)
+        urls = self.PackAllPageURL(self, crawCnt, self.logpath)
         # save images
-        pp.SaveImageBinData(urls, self.basePages, self.workdir, logFilePath)
+        pp.MultiProcessDownload(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
         endtime = datetime.datetime.now()
         logContext = "elapsed time: %ds" % (endtime - starttime).seconds
-        pp.LogCrawlerWork(logFilePath, logContext)
+        pp.LogCrawlerWork(self.logpath, logContext)
         # finish
-        pp.crawlerFinishWork(logFilePath)
+        pp.crawlerFinishWork(self.logpath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
