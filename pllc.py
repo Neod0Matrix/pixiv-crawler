@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v3p8_LTE'
+__version__         = 'v3p9_LTE'
 
 import urllib2, re, urllib, json                                    # post data build
 import time, os, linecache, sys                                     # name folder and files
@@ -238,6 +238,8 @@ nbrRegex = '\d+\.?\d*'                                              # mate any n
 imgThumbnailRegex = '<img src="(.*?)"'                              # mate thumbnail image
 illustNameRegex = 'r:title" content=".*? '                          # mate illust name
 imagesNameRegex = '" alt="(.*?)"'                                   # mate images name
+proxyServerRegex = 'tr'                                             # use beautifulsoup module, easy
+arrangeProxyServerRegex = 'td'                                      # cut gather list
 # illust artwork count mate
 def illustAWCntRegex(setid):
     return 'eRegister" data-user-id="%s">.*?<' % setid
@@ -273,7 +275,8 @@ def postKeyGather():
     # build total post data
     postKeydict = {'post_key': postKey}
     post_dict = dict(postwayRegInfo.items() + postKeydict.items())
-    post_data = json.dumps(urllib.urlencode(post_dict))
+    # json.dumps trasfer dict to str
+    post_data = json.dumps(urllib.urlencode(post_dict)).encode("UTF-8")
 
     return post_data
 postData = postKeyGather()                                          # call once

@@ -8,8 +8,8 @@ License
 Update
 ======
 
-    Version: v3p8_LTE 
-    Last Update Time: 20171124am0228
+    Version: v3p9_LTE 
+    Last Update Time: 20171124pm2150
     
     This python crawler is built to crawl pixiv images
     It have two mode: dailyRankTop and illustRepoAll 
@@ -47,6 +47,9 @@ Problems that may arise
     If your test network environment has been dns-polluted, I suggest you 
     fix your PC dns-server to a pure server
     In China, such as 115.159.146.99 from https://aixyz.com/
+    
+    If you crawl Pixiv website many times in a short time, you may be forbiddened
+    to visit website, now you can try add proxy server and run again
     
     ira mode you need input that illuster id ,not image id
     crawler log image will rename to array number + image id, 

@@ -4,9 +4,10 @@
 # =====================================================================
 # this python script is built to create a private library use in this crawler
 
-import urllib2, cookielib, os                                       # crawler depends
-import time
+import urllib2, cookielib, os, requests, urllib                     # crawler depends
+import time, random
 import pllc                                                         # messages
+from bs4 import BeautifulSoup
 
 pllc.EncodeDecodeResolve()
 
@@ -27,12 +28,17 @@ class PrivateLib:
             class init and create some self var
             here build a sample opener
         """
-        self.loginURL = pllc.originHost                             # login account page
-        self.loginHeader = pllc.InitLoginHeaders()                  # build request headers
-        self.cookie = cookielib.LWPCookieJar()                      # build cookie module
-        self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie)
-        self.opener = urllib2.build_opener(self.cookieHandler)      # build opener pack
-        urllib2.install_opener(self.opener)                         # install this pack
+        # login use url, post way data, headers
+        self.loginURL = pllc.originHost
+        self.postData = pllc.postData
+        self.loginHeader = pllc.InitLoginHeaders()
+        # example for private opener build
+        self.cookie = cookielib.LWPCookieJar()                      # create a cookie words
+        self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie) # add http cookie words
+        self.opener = urllib2.build_opener(self.cookieHandler)      # build the opener
+        ## self.opener.addheaders = self.loginHeader
+        urllib2.install_opener(self.opener)                         # install it
+        self.proxy = self.ProxyServerCrawl()                        # choose a proxy server
 
     @staticmethod
     def LogCrawlerWork(logPath, logInfo):
@@ -85,6 +91,47 @@ class PrivateLib:
             # response failed, you need to check network status
             logContext = 'login response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
+        web_src = response.read().decode("UTF-8", "ignore")
+        print web_src
+
+    @staticmethod
+    def ProxyServerCrawl():
+        """
+            catch a proxy server when crwaler crawl many times website forbidden host ip
+        :return:        proxy server ip dict
+        """
+        req_ps_url = 'http://www.xicidaili.com/nn/'
+        psHeaders = {}
+        if os.name == 'posix':
+            psHeaders = {'User-Agent': pllc.userAgentLinux}
+        elif os.name == 'nt':
+            psHeaders = {'User-Agent': pllc.userAgentWindows}
+        request = urllib2.Request(url=req_ps_url,
+                                  headers=psHeaders)
+        response = urllib2.urlopen(request, timeout=300)
+        proxyRawwords = []
+        if response.getcode() == pllc.reqSuccessCode:
+            logContext = 'crawl proxy successed'
+            web_src = response.read().decode("UTF-8", "ignore")
+            # use beautifulsoup lib mate 'tr' word
+            proxyRawwords = BeautifulSoup(web_src, 'lxml').find_all(pllc.proxyServerRegex)
+        else:
+            logContext = 'crawl proxy failed, return code: %d' %response.getcode()
+        print logContext
+        ip_list = []
+        for i in range(1, len(proxyRawwords)):
+            ip_info = proxyRawwords[i]
+            tds = ip_info.find_all(pllc.arrangeProxyServerRegex)
+            ip_list.append(tds[1].text + ':' + tds[2].text)
+
+        proxy_list = []
+        for ip in ip_list:
+            proxy_list.append('http://' + ip)
+        proxy_ip = random.choice(proxy_list)                        # random catch a proxy
+        proxyServer = {'http': proxy_ip}                            # setting proxy server
+        print 'choose proxy server: ' + proxy_ip
+
+        return proxyServer
 
     def SaveImageBinData(self, img_urls, base_pages, imgPath, logPath):
         """
@@ -105,6 +152,7 @@ class PrivateLib:
             img_request = urllib2.Request(url=img_url,
                                           headers=img_headers)
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+            ## opener.addheaders = img_headers
             urllib2.install_opener(opener)                          # must install new created opener
 
             # pixiv website image format have jpg and png two format
@@ -113,6 +161,7 @@ class PrivateLib:
             image_name = str(i) + '-' + img_id                      # image name, pixiv image name img_id + '_p0'
             try:
                 img_response = urllib2.urlopen(img_request, timeout=300)
+                ## img_response = opener.open(img_url, timeout=300)
             # http error because only use png format to build url
             # after except error, url will be changed to jpg format
             except Exception, e:
@@ -126,8 +175,10 @@ class PrivateLib:
                 )
                 # rebuild opener
                 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+                ## opener.addheaders = img_headers
                 urllib2.install_opener(opener)                      # must install new created opener
                 img_response = urllib2.urlopen(img_request, timeout=300) # request timeout set longer
+                ## img_response = opener.open(img_url, timeout=300)
 
                 if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
                     logContext = 'capture target jpg image ok'
