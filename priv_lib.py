@@ -161,8 +161,8 @@ class PrivateLib:
         # http error because only use png format to build url
         # after except error, url will be changed to jpg format
         except Exception, e:
-            logContext = str(e) + ", image format type may error"
-            self.LogCrawlerWork(logPath, logContext)
+            ## logContext = str(e) + ", image format type may error"
+            ## self.LogCrawlerWork(logPath, logContext)
             img_type_flag += 1
             chajpgurl = img_url[0:-3] + 'jpg'                       # replace to jpg format
             img_request = urllib2.Request(
@@ -222,11 +222,9 @@ class PrivateLib:
                 overwrite threading.thread run() method
             :return:    none
             """
-            download = PrivateLib().SaveOneImage
             # cancel lock release will let multi-process change to easy process
             ## self.lock.acquire()
-            # call Private_Lib().SaveOneImage() way to save one image
-            download(self.i, self.img_url, self.base_pages, self.imgPath, self.logPath)
+            PrivateLib().SaveOneImage(self.i, self.img_url, self.base_pages, self.imgPath, self.logPath)
             ## self.lock.release()
 
     def TargetImageDownload(self, urls, basePages, workdir, logpath):
@@ -243,7 +241,6 @@ class PrivateLib:
         self.LogCrawlerWork(logpath, logContext)
 
         lock = threading.Lock()                                     # object lock
-        subprocess = ''
         for i, img_url in enumerate(urls):
             # easy process run
             ## self.SaveOneImage(i, img_url, basePages, workdir, logpath)
@@ -252,10 +249,11 @@ class PrivateLib:
             subprocess = self.MultiThread(lock, i, img_url, basePages, workdir, logpath)
             subprocess.setDaemon(False)                             # set every download sub-process is non-daemon process
             subprocess.start()                                      # start download
-            subprocess.join()                                       # block sub-process
+            ## subprocess.join()                                       # block sub-process, it may turn to easy process
         # parent process wait all sub-process end
-        subprocess.join()                                           # block parent process
-        time.sleep(10)
+        subProcessAlivecnt = threading.active_count()
+        while subProcessAlivecnt != 1:                              # finally only parent process
+            subProcessAlivecnt = threading.active_count()
 
     @staticmethod
     def htmlBuilder(self, workdir, htmlpath, logpath):
