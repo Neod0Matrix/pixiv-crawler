@@ -78,18 +78,16 @@ class DailyRankTop:
         request = ''
         if ormode == 'o':
             page_url = pllc.rankWebURL
-            request = urllib2.Request(url=page_url,
-                                      data=pllc.getData)
+            request = urllib2.Request(url=page_url, data=pllc.getData)
         elif ormode == 'r':
             page_url = pllc.rankWebURL_R18
             r18_headers = pllc.R18DailyRankRequestHeaders()
-            request = urllib2.Request(url=page_url,
-                                      data=pllc.getData,
-                                      headers=r18_headers)
+            request = urllib2.Request(url=page_url, data=pllc.getData, headers=r18_headers)
         else:
             print pllc.SHELLHEAD + "argv(s) error\n"
             exit()
-
+        # after login, cookie will save in opener's cookie
+        # call opener.open or urlopen both will use that cookie
         response = pp.opener.open(request, timeout=300)
         ## response = urllib2.urlopen(request, timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
@@ -99,6 +97,7 @@ class DailyRankTop:
             logContext = 'website response fatal, return code %d' % response.getcode()
         pp.LogCrawlerWork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
+        pp.testSavehtml(self.workdir, web_src, self.logpath)
 
         # build original image url
         vwPattern = re.compile(pllc.rankVWRegex, re.S)
@@ -136,7 +135,7 @@ class DailyRankTop:
         # log runtime
         starttime = datetime.datetime.now()
         # check website can response crawler
-        pp.ProxyServerCrawl()
+        pp.ProxyServerCrawl(self.logpath)
         pp.CamouflageLogin(self.logpath)
         # get ids and urls
         urls = self.GatherTargetList(self, self.drt_mode, nbr)

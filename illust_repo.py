@@ -173,7 +173,7 @@ class IllustRepoAll:
         # log runtime
         starttime = datetime.datetime.now()
         # check website can response crawler
-        pp.ProxyServerCrawl()
+        pp.ProxyServerCrawl(self.logpath)
         pp.CamouflageLogin(self.logpath)
         # get capture image count
         crawCnt = self.GatherIndexInfo(self, self.logpath)

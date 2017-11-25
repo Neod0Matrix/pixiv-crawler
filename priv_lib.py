@@ -34,12 +34,11 @@ class PrivateLib:
         self.loginURL = pllc.originHost
         self.postData = pllc.postData
         self.loginHeader = pllc.InitLoginHeaders()
-        # example for private opener build
+        # from first login save cookie and create global opener
         self.cookie = cookielib.LWPCookieJar()                      # create a cookie words
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie) # add http cookie words
         self.opener = urllib2.build_opener(self.cookieHandler)      # build the opener
-        ## self.opener.addheaders = self.loginHeader
-        urllib2.install_opener(self.opener)                         # install it
+        urllib2.install_opener(self.opener)                         # install to global
 
     @staticmethod
     def LogCrawlerWork(logPath, logInfo):
@@ -76,10 +75,10 @@ class PrivateLib:
 
         return folder
 
-    @staticmethod
-    def ProxyServerCrawl():
+    def ProxyServerCrawl(self, logPath):
         """
             catch a proxy server when crwaler crawl many times website forbidden host ip
+        :param logPath: log save path
         :return:        proxy server ip dict
         """
         req_ps_url = pllc.proxyServerRequestURL
@@ -99,7 +98,7 @@ class PrivateLib:
             proxyRawwords = BeautifulSoup(web_src, 'lxml').find_all(pllc.proxyServerRegex)
         else:
             logContext = 'crawl proxy failed, return code: %d' % response.getcode()
-        print logContext
+        self.LogCrawlerWork(logPath, logContext)
         ip_list = []
         for i in range(1, len(proxyRawwords)):
             ip_info = proxyRawwords[i]
@@ -111,7 +110,8 @@ class PrivateLib:
             proxy_list.append('http://' + ip)
         proxy_ip = random.choice(proxy_list)                        # random catch a proxy
         proxyServer = {'http': proxy_ip}                            # setting proxy server
-        print 'choose proxy server: ' + proxy_ip
+        logContext = 'choose proxy server: ' + proxy_ip
+        self.LogCrawlerWork(logPath, logContext)
 
         return proxyServer
 
@@ -123,13 +123,27 @@ class PrivateLib:
         """
         # login init need to commit post data to Pixiv
         request = urllib2.Request(self.loginURL, pllc.postData, self.loginHeader)
-        response = self.opener.open(request)
+        response = self.opener.open(request)                        # this opener include cookie container
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'login response successed'
         else:
             # response failed, you need to check network status
             logContext = 'login response fatal, return code %d' % response.getcode()
+        self.LogCrawlerWork(logPath, logContext)
+        # print cookie
+        item = ''
+        for item in self.cookie:
+            logContext =  'cookie: name:' + item.name + '-value:' + item.value
+            self.LogCrawlerWork(logPath, logContext)
+
+        return item
+
+    def testSavehtml(self, workdir, content, logPath):
+        htmlfile = open(workdir + '/test.html', "wb")
+        htmlfile.write(content)
+        htmlfile.close()
+        logContext = 'save request html page ok'
         self.LogCrawlerWork(logPath, logContext)
 
     def SaveOneImage(self, i, img_url, base_pages, imgPath, logPath):
@@ -253,11 +267,11 @@ class PrivateLib:
         # parent process wait all sub-process end
         aliveThreadCnt = threading.active_count()
         while aliveThreadCnt != 1:                                  # finally only parent process
-            aliveThreadCnt = threading.active_count()
+            time.sleep(3)
+            aliveThreadCnt = threading.active_count()               # update count
             # display currently remaining process count
             logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, len(urls))
             self.LogCrawlerWork(logpath, logContext)
-            time.sleep(3)
         logContext = 'all of threads reclaim, download finished=====>'
         self.LogCrawlerWork(logpath, logContext)
 

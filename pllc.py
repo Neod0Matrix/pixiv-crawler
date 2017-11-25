@@ -8,11 +8,12 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v4p3_LTE'
+__version__         = 'v4p5_LTE'
 
 import urllib2, re, urllib, json                                    # post data build
 import time, os, linecache, sys                                     # name folder and files
 import getpass                                                      # user and passwd input
+from collections import OrderedDict
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
@@ -64,7 +65,7 @@ def LoginInfoLoad():
         userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
         userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ')
 
-    return userMailBox, userPassword
+    return userMailBox.strip(), userPassword.strip()                # strip() delete symbol '\n'
 loginInfo = LoginInfoLoad()                                         # call once
 
 # ========================================some use url address=====================================================
@@ -77,6 +78,7 @@ accountHost = "accounts.pixiv.net"                                  # account lo
 postKeyGeturl = 'https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index'
 login_ref = 'wwwtop_accounts_index'                                 # post data include
 originHost = "https://accounts.pixiv.net/api/login?lang=en"         # login request url
+originHost2 = "https://accounts.pixiv.net"                          # login origin
 # request universal original image constant words
 imgOriginalheader = 'https://i.pximg.net/img-original/img'          # original image https url header
 imgOriginaltail = '_p0.png'                                         # original image https url tail, default set to png
@@ -103,6 +105,7 @@ accept2 = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,imag
 acceptEncoding = "gzip, deflate, br"
 acceptEncoding2 = "br"                                              # no use gzip, transfer speed down, but will not error
 acceptLanguage = "en-US,en;q=0.8,zh-TW;q=0.6,zh;q=0.4,zh-CN;q=0.2"
+cacheControl = "no-cache"
 connection = "keep-alive"
 contentType = "application/x-www-form-urlencoded; charset=UTF-8"
 xRequestwith = "XMLHttpRequest"
@@ -116,12 +119,14 @@ def InitLoginHeaders():
         'Accept': accept,
         'Accept-Encoding': acceptEncoding,
         'Accept-Language': acceptLanguage,
+        'Cache-Control': cacheControl,
         'Connection': connection,
         'Content-Length': "207",
         'Content-Type': contentType,
+        'Cookie': "",                                               # cannot include
         'DNT': "1",
         'Host': accountHost,
-        'Origin': originHost,
+        'Origin': originHost2,
         'Referer': postKeyGeturl,                                   # last page is request post-key page
         'X-Requested-With': xRequestwith,
     }
@@ -257,15 +262,14 @@ def postKeyGather():
         :return:    post way request data
     """
     # build basic dict
-    postwayRegInfo = {
-            'pixiv_id': loginInfo[0],
-            'password': loginInfo[1],
-            'captcha': "",
-            'g_recaptcha_response': "",
-            'source': "pc",
-            'ref': login_ref,
-            'return_to': hostWebURL,
-        }
+    # this post data must has a order
+    postTabledict = OrderedDict()
+    postTabledict['pixiv_id'] = loginInfo[0]
+    postTabledict['password'] = loginInfo[1]
+    postTabledict['captcha'] = ""
+    postTabledict['g_recaptcha_response'] = ""
+
+    # request a post key
     request = urllib2.Request(postKeyGeturl)
     response = urllib2.urlopen(request, timeout=300)
     # mate post key
@@ -273,11 +277,15 @@ def postKeyGather():
     postPattern = re.compile(postKeyRegex, re.S)
     postKey = re.findall(postPattern, web_src)[0]
     print SHELLHEAD + 'get post-key: ' + postKey                    # display key
-    # build total post data
-    postKeydict = {'post_key': postKey}
-    post_dict = dict(postwayRegInfo.items() + postKeydict.items())
-    # json.dumps trasfer dict to str
-    post_data = json.dumps(urllib.urlencode(post_dict)).encode("UTF-8")
+
+    # pack the dict with order
+    postTabledict['post_key'] = postKey
+    postTabledict['source'] = "pc"
+    postTabledict['ref'] = login_ref
+    postTabledict['return_to'] = hostWebURL
+
+    # transfer to json data format
+    post_data = urllib.urlencode(postTabledict).encode("UTF-8")
 
     return post_data
 postData = postKeyGather()                                          # call once
