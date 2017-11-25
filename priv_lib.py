@@ -17,6 +17,7 @@ class PrivateLib:
     # help page
     """
         #################################################################################
+        #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)               #
         #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                   #
         #    MatPixivCrawler Help Page                                                  #
         #    1.drt  ---     dailyRankTop, crawl Pixiv daily-rank top N artwork(s)       #
@@ -133,7 +134,7 @@ class PrivateLib:
 
     def SaveOneImage(self, i, img_url, base_pages, imgPath, logPath):
         """
-            download one target image
+            download one target image, then multi-process will call here
             :param i:           image index
             :param img_url:     image urls list
             :param base_pages:  referer basic pages list
@@ -160,7 +161,7 @@ class PrivateLib:
         # http error because only use png format to build url
         # after except error, url will be changed to jpg format
         except Exception, e:
-            logContext = str(e) + ", image format need to change"
+            logContext = str(e) + ", image format type may error"
             self.LogCrawlerWork(logPath, logContext)
             img_type_flag += 1
             chajpgurl = img_url[0:-3] + 'jpg'                       # replace to jpg format
@@ -195,26 +196,30 @@ class PrivateLib:
     def TargetImageDownload(self, urls, basePages, workdir, logpath):
         """
             multi-process download all image
+            test speed: daily-rank top 50 whole crawl elapsed time 1min
             :param urls:        all original images urls
             :param basePages:   all referer basic pages
             :param workdir:     work directory
             :param logpath:     log save path
             :return:            none
         """
-        ## self.WholeDownload(urls, basePages, workdir, logpath) # easy download
         logContext = 'start to download target======>'
         self.LogCrawlerWork(logpath, logContext)
 
         lock = threading.Lock()                                     # object lock
-        downloadProcess = ''
+        subprocess = ''
         for i, img_url in enumerate(urls):
             # easy process run
             ## self.SaveOneImage(i, img_url, basePages, workdir, logpath)
-            # call threading module
-            downloadProcess = MultiThread(lock, i, img_url, basePages, workdir, logpath)
-            downloadProcess.start()
-        downloadProcess.join()                                      # father thread wait son thread end
-        time.sleep(5)                                               # wait all process end
+
+            # create overwrite threading.Thread object
+            subprocess = MultiThread(lock, i, img_url, basePages, workdir, logpath)
+            subprocess.setDaemon(False)                             # set every download sub-process is non-daemon process
+            subprocess.start()                                      # start download
+            ## sub.join()                                           # block sub-process
+        # parent process wait all sub-process end
+        subprocess.join()                                           # block parent process
+        time.sleep(10)
 
     def crawlerFinishWork(self, logPath):
         """
@@ -222,20 +227,20 @@ class PrivateLib:
             :param logPath: log save path
             :return:        none
         """
-        rtc = time.localtime()
+        rtc = time.localtime()                                      # real log get
         ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
         logContext = "crawler work finished, log time: " + ymdhms
         self.LogCrawlerWork(logPath, logContext)
-        logContext = \
-            pllc.__laboratory__ + ' ' + pllc.__organization__   \
-            + ' technology support\n'                                           \
+        logContext =                                                    \
+            pllc.__laboratory__ + ' ' + pllc.__organization__           \
+            + ' technology support\n'                                   \
             'Code by ' + pllc.__organization__ + '@' + pllc.__author__
         self.LogCrawlerWork(logPath, logContext)
         os.system(pllc.OSFileManager() + ' ' + pllc.workDir)        # open file-manager to check result
 
 class MultiThread(threading.Thread):
     """
-        use rewrite threading module to accelerate download process
+        overrides its run method by inheriting the Thread class
     """
     def __init__(self, lock, i, img_url, base_pages, imgPath, logPath):
         """
@@ -247,7 +252,8 @@ class MultiThread(threading.Thread):
             :param imgPath:     image save path
             :param logPath:     log save path
         """
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self)                             # threading module init method
+        ## super(MultiThread, self).__init__()                      # multiprocessing module init method
         self.lock       = lock
         self.i          = i
         self.img_url    = img_url
@@ -257,7 +263,7 @@ class MultiThread(threading.Thread):
 
     def run(self):
         """
-            rewrite threading.thread run() way
+            overwrite threading.thread run() method
         :return:    none
         """
         download = PrivateLib().SaveOneImage
