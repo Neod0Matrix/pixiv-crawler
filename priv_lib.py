@@ -9,10 +9,10 @@ import time, random
 import pllc                                                         # messages
 from bs4 import BeautifulSoup
 import threading                                                    # multi-process
+from PIL import Image                                               # pillow image handle
 
 pllc.EncodeDecodeResolve()
 
-# create a class for pixiv dailyRank top
 class PrivateLib:
     # help page
     """
@@ -193,6 +193,42 @@ class PrivateLib:
             logContext = 'download no.%d image finished' % i
             self.LogCrawlerWork(logPath, logContext)
 
+    class MultiThread(threading.Thread):
+        """
+            overrides its run method by inheriting the Thread class
+            this class can be placed outside the main class, you can also put inside
+        """
+        def __init__(self, lock, i, img_url, base_pages, imgPath, logPath):
+            """
+                commit class arguments
+                :param lock:        object lock
+                :param i:           image index
+                :param img_url:     image url
+                :param base_pages:  referer basic page
+                :param imgPath:     image save path
+                :param logPath:     log save path
+            """
+            threading.Thread.__init__(self)  # threading module init method
+            ## super(MultiThread, self).__init__()                      # multiprocessing module init method
+            self.lock = lock
+            self.i = i
+            self.img_url = img_url
+            self.base_pages = base_pages
+            self.imgPath = imgPath
+            self.logPath = logPath
+
+        def run(self):
+            """
+                overwrite threading.thread run() method
+            :return:    none
+            """
+            download = PrivateLib().SaveOneImage
+            # cancel lock release will let multi-process change to easy process
+            ## self.lock.acquire()
+            # call Private_Lib().SaveOneImage() way to save one image
+            download(self.i, self.img_url, self.base_pages, self.imgPath, self.logPath)
+            ## self.lock.release()
+
     def TargetImageDownload(self, urls, basePages, workdir, logpath):
         """
             multi-process download all image
@@ -213,13 +249,49 @@ class PrivateLib:
             ## self.SaveOneImage(i, img_url, basePages, workdir, logpath)
 
             # create overwrite threading.Thread object
-            subprocess = MultiThread(lock, i, img_url, basePages, workdir, logpath)
+            subprocess = self.MultiThread(lock, i, img_url, basePages, workdir, logpath)
             subprocess.setDaemon(False)                             # set every download sub-process is non-daemon process
             subprocess.start()                                      # start download
-            ## sub.join()                                           # block sub-process
+            subprocess.join()                                       # block sub-process
         # parent process wait all sub-process end
         subprocess.join()                                           # block parent process
         time.sleep(10)
+
+    @staticmethod
+    def htmlBuilder(self, workdir, htmlpath, logpath):
+        htmlFile = open(htmlpath, "wb")                             # write html file
+        # build html background page text
+        htmlFile.writelines("<html>\r\n<head>\r\n<title>pixiv-crawler(MatPixivCrawler) ResultPage</title>\r\n</head>\r\n<body>\r\n")
+        htmlFile.writelines("<script>window.onload = function(){"
+                            "var imgs = document.getElementsByTagName('img');"
+                            "for(var i = 0; i < imgs.length; i++){"
+                            "imgs[i].onclick = function(){"
+                            "if(this.width == this.attributes['oriWidth'].value && this.height == this.attributes['oriHeight'].value){"
+                            "this.width = this.attributes['oriWidth'].value * 1.0 / this.attributes['oriHeight'].value * 200;"
+                            "this.height = 200;"
+                            "}else{this.width = this.attributes['oriWidth'].value ;"
+                            "this.height = this.attributes['oriHeight'].value;}}}};</script>")
+        for i in os.listdir(workdir):
+            if i[-4:len(i)] in [".png", ".jpg", ".bmp"]:            # support image format
+                filename = i
+                # this step must protect image download end, or will get a IOError
+                try:
+                    width, height = Image.open(workdir + '\\' + filename).size
+                except Exception, e:
+                    logContext = str(e) + "read image file error, jump out"
+                    self.LogCrawlerWork(logpath, logContext)
+                    time.sleep(5)                                   # wait download sub-process end
+                    width, height = Image.open(workdir + '\\' + filename).size
+                filename = filename.replace("#", "%23")
+                ## htmlFile.writelines("<a href = \"%s\">"%("./" + filename))
+                # set image source line
+                htmlFile.writelines(
+                    "<img src = \"%s\" width = \"%dpx\" height = \"%dpx\" oriWidth = %d oriHeight = %d />\r\n"
+                    % ("./" + filename, width * 1.0 / height * 200, 200, width, height))
+                ## htmlFile.writelines("</a>\r\n")
+        # end of htmlfile
+        htmlFile.writelines("</body>\r\n</html>")
+        htmlFile.close()
 
     def crawlerFinishWork(self, logPath):
         """
@@ -237,41 +309,6 @@ class PrivateLib:
             'Code by ' + pllc.__organization__ + '@' + pllc.__author__
         self.LogCrawlerWork(logPath, logContext)
         os.system(pllc.OSFileManager() + ' ' + pllc.workDir)        # open file-manager to check result
-
-class MultiThread(threading.Thread):
-    """
-        overrides its run method by inheriting the Thread class
-    """
-    def __init__(self, lock, i, img_url, base_pages, imgPath, logPath):
-        """
-            commit class arguments
-            :param lock:        object lock
-            :param i:           image index
-            :param img_url:     image url
-            :param base_pages:  referer basic page
-            :param imgPath:     image save path
-            :param logPath:     log save path
-        """
-        threading.Thread.__init__(self)                             # threading module init method
-        ## super(MultiThread, self).__init__()                      # multiprocessing module init method
-        self.lock       = lock
-        self.i          = i
-        self.img_url    = img_url
-        self.base_pages = base_pages
-        self.imgPath    = imgPath
-        self.logPath    = logPath
-
-    def run(self):
-        """
-            overwrite threading.thread run() method
-        :return:    none
-        """
-        download = PrivateLib().SaveOneImage
-        # cancel lock release will let multi-process change to easy process
-        ## self.lock.acquire()
-        # call Private_Lib().SaveOneImage() way to save one image
-        download(self.i, self.img_url, self.base_pages, self.imgPath, self.logPath)
-        ## self.lock.release()
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

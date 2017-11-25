@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v4p1_LTE'
+__version__         = 'v4p2_LTE'
 
 import urllib2, re, urllib, json                                    # post data build
 import time, os, linecache, sys                                     # name folder and files
@@ -316,10 +316,13 @@ def SetOSHomeFolder ():
     return homeFolder
 workDir = SetOSHomeFolder()                                         # call once
 
-# private directory
-privateFolder = workDir + 'DailyRank_%s' % ymd                      # daily-rank use
-logFileName = '/CrawlerWork[%s].log' % ymd                          # universal name
-logFilePath = privateFolder + logFileName                           # daily-rank use
+# universal path
+logFileName = '/CrawlerWork[%s].log' % ymd
+htmlFileName = '/CrawlerWork[%s].html' % ymd
+privateFolder = workDir + 'DailyRank_%s' % ymd
+# daily-rank path
+logFilePath = privateFolder + logFileName
+htmlFilePath = privateFolder + htmlFileName
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

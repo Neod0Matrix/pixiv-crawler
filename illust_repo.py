@@ -24,6 +24,7 @@ class IllustRepoAll:
         # work directory create
         self.workdir = pllc.SetOSHomeFolder() + self.illustInputID
         self.logpath = self.workdir + pllc.logFileName
+        self.htmlpath = self.workdir + pllc.htmlFileName
 
     @staticmethod
     def GatherIndexInfo(self, logPath):
@@ -184,6 +185,7 @@ class IllustRepoAll:
         logContext = "elapsed time: %ds" % (endtime - starttime).seconds
         pp.LogCrawlerWork(self.logpath, logContext)
         # finish
+        pp.htmlBuilder(self, self.workdir, self.htmlpath, self.logpath)
         pp.crawlerFinishWork(self.logpath)
 
 # =====================================================================

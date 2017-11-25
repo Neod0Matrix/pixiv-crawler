@@ -21,6 +21,7 @@ class DailyRankTop:
         # class inner global var
         self.workdir = pllc.privateFolder                           # setting global work directory
         self.logpath = pllc.logFilePath                             # setting global log path
+        self.htmlpath = pllc.htmlFilePath                           # setting global html path
 
     @staticmethod
     def GetEssentialInfo(self, wd, lp):
@@ -146,6 +147,7 @@ class DailyRankTop:
         logContext = "elapsed time: %ds" % (endtime - starttime).seconds
         pp.LogCrawlerWork(self.logpath, logContext)
         # finish
+        pp.htmlBuilder(self, self.workdir, self.htmlpath, self.logpath)
         pp.crawlerFinishWork(self.logpath)
 
 # =====================================================================
