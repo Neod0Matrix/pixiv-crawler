@@ -251,9 +251,15 @@ class PrivateLib:
             subprocess.start()                                      # start download
             ## subprocess.join()                                       # block sub-process, it may turn to easy process
         # parent process wait all sub-process end
-        subProcessAlivecnt = threading.active_count()
-        while subProcessAlivecnt != 1:                              # finally only parent process
-            subProcessAlivecnt = threading.active_count()
+        aliveThreadCnt = threading.active_count()
+        while aliveThreadCnt != 1:                                  # finally only parent process
+            aliveThreadCnt = threading.active_count()
+            # display currently remaining process count
+            logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, len(urls))
+            self.LogCrawlerWork(logpath, logContext)
+            time.sleep(3)
+        logContext = 'all of threads reclaim, download finished=====>'
+        self.LogCrawlerWork(logpath, logContext)
 
     @staticmethod
     def htmlBuilder(self, workdir, htmlpath, logpath):
