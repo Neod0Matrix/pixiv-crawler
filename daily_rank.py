@@ -97,7 +97,7 @@ class DailyRankTop:
             logContext = 'website response fatal, return code %d' % response.getcode()
         pp.LogCrawlerWork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
-        pp.testSavehtml(self.workdir, web_src, self.logpath)
+        ## pp.testSavehtml(self.workdir, web_src, self.logpath)
 
         # build original image url
         vwPattern = re.compile(pllc.rankVWRegex, re.S)

@@ -35,7 +35,8 @@ class PrivateLib:
         self.postData = pllc.postData
         self.loginHeader = pllc.InitLoginHeaders()
         # from first login save cookie and create global opener
-        self.cookie = cookielib.LWPCookieJar()                      # create a cookie words
+        ## self.cookie = cookielib.LWPCookieJar()                   # create a cookie words
+        self.cookie = cookielib.CookieJar()                         # create a cookie words
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie) # add http cookie words
         self.opener = urllib2.build_opener(self.cookieHandler)      # build the opener
         urllib2.install_opener(self.opener)                         # install to global
@@ -71,6 +72,7 @@ class PrivateLib:
         # remove old log file
         if os.path.exists(logPath):
             os.remove(logPath)
+        # this step will create a new log file
         self.LogCrawlerWork(logPath, logContext)
 
         return folder
@@ -184,7 +186,9 @@ class PrivateLib:
                 headers=img_headers
             )
             # rebuild opener
-            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+            cookie = cookielib.CookieJar()
+            cookieHandler = urllib2.HTTPCookieProcessor(cookie)
+            opener = urllib2.build_opener(cookieHandler)
             ## opener.addheaders = img_headers
             urllib2.install_opener(opener)                          # must install new created opener
             img_response = urllib2.urlopen(img_request, timeout=300) # request timeout set longer
