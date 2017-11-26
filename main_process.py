@@ -4,7 +4,7 @@
 # =====================================================================
 # this python script is built to run main process
 
-import pllc, priv_lib, daily_rank, illust_repo
+import pllc, priv_lib, rank_top, illust_repo
 
 pp = priv_lib.PrivateLib()
 pllc.EncodeDecodeResolve()
@@ -13,9 +13,9 @@ helpPage = pp.__doc__
 if __name__ == '__main__':
     print helpPage
     mode = raw_input(pllc.SHELLHEAD + 'select a mode: ')
-    if mode == 'drt' or mode == '1':
+    if mode == 'rtn' or mode == '1':
         print pllc.SHELLHEAD + "check mode: dailyRankTop"
-        daily_rank.DailyRankTop().drtStartCrawler()
+        rank_top.DailyRankTop().rtnStartCrawler()
     elif mode == 'ira' or mode == '2':
         print pllc.SHELLHEAD + "check mode: illustRepoAll"
         illust_repo.IllustRepoAll().iraStartCrawler()

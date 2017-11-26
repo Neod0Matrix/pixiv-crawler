@@ -84,8 +84,14 @@ imgOriginalheader = 'https://i.pximg.net/img-original/img'          # original i
 imgOriginaltail = '_p0.png'                                         # original image https url tail, default set to png
 # page request http proxy
 proxyServerRequestURL = 'http://www.xicidaili.com/nn/'              # proxy server get website
-rankWebURL = 'http://www.pixiv.net/ranking.php?mode=daily'          # dailyRank
-rankWebURL_R18 = 'http://www.pixiv.net/ranking.php?mode=daily_r18'  # r18 dailyRank
+ucRankURL = 'http://www.pixiv.net/ranking.php?mode='                # rank top universal word header
+r18RankWordTail = '_r18'                                            # r18 rank word tail
+dailyRankURL = ucRankURL + 'daily'                                  # daily-rank
+weeklyRankURL = ucRankURL + 'weekly'                                # weekly-rank
+monthlyRankURL = ucRankURL + 'monthly'                              # monthly-rank
+dailyRankURL_R18 = dailyRankURL + r18RankWordTail                   # r18 daily-rank
+weeklyRankURL_R18 = weeklyRankURL + r18RankWordTail                 # r18 weekly-rank
+monthlyRankURL_R18 = monthlyRankURL + r18RankWordTail               # r18 monthly-rank
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
 illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
 mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust main page
@@ -327,7 +333,7 @@ workDir = SetOSHomeFolder()                                         # call once
 # universal path
 logFileName = '/CrawlerWork[%s].log' % ymd
 htmlFileName = '/CrawlerWork[%s].html' % ymd
-privateFolder = workDir + 'DailyRank_%s' % ymd
+privateFolder = workDir + 'RankTop_%s' % ymd
 # daily-rank path
 logFilePath = privateFolder + logFileName
 htmlFilePath = privateFolder + htmlFileName

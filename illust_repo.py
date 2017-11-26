@@ -158,7 +158,7 @@ class IllustRepoAll:
         logContext = 'illustrator: ' + self.illustName + ' id: ' + self.illustInputID + ' artworks info====>'
         pp.LogCrawlerWork(logPath, logContext)
         for k, i in enumerate(self.imagesName[:nbr]):
-            logContext = 'no.%d image: %s id: %s url: %s' % (k, i, artworkIDs[k], imgOriginalhttps[k])
+            logContext = 'no.%d image: %s id: %s url: %s' % ((k + 1), i, artworkIDs[k], imgOriginalhttps[k])
             pp.LogCrawlerWork(logPath, logContext)
 
         return imgOriginalhttps

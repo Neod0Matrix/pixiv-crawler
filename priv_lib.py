@@ -16,14 +16,14 @@ pllc.EncodeDecodeResolve()
 class PrivateLib:
     # help page
     """
-        #################################################################################
-        #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)               #
-        #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                   #
-        #    MatPixivCrawler Help Page                                                  #
-        #    1.drt  ---     dailyRankTop, crawl Pixiv daily-rank top N artwork(s)       #
-        #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all artwork(s)   #
-        #    help   ---     print this help page                                        #
-        #################################################################################
+        #####################################################################################
+        #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                   #
+        #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                       #
+        #    MatPixivCrawler Help Page                                                      #
+        #    1.rtn  ---     RankTop, crawl Pixiv daily/weekly/month rank top N artwork(s)   #
+        #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all artwork(s)       #
+        #    help   ---     print this help page                                            #
+        #####################################################################################
     """
     def __init__(self):
         """
@@ -133,6 +133,9 @@ class PrivateLib:
             # response failed, you need to check network status
             logContext = 'login response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
+        ## web_src = response.read().decode("UTF-8", "ignore")
+        ## self.testSavehtml(pllc.privateFolder, web_src, logPath)
+
         # print cookie
         item = ''
         for item in self.cookie:
@@ -170,7 +173,7 @@ class PrivateLib:
         # pixiv website image format have jpg and png two format
         img_type_flag = 0                                           # replace png format, reset last
         img_id = img_url[57:][:-7]                                  # cut id from url
-        image_name = str(i) + '-' + img_id                          # image name, pixiv image name img_id + '_p0'
+        image_name = str(i + 1) + '-' + img_id                      # image name, pixiv image name img_id + '_p0'
         try:
             img_response = urllib2.urlopen(img_request, timeout=300)
             ## img_response = opener.open(img_url, timeout=300)
@@ -195,20 +198,20 @@ class PrivateLib:
             ## img_response = opener.open(img_url, timeout=300)
 
             if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
-                logContext = 'capture target no.%d jpg image ok' % i
+                logContext = 'capture target no.%d jpg image ok' % (i + 1)
                 self.LogCrawlerWork(logPath, logContext)
                 with open(imgPath + '/' + image_name + '.jpg', 'wb') as jpg:
                     jpg.write(img_response.read())
-                logContext = 'download no.%d image finished' % i
+                logContext = 'download no.%d image finished' % (i + 1)
                 self.LogCrawlerWork(logPath, logContext)
 
         # no http error, image is png format, continue request
         if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
-            logContext = 'capture target no.%d png image ok' % i
+            logContext = 'capture target no.%d png image ok' % (i + 1)
             self.LogCrawlerWork(logPath, logContext)
             with open(imgPath + '/' + image_name + '.png', 'wb') as png:
                 png.write(img_response.read())
-            logContext = 'download no.%d image finished' % i
+            logContext = 'download no.%d image finished' % (i + 1)
             self.LogCrawlerWork(logPath, logContext)
 
     class MultiThread(threading.Thread):
