@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v4p5_LTE'
+__version__         = 'v4p6_LTE'
 
 import urllib2, re, urllib, json                                    # post data build
 import time, os, linecache, sys                                     # name folder and files
@@ -91,7 +91,6 @@ weeklyRankURL = ucRankURL + 'weekly'                                # weekly-ran
 monthlyRankURL = ucRankURL + 'monthly'                              # monthly-rank
 dailyRankURL_R18 = dailyRankURL + r18RankWordTail                   # r18 daily-rank
 weeklyRankURL_R18 = weeklyRankURL + r18RankWordTail                 # r18 weekly-rank
-monthlyRankURL_R18 = monthlyRankURL + r18RankWordTail               # r18 monthly-rank
 baseWebURL = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' # basic format
 illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust home page
 mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust main page
@@ -115,6 +114,19 @@ cacheControl = "no-cache"
 connection = "keep-alive"
 contentType = "application/x-www-form-urlencoded; charset=UTF-8"
 xRequestwith = "XMLHttpRequest"
+
+def headersDictTransfList (buildHeaders):
+    """
+        change headers dict data-type to list
+        :param buildHeaders:    dict headers
+        :return:                list headers
+    """
+    headall = []
+    for key, value in buildHeaders.items():
+        item = (key, value)
+        headall.append(item)
+
+    return headall
 
 def InitLoginHeaders():
     """

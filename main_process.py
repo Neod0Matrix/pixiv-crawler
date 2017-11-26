@@ -14,7 +14,7 @@ if __name__ == '__main__':
     print helpPage
     mode = raw_input(pllc.SHELLHEAD + 'select a mode: ')
     if mode == 'rtn' or mode == '1':
-        print pllc.SHELLHEAD + "check mode: dailyRankTop"
+        print pllc.SHELLHEAD + "check mode: RankTopN"
         rank_top.DailyRankTop().rtnStartCrawler()
     elif mode == 'ira' or mode == '2':
         print pllc.SHELLHEAD + "check mode: illustRepoAll"
@@ -22,6 +22,7 @@ if __name__ == '__main__':
     elif mode == 'help':
         print helpPage
     else:
+        mode = None
         print pllc.SHELLHEAD + "argv(s) error\n"
         print helpPage
 

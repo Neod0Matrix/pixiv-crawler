@@ -37,31 +37,28 @@ class DailyRankTop:
         # select ordinary top or r18 top
         # transfer ascii string to number
         ormode = raw_input(pllc.SHELLHEAD + 'select ordinary top or r18 top(tap "o"&"1" or "r"&"2"): ')
-        logContext = ''
         imgCnt = ''
         # setting max count, base on request web src
         ordinaryMaxcnt = 50
-        r18MaxCnt = 100
+        r18MaxCnt = 50
         if ormode == 'o' or ormode == '1':
             # input a string for request image number
-            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank top images count(max is %d): ' % ordinaryMaxcnt))
-            while imgCnt > 50:
-                print pllc.SHELLHEAD + 'input error, daily-rank top at most %d' % ordinaryMaxcnt
+            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter crawl rank top image count(max is %d): ' % ordinaryMaxcnt))
+            while imgCnt > ordinaryMaxcnt:
+                print pllc.SHELLHEAD + 'input error, rank top at most %d' % ordinaryMaxcnt
                 imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter again(max is %d): ' % ordinaryMaxcnt))
-            logContext = 'this python auto-crawler work to crawle pixiv website daily top %d images' % imgCnt
         elif ormode == 'r' or ormode == '2':
             # input a string for request image number
-            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter daily-rank R18 top images count(max is %d): ' % r18MaxCnt))
-            while imgCnt > 100:
-                print pllc.SHELLHEAD + 'input error, daily-rank R18 top at most %d' % r18MaxCnt
+            imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter crawl rank R18 top image count(max is %d): ' % r18MaxCnt))
+            while imgCnt > r18MaxCnt:
+                print pllc.SHELLHEAD + 'input error, rank R18 top at most %d' % r18MaxCnt
                 imgCnt = string.atoi(raw_input(pllc.SHELLHEAD + 'enter again(max is %d): ' % r18MaxCnt))
-            logContext = 'this python auto-crawler work to crawle pixiv website daily top R18 %d images' % imgCnt
         else:
             print pllc.SHELLHEAD + "argv(s) error\n"
-        pp.LogCrawlerWork(lp, logContext)
+            ormode = None
         # set to global var
         self.reqImageCnt = imgCnt
-        self.drt_mode = ormode
+        self.rtn_mode = ormode
 
         return imgCnt
 
@@ -76,38 +73,45 @@ class DailyRankTop:
         """
         logContext = 'gather rank list======>'
         pp.LogCrawlerWork(self.logpath, logContext)
-
-        request = ''
+        rankWord = ''
         page_url = ''
+        request = ''
         if ormode == 'o' or ormode == '1':
             dwm = raw_input(pllc.SHELLHEAD + 'select daily(1)/weekly(2)/monthly(3) rank top: ')
             if dwm == '1':
                 page_url = pllc.dailyRankURL
+                rankWord = 'daily'
             elif dwm == '2':
                 page_url = pllc.weeklyRankURL
+                rankWord = 'weekly'
             elif dwm == '3':
                 page_url = pllc.monthlyRankURL
+                rankWord = 'monthly'
             else:
                 print pllc.SHELLHEAD + "argv(s) error\n"
             request = urllib2.Request(url=page_url, data=pllc.getData)
+            logContext = 'crawler set target to %s rank top %d image(s)' % (rankWord, img_nbr)
+            pp.LogCrawlerWork(self.logpath, logContext)
         elif ormode == 'r' or ormode == '2':
-            dwm = raw_input(pllc.SHELLHEAD + 'select daily(1)/weekly(2)/monthly(3) R18 rank top: ')
+            dwm = raw_input(pllc.SHELLHEAD + 'select daily(1)/weekly(2) R18 rank top: ')
             if dwm == '1':
                 page_url = pllc.dailyRankURL_R18
+                rankWord = 'daily'
             elif dwm == '2':
                 page_url = pllc.weeklyRankURL_R18
-            elif dwm == '3':
-                page_url = pllc.monthlyRankURL_R18
+                rankWord = 'weekly'
             else:
                 print pllc.SHELLHEAD + "argv(s) error\n"
             r18_headers = pllc.R18DailyRankRequestHeaders()
             request = urllib2.Request(url=page_url, data=pllc.getData, headers=r18_headers)
+            logContext = 'crawler set target to %s r18 rank top %d image(s)' % (rankWord, img_nbr)
+            pp.LogCrawlerWork(self.logpath, logContext)
         else:
             print pllc.SHELLHEAD + "argv(s) error\n"
-        # after login, cookie will save in opener's cookie
-        # call opener.open or urlopen both will use that cookie
+        ## request.add_data(pllc.getData)
+        ## pp.opener.addheaders = pllc.R18DailyRankRequestHeaders()
+        ## urllib2.install_opener(pp.opener)
         response = pp.opener.open(request, timeout=300)
-        ## response = urllib2.urlopen(request, timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'website response successed'
         else:
@@ -156,7 +160,7 @@ class DailyRankTop:
         pp.ProxyServerCrawl(self.logpath)
         pp.CamouflageLogin(self.logpath)
         # get ids and urls
-        urls = self.GatherTargetList(self, self.drt_mode, nbr)
+        urls = self.GatherTargetList(self, self.rtn_mode, nbr)
         # save images
         pp.TargetImageDownload(urls, self.basePages, self.workdir, self.logpath)
         # stop log time

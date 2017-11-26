@@ -20,7 +20,7 @@ class PrivateLib:
         #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                   #
         #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                       #
         #    MatPixivCrawler Help Page                                                      #
-        #    1.rtn  ---     RankTop, crawl Pixiv daily/weekly/month rank top N artwork(s)   #
+        #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)  #
         #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all artwork(s)       #
         #    help   ---     print this help page                                            #
         #####################################################################################
@@ -39,7 +39,6 @@ class PrivateLib:
         self.cookie = cookielib.CookieJar()                         # create a cookie words
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie) # add http cookie words
         self.opener = urllib2.build_opener(self.cookieHandler)      # build the opener
-        urllib2.install_opener(self.opener)                         # install to global
 
     @staticmethod
     def LogCrawlerWork(logPath, logInfo):
@@ -124,7 +123,10 @@ class PrivateLib:
             :return:        none
         """
         # login init need to commit post data to Pixiv
-        request = urllib2.Request(self.loginURL, pllc.postData, self.loginHeader)
+        headers = pllc.headersDictTransfList(self.loginHeader)
+        self.opener.addheaders = headers
+        urllib2.install_opener(self.opener)
+        request = urllib2.Request(self.loginURL, pllc.postData)
         response = self.opener.open(request)                        # this opener include cookie container
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
@@ -133,8 +135,6 @@ class PrivateLib:
             # response failed, you need to check network status
             logContext = 'login response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
-        ## web_src = response.read().decode("UTF-8", "ignore")
-        ## self.testSavehtml(pllc.privateFolder, web_src, logPath)
 
         # print cookie
         item = ''
