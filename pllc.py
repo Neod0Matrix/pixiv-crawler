@@ -10,10 +10,9 @@ __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
 __version__         = 'v4p6_LTE'
 
-import urllib2, re, urllib, json                                    # post data build
+import urllib, json                                                 # post data build
 import time, os, linecache, sys                                     # name folder and files
 import getpass                                                      # user and passwd input
-from collections import OrderedDict
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
@@ -161,6 +160,7 @@ def InitLoginHeaders():
         }.items())
 
     return buildHeaders
+loginHeaders = InitLoginHeaders()
 
 def R18DailyRankRequestHeaders():
     """
@@ -191,6 +191,7 @@ def R18DailyRankRequestHeaders():
         }.items())
 
     return buildHeaders
+r18_headers = R18DailyRankRequestHeaders()
 
 def MainpageRequestHeaders(referer):
     """
@@ -273,40 +274,6 @@ def illustAWCntRegex(setid):
 # GET way need info
 getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]    # priv_lib will first init it
 getData = json.dumps(urllib.urlencode(getwayRegInfo))               # call once
-
-def postKeyGather():
-    """
-        POST way login need post-key
-        :return:    post way request data
-    """
-    # build basic dict
-    # this post data must has a order
-    postTabledict = OrderedDict()
-    postTabledict['pixiv_id'] = loginInfo[0]
-    postTabledict['password'] = loginInfo[1]
-    postTabledict['captcha'] = ""
-    postTabledict['g_recaptcha_response'] = ""
-
-    # request a post key
-    request = urllib2.Request(postKeyGeturl)
-    response = urllib2.urlopen(request, timeout=300)
-    # mate post key
-    web_src = response.read().decode("UTF-8", "ignore")
-    postPattern = re.compile(postKeyRegex, re.S)
-    postKey = re.findall(postPattern, web_src)[0]
-    print SHELLHEAD + 'get post-key: ' + postKey                    # display key
-
-    # pack the dict with order
-    postTabledict['post_key'] = postKey
-    postTabledict['source'] = "pc"
-    postTabledict['ref'] = login_ref
-    postTabledict['return_to'] = hostWebURL
-
-    # transfer to json data format
-    post_data = urllib.urlencode(postTabledict).encode("UTF-8")
-
-    return post_data
-postData = postKeyGather()                                          # call once
 
 # ======================get format time, and get year-month-date to be a folder name===============================
 

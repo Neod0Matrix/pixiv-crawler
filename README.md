@@ -10,7 +10,7 @@ Update
 ======
 
     Version: v4p6_LTE 
-    Last Update Time: 20171127am0026
+    Last Update Time: 20171127pm1534
     
     This python crawler is built to crawl pixiv images
     It have two mode: RankTopN and illustRepoAll 

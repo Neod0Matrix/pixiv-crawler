@@ -89,7 +89,8 @@ class DailyRankTop:
                 rankWord = 'monthly'
             else:
                 print pllc.SHELLHEAD + "argv(s) error\n"
-            request = urllib2.Request(url=page_url, data=pllc.getData)
+            request = urllib2.Request(url=page_url,
+                                      data=pllc.getData)
             logContext = 'crawler set target to %s rank top %d image(s)' % (rankWord, img_nbr)
             pp.LogCrawlerWork(self.logpath, logContext)
         elif ormode == 'r' or ormode == '2':
@@ -102,8 +103,9 @@ class DailyRankTop:
                 rankWord = 'weekly'
             else:
                 print pllc.SHELLHEAD + "argv(s) error\n"
-            r18_headers = pllc.R18DailyRankRequestHeaders()
-            request = urllib2.Request(url=page_url, data=pllc.getData, headers=r18_headers)
+            request = urllib2.Request(url=page_url,
+                                      data=pllc.getData,
+                                      headers=pllc.r18_headers)
             logContext = 'crawler set target to %s r18 rank top %d image(s)' % (rankWord, img_nbr)
             pp.LogCrawlerWork(self.logpath, logContext)
         else:

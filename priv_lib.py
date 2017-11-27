@@ -4,12 +4,13 @@
 # =====================================================================
 # this python script is built to create a private library use in this crawler
 
-import urllib2, cookielib, os                                       # crawler depends
-import time, random
+import urllib, urllib2, cookielib, os                               # crawler depends
+import time, random, re
 import pllc                                                         # messages
 from bs4 import BeautifulSoup
 import threading                                                    # multi-process
 from PIL import Image                                               # pillow image handle
+from collections import OrderedDict
 
 pllc.EncodeDecodeResolve()
 
@@ -32,13 +33,13 @@ class PrivateLib:
         """
         # login use url, post way data, headers
         self.loginURL = pllc.originHost
-        self.postData = pllc.postData
-        self.loginHeader = pllc.InitLoginHeaders()
+        self.loginHeaders = pllc.loginHeaders
         # from first login save cookie and create global opener
         ## self.cookie = cookielib.LWPCookieJar()                   # create a cookie words
         self.cookie = cookielib.CookieJar()                         # create a cookie words
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie) # add http cookie words
         self.opener = urllib2.build_opener(self.cookieHandler)      # build the opener
+        urllib2.install_opener(self.opener)
 
     @staticmethod
     def LogCrawlerWork(logPath, logInfo):
@@ -116,6 +117,44 @@ class PrivateLib:
 
         return proxyServer
 
+    @staticmethod
+    def postKeyGather():
+        """
+            POST way login need post-key
+            :return:    post way request data
+        """
+        # build basic dict
+        postTabledict = OrderedDict()                               # this post data must has a order
+        postTabledict['pixiv_id'] = pllc.loginInfo[0]
+        postTabledict['password'] = pllc.loginInfo[1]
+        postTabledict['captcha'] = ""
+        postTabledict['g_recaptcha_response'] = ""
+
+        # request a post key
+        request = urllib2.Request(pllc.postKeyGeturl)
+        response = urllib2.urlopen(request, timeout=300)
+        if response.getcode() == pllc.reqSuccessCode:
+            logContext = pllc.SHELLHEAD + 'post-key response successed'
+        else:
+            logContext = pllc.SHELLHEAD + 'post-key response failed, return code: %d' % response.getcode()
+        print logContext
+        # mate post key
+        web_src = response.read().decode("UTF-8", "ignore")
+        postPattern = re.compile(pllc.postKeyRegex, re.S)
+        postKey = re.findall(postPattern, web_src)[0]
+        print pllc.SHELLHEAD + 'get post-key: ' + postKey           # display key
+
+        # pack the dict with order
+        postTabledict['post_key'] = postKey
+        postTabledict['source'] = "pc"
+        postTabledict['ref'] = pllc.login_ref
+        postTabledict['return_to'] = pllc.hostWebURL
+
+        # transfer to json data format
+        post_data = urllib.urlencode(postTabledict).encode("UTF-8")
+
+        return post_data
+
     def CamouflageLogin(self, logPath):
         """
             camouflage browser to login
@@ -123,10 +162,10 @@ class PrivateLib:
             :return:        none
         """
         # login init need to commit post data to Pixiv
-        headers = pllc.headersDictTransfList(self.loginHeader)
-        self.opener.addheaders = headers
-        urllib2.install_opener(self.opener)
-        request = urllib2.Request(self.loginURL, pllc.postData)
+        postData = self.postKeyGather()                             # get post-key and build post-data
+        request = urllib2.Request(url=self.loginURL,
+                                  data=postData,
+                                  headers=self.loginHeaders)
         response = self.opener.open(request)                        # this opener include cookie container
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
@@ -139,7 +178,7 @@ class PrivateLib:
         # print cookie
         item = ''
         for item in self.cookie:
-            logContext =  'cookie: name:' + item.name + '-value:' + item.value
+            logContext =  'cookie: [name:' + item.name + '-value:' + item.value + ']'
             self.LogCrawlerWork(logPath, logContext)
 
         return item
