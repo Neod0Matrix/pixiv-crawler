@@ -37,7 +37,7 @@ class IllustRepoAll:
         cnt_url = pllc.illustHomeURL + self.illustInputID           # get illust artwork count mainpage url
         # build http request
         request = urllib2.Request(url=cnt_url,
-                                  data=pllc.getData)
+                                  data=pllc.loginData[2])
         response = pp.opener.open(request, timeout=300)
         web_src = response.read().decode("UTF-8", "ignore")
 
@@ -96,7 +96,7 @@ class IllustRepoAll:
             referer = step1url + pllc.mainPagetail + str(array - 1)
         mainPageHeader = pllc.MainpageRequestHeaders(referer)
         request = urllib2.Request(url=urlTarget,
-                                  data=pllc.getData,
+                                  data=pllc.loginData[2],
                                   headers=mainPageHeader)
         # build and install opener
         cookie = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())

@@ -14,7 +14,7 @@ pllc.EncodeDecodeResolve()
 class RankingTopN:
     """
         Pixiv website has a rank top, ordinary and R18, daily, weekly, monthly
-        this class include fuction will gather all of those ranks
+        this class include fuction will gather all of those rank
     """
     def __init__(self):
         """class include init process"""
@@ -90,7 +90,7 @@ class RankingTopN:
             else:
                 print pllc.SHELLHEAD + "argv(s) error\n"
             request = urllib2.Request(url=page_url,
-                                      data=pllc.getData)
+                                      data=pllc.loginData[2])
             logContext = 'crawler set target to %s rank top %d image(s)' % (rankWord, img_nbr)
             pp.LogCrawlerWork(self.logpath, logContext)
         elif ormode == 'r' or ormode == '2':
@@ -104,7 +104,7 @@ class RankingTopN:
             else:
                 print pllc.SHELLHEAD + "argv(s) error\n"
             request = urllib2.Request(url=page_url,
-                                      data=pllc.getData,
+                                      data=pllc.loginData[2],
                                       headers=pllc.r18_headers)
             logContext = 'crawler set target to %s r18 rank top %d image(s)' % (rankWord, img_nbr)
             pp.LogCrawlerWork(self.logpath, logContext)

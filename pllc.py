@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v4p7_LTE'
+__version__         = 'v4p8_LTE'
 
 import urllib, json                                                 # post data build
 import time, os, linecache, sys                                     # name folder and files
@@ -38,7 +38,7 @@ def LoginInfoLoad():
         =================================
         :return:    username, password
     """
-    print '###########################[pixiv-crawler(MatPixivCrawler) %s]###########################\n' % __version__
+    print "###################################login data check###################################"
     loginFilePath = os.getcwd() + '/' + 'login.cr'                  # get local dir path
     isLoginCrExisted = os.path.exists(loginFilePath)
     if isLoginCrExisted:
@@ -51,21 +51,30 @@ def LoginInfoLoad():
             userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ') # pycharm python console not support
         else:
             check = raw_input(SHELLHEAD + "please check your info:\n"
-                                          "    username: %s    password: %s"
+                                          "[!]    username: %s[!]    password: %s"
                                           "Yes or No?: " % (userMailBox, userPassword))
             # user judge info are error
             if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
                 print SHELLHEAD + "you can write new info"
                 userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
                 userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ')
+            else:
+                pass
     # no login.cr file
     else:
         print SHELLHEAD + "cannot find login.cr file, please input your login info"
         userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
         userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ')
 
-    return userMailBox.strip(), userPassword.strip()                # strip() delete symbol '\n'
-loginInfo = LoginInfoLoad()                                         # call once
+    # strip() delete symbol '\n'
+    username = userMailBox.strip()
+    passwd = userPassword.strip()
+
+    getwayRegInfo = [('user', username), ('pass', passwd)]
+    getData = json.dumps(urllib.urlencode(getwayRegInfo))           # transfer format
+
+    return username, passwd, getData
+loginData = LoginInfoLoad()                                         # preduce call once
 
 # ========================================some use url address=====================================================
 # login request must be https proxy format, request page or image must be http proxy
@@ -158,6 +167,8 @@ def InitLoginHeaders():
         buildHeaders = dict(baseHeaders.items() + {
             'User-Agent': userAgentWindows,
         }.items())
+    else:
+        pass
 
     return buildHeaders
 loginHeaders = InitLoginHeaders()
@@ -189,6 +200,8 @@ def R18DailyRankRequestHeaders():
         buildHeaders = dict(baseHeaders.items() + {
             'User-Agent': userAgentWindows,
         }.items())
+    else:
+        pass
 
     return buildHeaders
 r18_headers = R18DailyRankRequestHeaders()
@@ -220,6 +233,8 @@ def MainpageRequestHeaders(referer):
         buildHeaders = dict(baseHeaders.items() + {
             'User-Agent': userAgentWindows,
         }.items())
+    else:
+        pass
 
     return buildHeaders
 
@@ -251,6 +266,8 @@ def OriginalImageRequestHeaders(referer):
         buildHeaders = dict(baseHeaders.items() + {
             'User-Agent': userAgentWindows,
         }.items())
+    else:
+        pass
 
     return buildHeaders
 
@@ -268,12 +285,6 @@ arrangeProxyServerRegex = 'td'                                      # cut gather
 # illust artwork count mate
 def illustAWCntRegex(setid):
     return 'eRegister" data-user-id="%s">.*?<' % setid
-# ======================================login need word build================================================
-# http request have more way, Pixiv use POST way to login and request image, use GET way to request page
-
-# GET way need info
-getwayRegInfo = [('user', loginInfo[0]), ('pass', loginInfo[1])]    # priv_lib will first init it
-getData = json.dumps(urllib.urlencode(getwayRegInfo))               # call once
 
 # ======================get format time, and get year-month-date to be a folder name===============================
 
@@ -291,6 +302,8 @@ def OSFileManager():
         fm = 'nautilus'
     elif os.name == 'nt':
         fm = 'explorer'
+    else:
+        pass
     return fm
 
 def SetOSHomeFolder ():
@@ -305,6 +318,8 @@ def SetOSHomeFolder ():
     # windows
     elif os.name == 'nt':
         homeFolder = 'E:\\Workstation_Files\\Pictures\\Comic\\IllustratorDesign\\Crawler\\'
+    else:
+        pass
 
     return homeFolder
 workDir = SetOSHomeFolder()                                         # call once

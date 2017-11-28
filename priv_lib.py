@@ -17,14 +17,21 @@ pllc.EncodeDecodeResolve()
 class PrivateLib:
     # help page
     """
-        #####################################################################################
-        #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                   #
-        #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                       #
-        #    MatPixivCrawler Help Page                                                      #
-        #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)  #
-        #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all artwork(s)       #
-        #    help   ---     print this help page                                            #
-        #####################################################################################
+        #########################################################################################################
+        #    ██████╗ ██╗██╗  ██╗██╗██╗   ██╗       ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗     #
+        #    ██╔══██╗██║╚██╗██╔╝██║██║   ██║      ██╔════╝██╔══██╗██╔══██╗██║    ██║██║     ██╔════╝██╔══██╗    #
+        #    ██████╔╝██║ ╚███╔╝ ██║██║   ██║█████╗██║     ██████╔╝███████║██║ █╗ ██║██║     █████╗  ██████╔╝    #
+        #    ██╔═══╝ ██║ ██╔██╗ ██║╚██╗ ██╔╝╚════╝██║     ██╔══██╗██╔══██║██║███╗██║██║     ██╔══╝  ██╔══██╗    #
+        #    ██║     ██║██╔╝ ██╗██║ ╚████╔╝       ╚██████╗██║  ██║██║  ██║╚███╔███╔╝███████╗███████╗██║  ██║    #
+        #    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝    #
+        #                                                                                                       #
+        #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                       #
+        #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                           #
+        #    MatPixivCrawler Help Page                                                                          #
+        #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                      #
+        #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all artwork(s)                           #
+        #    help   ---     print this help page                                                                #
+        #########################################################################################################
     """
     def __init__(self):
         """
@@ -45,7 +52,6 @@ class PrivateLib:
     def LogCrawlerWork(logPath, logInfo):
         """
             universal work log save
-            its save path define in pllc.py and use here
             :param logPath: log save path
             :param logInfo: log save content
             :return:        none
@@ -125,8 +131,8 @@ class PrivateLib:
         """
         # build basic dict
         postTabledict = OrderedDict()                               # this post data must has a order
-        postTabledict['pixiv_id'] = pllc.loginInfo[0]
-        postTabledict['password'] = pllc.loginInfo[1]
+        postTabledict['pixiv_id'] = pllc.loginData[0]
+        postTabledict['password'] = pllc.loginData[1]
         postTabledict['captcha'] = ""
         postTabledict['g_recaptcha_response'] = ""
 

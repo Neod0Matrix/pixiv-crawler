@@ -1,3 +1,16 @@
+[![Python 2.7](https://img.shields.io/badge/Python-2.7-yellow.svg)](http://www.python.org/download/)
+
+# pixiv-crawler - Pixiv images and messages crawler
+
+██████╗ ██╗██╗  ██╗██╗██╗   ██╗       ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗ 
+██╔══██╗██║╚██╗██╔╝██║██║   ██║      ██╔════╝██╔══██╗██╔══██╗██║    ██║██║     ██╔════╝██╔══██╗
+██████╔╝██║ ╚███╔╝ ██║██║   ██║█████╗██║     ██████╔╝███████║██║ █╗ ██║██║     █████╗  ██████╔╝
+██╔═══╝ ██║ ██╔██╗ ██║╚██╗ ██╔╝╚════╝██║     ██╔══██╗██╔══██║██║███╗██║██║     ██╔══╝  ██╔══██╗
+██║     ██║██╔╝ ██╗██║ ╚████╔╝       ╚██████╗██║  ██║██║  ██║╚███╔███╔╝███████╗███████╗██║  ██║
+╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝
+
+ascii artword from http://patorjk.com/software/taag/
+
 License
 ======
     
@@ -9,8 +22,8 @@ License
 Update
 ======
 
-    Version: v4p7_LTE 
-    Last Update Time: 20171128pm1707
+    Version: v4p8_LTE 
+    Last Update Time: 20171128pm1926
     
     This python crawler is built to crawl pixiv images
     It have two mode: RankTopN and illustRepoAll 
@@ -23,20 +36,26 @@ Platform
 
     Linux x86_64 kernel or Windows NT
     Python: 2.7+(2.6 maybe too old, not support 3.x)
-    Python crawler regular-module depend: urllib, urllib2, cookielib, re, json
-    others are essential module, python will auto-install
-    You need to use browser's javascript console to check your system user-agent
+
+## Requirements
+
+* urllib
+* urllib2
+* beautifulsoup4
+* json
+* getpass
+* cookielib
+* threading
+* PIL
 
 Run
 ======
 
 - [pixiv-crawler](https://github.com/Neod0Matrix/pixiv-crawler)
-* git clone https://github.com/Neod0Matrix/pixiv-crawler.git
-    
+    git clone https://github.com/Neod0Matrix/pixiv-crawler.git
+    cd pixiv-crawler
     First config your local folder in pllc.py and login.cr
-
-Linux / Windows
-> $ python main_process.py
+    python main_process.py
 
 Problems that may arise
 ======
