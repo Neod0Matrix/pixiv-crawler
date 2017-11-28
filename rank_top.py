@@ -11,7 +11,7 @@ import pllc, priv_lib                                               # local lib
 pp = priv_lib.PrivateLib()
 pllc.EncodeDecodeResolve()
 
-class DailyRankTop:
+class RankingTopN:
     """
         Pixiv website has a rank top, ordinary and R18, daily, weekly, monthly
         this class include fuction will gather all of those ranks
@@ -171,7 +171,7 @@ class DailyRankTop:
         pp.LogCrawlerWork(self.logpath, logContext)
         # finish
         pp.htmlBuilder(self, self.workdir, self.htmlpath, self.logpath)
-        pp.crawlerFinishWork(self.logpath)
+        pp.WorkFinished(self.logpath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

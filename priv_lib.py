@@ -297,7 +297,7 @@ class PrivateLib:
             :param logpath:     log save path
             :return:            none
         """
-        logContext = 'start to download target======>'
+        logContext = 'start to download target(s)======>'
         self.LogCrawlerWork(logpath, logContext)
 
         lock = threading.Lock()                                     # object lock
@@ -351,13 +351,13 @@ class PrivateLib:
                 # set image source line
                 htmlFile.writelines(
                     "<img src = \"%s\" width = \"%dpx\" height = \"%dpx\" oriWidth = %d oriHeight = %d />\r\n"
-                    % ("./" + filename, width * 1.0 / height * 200, 200, width, height))
+                    % ("./" + filename, width * 1.0 / height * 200, 200, width, height)) # limit display images size
                 ## htmlFile.writelines("</a>\r\n")
         # end of htmlfile
         htmlFile.writelines("</body>\r\n</html>")
         htmlFile.close()
 
-    def crawlerFinishWork(self, logPath):
+    def WorkFinished(self, logPath):
         """
             work finished log
             :param logPath: log save path

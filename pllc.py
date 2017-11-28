@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v4p6_LTE'
+__version__         = 'v4p7_LTE'
 
 import urllib, json                                                 # post data build
 import time, os, linecache, sys                                     # name folder and files
@@ -48,7 +48,7 @@ def LoginInfoLoad():
         if userMailBox == '' or userPassword == '':
             print SHELLHEAD + "login.cr file invaild, please input your login info"
             userMailBox = raw_input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
-            userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ')
+            userPassword = getpass.getpass(SHELLHEAD + 'enter your account password: ') # pycharm python console not support
         else:
             check = raw_input(SHELLHEAD + "please check your info:\n"
                                           "    username: %s    password: %s"
@@ -114,18 +114,18 @@ connection = "keep-alive"
 contentType = "application/x-www-form-urlencoded; charset=UTF-8"
 xRequestwith = "XMLHttpRequest"
 
-def headersDictTransfList (buildHeaders):
+def DictTransferList (input_dict):
     """
-        change headers dict data-type to list
-        :param buildHeaders:    dict headers
-        :return:                list headers
+        change dict data-type to list
+        :param input_dict:      dict
+        :return:                list
     """
-    headall = []
-    for key, value in buildHeaders.items():
+    result_list = []
+    for key, value in input_dict.items():
         item = (key, value)
-        headall.append(item)
+        result_list.append(item)
 
-    return headall
+    return result_list
 
 def InitLoginHeaders():
     """

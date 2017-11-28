@@ -15,7 +15,7 @@ if __name__ == '__main__':
     mode = raw_input(pllc.SHELLHEAD + 'select a mode: ')
     if mode == 'rtn' or mode == '1':
         print pllc.SHELLHEAD + "check mode: RankTopN"
-        rank_top.DailyRankTop().rtnStartCrawler()
+        rank_top.RankingTopN().rtnStartCrawler()
     elif mode == 'ira' or mode == '2':
         print pllc.SHELLHEAD + "check mode: illustRepoAll"
         illust_repo.IllustRepoAll().iraStartCrawler()

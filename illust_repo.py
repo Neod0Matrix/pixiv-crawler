@@ -186,7 +186,7 @@ class IllustRepoAll:
         pp.LogCrawlerWork(self.logpath, logContext)
         # finish
         pp.htmlBuilder(self, self.workdir, self.htmlpath, self.logpath)
-        pp.crawlerFinishWork(self.logpath)
+        pp.WorkFinished(self.logpath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
