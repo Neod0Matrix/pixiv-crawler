@@ -18,16 +18,16 @@ SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux
 
 # ==============================================pixiv login info====================================================
 
-def EncodeDecodeResolve():
+def encode_resolve():
     """
         use reload sys to resolve python damn encode question
         :return:    none
     """
     reload(sys)
     sys.setdefaultencoding('UTF-8')
-EncodeDecodeResolve()                                               # run once just ok
+encode_resolve()                                                    # run once just ok
 
-def LoginInfoLoad():
+def login_infopreload():
     """
         get user input username and password
         login.cr file example:
@@ -74,7 +74,7 @@ def LoginInfoLoad():
     getData = json.dumps(urllib.urlencode(getwayRegInfo))           # transfer format
 
     return username, passwd, getData
-loginData = LoginInfoLoad()                                         # preduce call once
+login_data = login_infopreload()                                    # preduce call once
 
 # ========================================some use url address=====================================================
 # login request must be https proxy format, request page or image must be http proxy
@@ -123,7 +123,7 @@ connection = "keep-alive"
 contentType = "application/x-www-form-urlencoded; charset=UTF-8"
 xRequestwith = "XMLHttpRequest"
 
-def DictTransferList (input_dict):
+def dict_transto_list (input_dict):
     """
         change dict data-type to list
         :param input_dict:      dict
@@ -136,7 +136,7 @@ def DictTransferList (input_dict):
 
     return result_list
 
-def InitLoginHeaders(cookie):
+def build_login_headers(cookie):
     """
         build the first request login headers
         :param cookie:  cookie
@@ -173,8 +173,7 @@ def InitLoginHeaders(cookie):
 
     return buildHeaders
 
-# original image
-def OriImageHeaders(referer):
+def build_original_headers(referer):
     """
         original image request headers
         :param referer: headers need a last page referer
@@ -221,7 +220,7 @@ illustAWCntRegex = 'dge">.*?<'                                      # illust art
 
 # ======================get format time, and get year-month-date to be a folder name===============================
 
-def OSFileManager():
+def platform_filemanager():
     """
         define os gui file manager
         :return:    file manager name
@@ -235,7 +234,7 @@ def OSFileManager():
         pass
     return fm
 
-def SetOSHomeFolder ():
+def setting_platform_workdir ():
     """
         set os platform to set folder format
         :return:    platform work directory
@@ -251,19 +250,19 @@ def SetOSHomeFolder ():
         pass
 
     return homeFolder
-workDir = SetOSHomeFolder()                                         # call once
+work_dir = setting_platform_workdir()                               # call once
 
 # real time clock
 rtc = time.localtime()
 ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
 
 # universal path
-logFileName = '/CrawlerWork[%s].log' % ymd
-htmlFileName = '/CrawlerWork[%s].html' % ymd
-privateFolder = workDir + 'RankTop_%s' % ymd
+logfile_name = '/CrawlerWork[%s].log' % ymd
+htmlfile_name = '/CrawlerWork[%s].html' % ymd
+ranking_folder = work_dir + 'RankTop_%s' % ymd
 # daily-rank path
-logFilePath = privateFolder + logFileName
-htmlFilePath = privateFolder + htmlFileName
+logfile_path = ranking_folder + logfile_name
+htmlfile_path = ranking_folder + htmlfile_name
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

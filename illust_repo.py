@@ -9,9 +9,9 @@ import time, string
 import pllc, priv_lib                                               # local lib
 
 pp = priv_lib.PrivateLib()
-pllc.EncodeDecodeResolve()
+pllc.encode_resolve()
 
-class IllustRepoAll:
+class IllustratorRepos:
     """
         every illustrator in Pixiv has own mainpage
         this class include fuction will crawl all of those page all images
@@ -22,22 +22,22 @@ class IllustRepoAll:
         self.illustInputID = raw_input(pllc.SHELLHEAD
                 + 'enter you want to crawl illuster id: ')
         # work directory create
-        self.workdir = pllc.SetOSHomeFolder() + self.illustInputID
-        self.logpath = self.workdir + pllc.logFileName
-        self.htmlpath = self.workdir + pllc.htmlFileName
+        self.workdir = pllc.setting_platform_workdir() + self.illustInputID
+        self.logpath = self.workdir + pllc.logfile_name
+        self.htmlpath = self.workdir + pllc.htmlfile_name
 
     @staticmethod
-    def GatherIndexInfo(self, logPath):
+    def gather_preloadinfo(self, logpath):
         """
             crawler need to know how many images do you want
             :param self:    self class
-            :param logPath: log save path
+            :param logpath: log save path
             :return:        request images count
         """
         # get illust artwork count mainpage url
         cnt_url = pllc.mainPage + self.illustInputID
         response = pp.opener.open(fullurl=cnt_url,
-                                  data=pllc.loginData[2],
+                                  data=pllc.login_data[2],
                                   timeout=300)
         web_src = response.read().decode("UTF-8", "ignore")
 
@@ -58,12 +58,12 @@ class IllustRepoAll:
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD
                 + 'error, input count must <= %d and not 0: ' % maxCnt))
         logContext = "check gather illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
-        pp.LogCrawlerWork(logPath, logContext)
+        pp.logprowork(logpath, logContext)
 
         return capCnt
 
     @staticmethod
-    def CrawlAllTargetURL(self, array, logPath):
+    def crawl_onepage_data(self, array, logpath):
         """
             crawl all target url about images
             page request regular:
@@ -72,7 +72,7 @@ class IllustRepoAll:
             no.3 referer: &type=all&p=3 request url: &type=all&p=4
             :param self:    self class
             :param array:   count cut to every 20 images from each page, they have an array
-            :param logPath: log save path
+            :param logpath: log save path
             :return:        use regex to mate web src thumbnail images url
         """
         step1url = pllc.mainPage + self.illustInputID + pllc.mainPagemiddle
@@ -83,13 +83,13 @@ class IllustRepoAll:
         else:
             urlTarget = step1url + pllc.mainPagetail + str(array)
         response = pp.opener.open(fullurl=urlTarget,
-                                  data=pllc.loginData[2],
+                                  data=pllc.login_data[2],
                                   timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = "mainpage %d response successed" % array
         else:
             logContext = "mainpage %d response timeout, failed" % array
-        pp.LogCrawlerWork(logPath, logContext)
+        pp.logprowork(logpath, logContext)
         # each page cut thumbnail image url
         web_src = response.read().decode("UTF-8", "ignore")
 
@@ -105,17 +105,17 @@ class IllustRepoAll:
         thumbnailImageurls = re.findall(pattern, web_src)
 
         logContext = "mainpage %d data gather finished" % array
-        pp.LogCrawlerWork(logPath, logContext)
+        pp.logprowork(logpath, logContext)
 
         return thumbnailImageurls, imagesName
 
     @staticmethod
-    def PackAllPageURL(self, nbr, logPath):
+    def crawl_allpage_target(self, nbr, logpath):
         """
             package all gather url
             :param self:    self class
             :param nbr:     package images count
-            :param logPath: log save path
+            :param logpath: log save path
             :return:        build original images urls list
         """
         # calcus nbr need request count
@@ -128,7 +128,7 @@ class IllustRepoAll:
         allThumbnailimage = []
         allArtworkName = []
         for i in range(needPagecnt):
-            dataCapture = self.CrawlAllTargetURL(self, i + 1, logPath)
+            dataCapture = self.crawl_onepage_data(self, i + 1, logpath)
             allThumbnailimage += dataCapture[0]
             allArtworkName += dataCapture[1]
 
@@ -150,38 +150,38 @@ class IllustRepoAll:
 
         # log images info
         logContext = 'illustrator: ' + self.illustName + ' id: ' + self.illustInputID + ' artworks info====>'
-        pp.LogCrawlerWork(logPath, logContext)
+        pp.logprowork(logpath, logContext)
 
         for k, i in enumerate(allArtworkName[:nbr]):
             logContext = 'no.%d image: %s id: %s url: %s' % ((k + 1), i, artworkIDs[k], imgOriginalhttps[k])
-            pp.LogCrawlerWork(logPath, logContext)
+            pp.logprowork(logpath, logContext)
 
         return imgOriginalhttps
 
-    def iraStartCrawler(self):
+    def start_ira(self):
         """
             include this class run logic
             :return:    none
         """
         # make dir
-        pp.MkDir(self.logpath, self.workdir)
+        pp.mkworkdir(self.logpath, self.workdir)
         # log runtime
         starttime = time.time()
         # check website can response crawler
-        pp.ProxyServerCrawl(self.logpath)
-        pp.CamouflageLogin(self.logpath)
+        pp.getproxyserver(self.logpath)
+        pp.camouflage_login(self.logpath)
         # get capture image count
-        crawCnt = self.GatherIndexInfo(self, self.logpath)
-        urls = self.PackAllPageURL(self, crawCnt, self.logpath)
+        target_cnt = self.gather_preloadinfo(self, self.logpath)
+        urls = self.crawl_allpage_target(self, target_cnt, self.logpath)
         # save images
-        pp.TargetImageDownload(urls, self.basePages, self.workdir, self.logpath)
+        pp.download_alltarget(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
         endtime = time.time()
         logContext = "elapsed time: %ds" % (endtime - starttime)
-        pp.LogCrawlerWork(self.logpath, logContext)
+        pp.logprowork(self.logpath, logContext)
         # finish
-        pp.htmlBuilder(self.workdir, self.htmlpath, self.logpath)
-        pp.WorkFinished(self.logpath)
+        pp.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
+        pp.work_finished(self.logpath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

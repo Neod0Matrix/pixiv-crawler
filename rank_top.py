@@ -9,9 +9,9 @@ import time, string
 import pllc, priv_lib                                               # local lib
 
 pp = priv_lib.PrivateLib()
-pllc.EncodeDecodeResolve()
+pllc.encode_resolve()
 
-class RankingTopN:
+class DWMRankingTop:
     """
         Pixiv website has a rank top, ordinary and R18, daily, weekly, monthly
         this class include fuction will gather all of those rank
@@ -19,21 +19,21 @@ class RankingTopN:
     def __init__(self):
         """class include init process"""
         # class inner global var
-        self.workdir = pllc.privateFolder                           # setting global work directory
-        self.logpath = pllc.logFilePath                             # setting global log path
-        self.htmlpath = pllc.htmlFilePath                           # setting global html path
+        self.workdir = pllc.ranking_folder                           # setting global work directory
+        self.logpath = pllc.logfile_path                             # setting global log path
+        self.htmlpath = pllc.htmlfile_path                           # setting global html path
 
     @staticmethod
-    def GetEssentialInfo(self, wd, lp):
+    def gather_essential_info(self, work_dir, logpath):
         """
             get input image count
             :param self:    self class
-            :param wd:      work directory
-            :param lp:      log save path
+            :param work_dir:      work directory
+            :param logpath:      log save path
             :return:        crawl images count
         """
         # first create folder
-        pp.MkDir(lp, wd)
+        pp.mkworkdir(logpath, work_dir)
         # select ordinary top or r18 top
         # transfer ascii string to number
         ormode = raw_input(pllc.SHELLHEAD + 'select ordinary top or r18 top(tap "o"&"1" or "r"&"2"): ')
@@ -63,7 +63,7 @@ class RankingTopN:
         return imgCnt
 
     @staticmethod
-    def GatherTargetList(self, ormode, img_nbr):
+    def gather_rankingdata(self, ormode, img_nbr):
         """
             crawl dailyRank list
             :param self:    self class
@@ -72,7 +72,7 @@ class RankingTopN:
             :return:        original images urls list
         """
         logContext = 'gather rank list======>'
-        pp.LogCrawlerWork(self.logpath, logContext)
+        pp.logprowork(self.logpath, logContext)
         rankWord = ''
         page_url = ''
         if ormode == 'o' or ormode == '1':
@@ -102,18 +102,17 @@ class RankingTopN:
             logContext = 'crawler set target to %s r18 rank top %d image(s)' % (rankWord, img_nbr)
         else:
             print pllc.SHELLHEAD + "argv(s) error\n"
-        pp.LogCrawlerWork(self.logpath, logContext)
+        pp.logprowork(self.logpath, logContext)
         response = pp.opener.open(fullurl=page_url,
-                                  data=pllc.loginData[2],
+                                  data=pllc.login_data[2],
                                   timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'website response successed'
         else:
             # response failed, you need to check network status
             logContext = 'website response fatal, return code %d' % response.getcode()
-        pp.LogCrawlerWork(self.logpath, logContext)
+        pp.logprowork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
-        pp.testSavehtml(self.workdir, web_src, self.logpath)
 
         # build original image url
         vwPattern = re.compile(pllc.rankVWRegex, re.S)
@@ -128,42 +127,42 @@ class RankingTopN:
         dataCapture = re.findall(infoPattern, web_src)
 
         logContext = 'top ' + str(img_nbr) + ' info======>'
-        pp.LogCrawlerWork(self.logpath, logContext)
+        pp.logprowork(self.logpath, logContext)
         aw_ids = []                                                 # artwork id
         self.basePages = []                                         # request original image need referer
         for k, i in enumerate(dataCapture[:img_nbr]):
             logContext = '------------no.%s-----------' % i[0]      # artwork array
-            pp.LogCrawlerWork(self.logpath, logContext)
+            pp.logprowork(self.logpath, logContext)
             logContext = 'name: %s illustrator: %s id: %s url: %s' % (i[1], i[2], i[4], targetURL[k])
-            pp.LogCrawlerWork(self.logpath, logContext)
+            pp.logprowork(self.logpath, logContext)
             aw_ids.append(i[4])
             self.basePages.append(pllc.baseWebURL + i[4])           # every picture url address: base_url address + picture_id
 
         return targetURL
 
-    def rtnStartCrawler(self):
+    def start_rtn(self):
         """
             class main call process
             :return:    none
         """
         # prepare works
-        nbr = self.GetEssentialInfo(self, self.workdir, self.logpath)
+        nbr = self.gather_essential_info(self, self.workdir, self.logpath)
         # log runtime
         starttime = time.time()
         # check website can response crawler
-        pp.ProxyServerCrawl(self.logpath)
-        pp.CamouflageLogin(self.logpath)
+        pp.getproxyserver(self.logpath)
+        pp.camouflage_login(self.logpath)
         # get ids and urls
-        urls = self.GatherTargetList(self, self.rtn_mode, nbr)
+        urls = self.gather_rankingdata(self, self.rtn_mode, nbr)
         # save images
-        pp.TargetImageDownload(urls, self.basePages, self.workdir, self.logpath)
+        pp.download_alltarget(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
         endtime = time.time()
         logContext = "elapsed time: %ds" % (endtime - starttime)
-        pp.LogCrawlerWork(self.logpath, logContext)
+        pp.logprowork(self.logpath, logContext)
         # finish
-        pp.htmlBuilder(self.workdir, self.htmlpath, self.logpath)
-        pp.WorkFinished(self.logpath)
+        pp.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
+        pp.work_finished(self.logpath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
