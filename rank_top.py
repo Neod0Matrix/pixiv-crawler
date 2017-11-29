@@ -158,7 +158,7 @@ class DWMRankingTop:
         pp.download_alltarget(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
         endtime = time.time()
-        logContext = "elapsed time: %ds" % (endtime - starttime)
+        logContext = "elapsed time: %0.2fs" % (endtime - starttime)
         pp.logprowork(self.logpath, logContext)
         # finish
         pp.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)

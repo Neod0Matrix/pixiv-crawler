@@ -8,7 +8,7 @@ import urllib, urllib2, cookielib, os                               # crawler de
 import time, random, re
 import pllc                                                         # messages
 from bs4 import BeautifulSoup
-import threading                                                    # multi-process
+import threading                                                    # multi-threads
 from PIL import Image                                               # pillow image handle
 from collections import OrderedDict
 
@@ -26,7 +26,7 @@ class PrivateLib:
         #    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝    #
         #                                                                                                       #
         #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                       #
-        #    Version: 5.0.0 LTE                                                                                 #
+        #    Version: 5.1.0 LTE                                                                                 #
         #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                           #
         #    MatPixivCrawler Help Page                                                                          #
         #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                      #
@@ -255,6 +255,7 @@ class PrivateLib:
         """
             overrides its run method by inheriting the Thread class
             this class can be placed outside the main class, you can also put inside
+            threads are the smallest unit of program execution flow that is less burdensome than process creation
         """
         def __init__(self, lock, i, img_url, base_pages, imgPath, logPath):
             """
@@ -266,8 +267,9 @@ class PrivateLib:
                 :param imgPath:     image save path
                 :param logPath:     log save path
             """
-            threading.Thread.__init__(self)  # threading module init method
-            ## super(MultiThread, self).__init__()                      # multiprocessing module init method
+            # callable class init
+            threading.Thread.__init__(self)
+            # arguments transfer to global
             self.lock = lock
             self.i = i
             self.img_url = img_url
@@ -301,7 +303,7 @@ class PrivateLib:
         lock = threading.Lock()                                     # object lock
         for i, img_url in enumerate(urls):
             # easy process run
-            ## self.SaveOneImage(i, img_url, basePages, workdir, logpath)
+            ## self.save_oneimage(i, img_url, basePages, workdir, logpath)
 
             # create overwrite threading.Thread object
             subprocess = self.MultiThread(lock, i, img_url, base_pages, workdir, logpath)
