@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v4p9_LTE'
+__version__         = 'v5p0_LTE'
 
 import urllib, json                                                 # post data build
 import time, os, linecache, sys                                     # name folder and files
@@ -174,7 +174,7 @@ def InitLoginHeaders(cookie):
     return buildHeaders
 
 # original image
-def OriginalImageRequestHeaders(referer):
+def OriImageHeaders(referer):
     """
         original image request headers
         :param referer: headers need a last page referer

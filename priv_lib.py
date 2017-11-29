@@ -26,7 +26,7 @@ class PrivateLib:
         #    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝    #
         #                                                                                                       #
         #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                       #
-        #    Version: 4.8.0                                                                                     #
+        #    Version: 5.0.0 LTE                                                                                 #
         #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                           #
         #    MatPixivCrawler Help Page                                                                          #
         #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                      #
@@ -40,8 +40,7 @@ class PrivateLib:
             here build a sample opener
         """
         # from first login save cookie and create global opener
-        ## self.cookie = cookielib.LWPCookieJar()                   # create a cookie words
-        self.cookie = cookielib.CookieJar()                         # create a cookie words
+        self.cookie = cookielib.LWPCookieJar()                      # create a cookie words
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie) # add http cookie words
         self.opener = urllib2.build_opener(self.cookieHandler)      # build the opener
         urllib2.install_opener(self.opener)
@@ -180,6 +179,30 @@ class PrivateLib:
         logContext = 'save request html page ok'
         self.LogCrawlerWork(logPath, logContext)
 
+    def RequestPack(self, mode, url, headers, timeout):
+        """
+            package a request with two mode, use to test
+            test result: mode 1 slower, mode 2 faster
+            :param mode:        mode choose, 1 or 2
+            :param url:         request url address
+            :param headers:     add headers
+            :param timeout:     request timeout
+            :return:            response frame
+        """
+        response = None
+        if mode == 1:
+            list_headers = pllc.DictTransferList(headers)               # change headers data type(opener use list, urlopen use dict)
+            self.opener.addheaders = list_headers                       # add headers to opener
+            urllib2.install_opener(self.opener)                         # must install new
+            response = self.opener.open(fullurl=url, timeout=timeout)
+        elif mode == 2:
+            request = urllib2.Request(url=url, headers=headers)
+            response = urllib2.urlopen(request, timeout=timeout)
+        else:
+            pass
+
+        return response                                                 # call it
+
     def SaveOneImage(self, i, img_url, base_pages, imgPath, logPath):
         """
             download one target image, then multi-process will call here
@@ -190,42 +213,27 @@ class PrivateLib:
             :param logPath:     log save path
             :return:            none
         """
-        img_headers = pllc.OriginalImageRequestHeaders(base_pages[i]) # reset headers with basic pages
-        # use GET way to request server
-        ## img_url_get_way = img_url + "?" + urllib.urlencode(pllc.get_way_info)
-        img_request = urllib2.Request(url=img_url,
-                                      headers=img_headers)
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-        ## opener.addheaders = img_headers
-        urllib2.install_opener(opener)                              # must install new created opener
+        request_mode = 2                                            # set request images mode
 
-        # pixiv website image format have jpg and png two format
+        # set images download arguments
         img_type_flag = 0                                           # replace png format, reset last
         img_id = img_url[57:][:-7]                                  # cut id from url
         ## image_name = str(i + 1) + '-' + img_id
-        image_name = img_id                                         # in order to better organize images, use image id name image
+        image_name = img_id
+
+        img_headers = pllc.OriImageHeaders(base_pages[i])           # setting headers
         try:
-            img_response = urllib2.urlopen(img_request, timeout=300)
+            img_response = self.RequestPack(request_mode, img_url, img_headers, 300)
         # http error because only use png format to build url
         # after except error, url will be changed to jpg format
         except Exception, e:
-            ## logContext = str(e) + ", image format type may error"
-            ## self.LogCrawlerWork(logPath, logContext)
-            img_type_flag += 1
-            chajpgurl = img_url[0:-3] + 'jpg'                       # replace to jpg format
-            img_request = urllib2.Request(
-                url=chajpgurl,
-                headers=img_headers
-            )
-            # rebuild opener
-            cookie = cookielib.CookieJar()
-            cookieHandler = urllib2.HTTPCookieProcessor(cookie)
-            opener = urllib2.build_opener(cookieHandler)
-            ## opener.addheaders = img_headers
-            urllib2.install_opener(opener)                          # must install new created opener
-            img_response = urllib2.urlopen(img_request, timeout=300) # request timeout set longer
-            ## img_response = opener.open(img_url, timeout=300)
+            # this error display can release
+            logContext = str(e)
+            self.LogCrawlerWork(logPath, logContext)
 
+            img_type_flag += 1
+            changeToJPGurl = img_url[0:-3] + 'jpg'                  # replace to jpg format
+            img_response = self.RequestPack(request_mode, changeToJPGurl, img_headers, 300)
             if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
                 logContext = 'capture target no.%d jpg image ok' % (i + 1)
                 self.LogCrawlerWork(logPath, logContext)
