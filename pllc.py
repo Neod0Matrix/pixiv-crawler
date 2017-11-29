@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v4p8_LTE'
+__version__         = 'v4p9_LTE'
 
 import urllib, json                                                 # post data build
 import time, os, linecache, sys                                     # name folder and files
@@ -36,7 +36,7 @@ def LoginInfoLoad():
         <mail>
         <passwd>
         =================================
-        :return:    username, password
+        :return:    username, password, get data
     """
     print "###################################login data check###################################"
     loginFilePath = os.getcwd() + '/' + 'login.cr'                  # get local dir path
@@ -136,11 +136,13 @@ def DictTransferList (input_dict):
 
     return result_list
 
-def InitLoginHeaders():
+def InitLoginHeaders(cookie):
     """
-        first login to Pixiv, use POST way
-        :return:    build headers
+        build the first request login headers
+        :param cookie:  cookie
+        :return:        login headers
     """
+    # this build headers key-word is referer and user-agent
     baseHeaders = {
         'Accept': accept,
         'Accept-Encoding': acceptEncoding,
@@ -149,7 +151,7 @@ def InitLoginHeaders():
         'Connection': connection,
         'Content-Length': "207",
         'Content-Type': contentType,
-        'Cookie': "",                                               # cannot include
+        'Cookie': cookie,
         'DNT': "1",
         'Host': accountHost,
         'Origin': originHost2,
@@ -157,78 +159,11 @@ def InitLoginHeaders():
         'X-Requested-With': xRequestwith,
     }
     buildHeaders = {}
-    # linux
+    # platform choose
     if os.name == 'posix':
         buildHeaders = dict(baseHeaders.items() + {
             'User-Agent': userAgentLinux,
         }.items())
-    # windows
-    elif os.name == 'nt':
-        buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': userAgentWindows,
-        }.items())
-    else:
-        pass
-
-    return buildHeaders
-loginHeaders = InitLoginHeaders()
-
-def R18DailyRankRequestHeaders():
-    """
-        r18 daily-rank page request headers
-        :return:    build headers
-    """
-    baseHeaders = {
-        'Accept': accept2,
-        'Accept-Encoding': acceptEncoding,
-        'Accept-Language': acceptLanguage,
-        'Cache-Control': "max-age=0",
-        'Connection': connection,
-        'DNT': "1",
-        'Host': wwwHost,
-        'Referer': "https://www.pixiv.net/ranking.php?mode=daily",  # https proxy string
-        'Upgrade-Insecure-Requests': "1",
-    }
-    buildHeaders = {}
-    # linux
-    if os.name == 'posix':
-        buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': userAgentLinux,
-        }.items())
-    # windows
-    elif os.name == 'nt':
-        buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': userAgentWindows,
-        }.items())
-    else:
-        pass
-
-    return buildHeaders
-r18_headers = R18DailyRankRequestHeaders()
-
-def MainpageRequestHeaders(referer):
-    """
-        illustrator private mainpage request headers
-        :param referer: headers need a last page referer
-        :return:        build headers
-    """
-    baseHeaders = {
-        'Accept': accept2,
-        'Accept-Encoding': acceptEncoding2,
-        'Accept-Language': acceptLanguage,
-        'Connection': connection,
-        'DNT': 1,
-        'Host': wwwHost,
-        'Referer': referer,
-        'Upgrade-Insecure-Requests': 1,
-    }
-    buildHeaders = {}
-    # linux
-    if os.name == 'posix':
-        buildHeaders = dict(baseHeaders.items() + {
-            'User-Agent': userAgentLinux,
-        }.items())
-    # windows
     elif os.name == 'nt':
         buildHeaders = dict(baseHeaders.items() + {
             'User-Agent': userAgentWindows,
@@ -256,12 +191,11 @@ def OriginalImageRequestHeaders(referer):
         'Referer': referer,  # request basic page
     }
     buildHeaders = {}
-    # linux
+    # platform choose
     if os.name == 'posix':
         buildHeaders = dict(baseHeaders.items() + {
             'User-Agent': userAgentLinux,
         }.items())
-    # windows
     elif os.name == 'nt':
         buildHeaders = dict(baseHeaders.items() + {
             'User-Agent': userAgentWindows,
@@ -278,19 +212,14 @@ rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user
 rankVWRegex = 'r/img/.*?_'                                          # from dailyRank page gather vaild words
 nbrRegex = '\d+\.?\d*'                                              # mate any number
 imgThumbnailRegex = '<img src="(.*?)"'                              # mate thumbnail image
-illustNameRegex = 'r:title" content=".*? '                          # mate illust name
-imagesNameRegex = '" alt="(.*?)"'                                   # mate images name
+mainpageThumbnailRegex = '-src=".*?"'                               # mainpage use thumbnail regex
+illustNameRegex = 'me"title=".*?"'                                  # mate illust name
+imagesNameRegex = 'e" title=".*?"'                                  # mate mainpage images name
 proxyServerRegex = 'tr'                                             # use beautifulsoup module, easy
 arrangeProxyServerRegex = 'td'                                      # cut gather list
-# illust artwork count mate
-def illustAWCntRegex(setid):
-    return 'eRegister" data-user-id="%s">.*?<' % setid
+illustAWCntRegex = 'dge">.*?<'                                      # illust artwork count mate
 
 # ======================get format time, and get year-month-date to be a folder name===============================
-
-# real time clock
-rtc = time.localtime()
-ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
 
 def OSFileManager():
     """
@@ -323,6 +252,10 @@ def SetOSHomeFolder ():
 
     return homeFolder
 workDir = SetOSHomeFolder()                                         # call once
+
+# real time clock
+rtc = time.localtime()
+ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
 
 # universal path
 logFileName = '/CrawlerWork[%s].log' % ymd

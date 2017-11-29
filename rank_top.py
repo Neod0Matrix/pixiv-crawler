@@ -4,8 +4,8 @@
 # =====================================================================
 # this python script is built to get pixiv rank top images
 
-import urllib2, re                                                  # crawler depends
-import datetime, string
+import re                                                           # crawler depends
+import time, string
 import pllc, priv_lib                                               # local lib
 
 pp = priv_lib.PrivateLib()
@@ -75,7 +75,6 @@ class RankingTopN:
         pp.LogCrawlerWork(self.logpath, logContext)
         rankWord = ''
         page_url = ''
-        request = ''
         if ormode == 'o' or ormode == '1':
             dwm = raw_input(pllc.SHELLHEAD + 'select daily(1)/weekly(2)/monthly(3) rank top: ')
             if dwm == '1':
@@ -89,10 +88,7 @@ class RankingTopN:
                 rankWord = 'monthly'
             else:
                 print pllc.SHELLHEAD + "argv(s) error\n"
-            request = urllib2.Request(url=page_url,
-                                      data=pllc.loginData[2])
             logContext = 'crawler set target to %s rank top %d image(s)' % (rankWord, img_nbr)
-            pp.LogCrawlerWork(self.logpath, logContext)
         elif ormode == 'r' or ormode == '2':
             dwm = raw_input(pllc.SHELLHEAD + 'select daily(1)/weekly(2) R18 rank top: ')
             if dwm == '1':
@@ -103,17 +99,13 @@ class RankingTopN:
                 rankWord = 'weekly'
             else:
                 print pllc.SHELLHEAD + "argv(s) error\n"
-            request = urllib2.Request(url=page_url,
-                                      data=pllc.loginData[2],
-                                      headers=pllc.r18_headers)
             logContext = 'crawler set target to %s r18 rank top %d image(s)' % (rankWord, img_nbr)
-            pp.LogCrawlerWork(self.logpath, logContext)
         else:
             print pllc.SHELLHEAD + "argv(s) error\n"
-        ## request.add_data(pllc.getData)
-        ## pp.opener.addheaders = pllc.R18DailyRankRequestHeaders()
-        ## urllib2.install_opener(pp.opener)
-        response = pp.opener.open(request, timeout=300)
+        pp.LogCrawlerWork(self.logpath, logContext)
+        response = pp.opener.open(fullurl=page_url,
+                                  data=pllc.loginData[2],
+                                  timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'website response successed'
         else:
@@ -121,7 +113,7 @@ class RankingTopN:
             logContext = 'website response fatal, return code %d' % response.getcode()
         pp.LogCrawlerWork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
-        ## pp.testSavehtml(self.workdir, web_src, self.logpath)
+        pp.testSavehtml(self.workdir, web_src, self.logpath)
 
         # build original image url
         vwPattern = re.compile(pllc.rankVWRegex, re.S)
@@ -157,7 +149,7 @@ class RankingTopN:
         # prepare works
         nbr = self.GetEssentialInfo(self, self.workdir, self.logpath)
         # log runtime
-        starttime = datetime.datetime.now()
+        starttime = time.time()
         # check website can response crawler
         pp.ProxyServerCrawl(self.logpath)
         pp.CamouflageLogin(self.logpath)
@@ -166,11 +158,11 @@ class RankingTopN:
         # save images
         pp.TargetImageDownload(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
-        endtime = datetime.datetime.now()
-        logContext = "elapsed time: %ds" % (endtime - starttime).seconds
+        endtime = time.time()
+        logContext = "elapsed time: %ds" % (endtime - starttime)
         pp.LogCrawlerWork(self.logpath, logContext)
         # finish
-        pp.htmlBuilder(self, self.workdir, self.htmlpath, self.logpath)
+        pp.htmlBuilder(self.workdir, self.htmlpath, self.logpath)
         pp.WorkFinished(self.logpath)
 
 # =====================================================================

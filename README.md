@@ -22,8 +22,8 @@ License
 Update
 ======
 
-    Version: v4p8_LTE 
-    Last Update Time: 20171128pm1931
+    Version: v4p9_LTE 
+    Last Update Time: 20171129pm1832
     
     This python crawler is built to crawl pixiv images
     It have two mode: RankTopN and illustRepoAll 
@@ -34,8 +34,8 @@ Update
 Platform
 ======
 
-    Linux x86_64 kernel or Windows NT
-    Python: 2.7+(2.6 maybe too old, not support 3.x)
+    Linux x86_64 kernel and Windows NT
+    Python: 2.7+(2.6 may be too old, and not support 3.x)
 
 ## Requirements
 
@@ -63,31 +63,28 @@ Run
 Problems that may arise
 ======
 
-    May the good network with you
+    May the good network status with you
 
-    If you frequently use the crawler to request resources from the server, 
-    then after some time the server may throw you 10060 error, 
-    just wait for a second and ok
+    If you use the crawler too often to request data from the server, 
+    the server may return an 10060 error for you, 
+    just need to wait for a while and then try again, or use a proxy server
     
     If your test network environment has been dns-polluted, I suggest you 
     fix your PC dns-server to a pure server
     In China, such as 115.159.146.99 from https://aixyz.com/
     
-    If you crawl Pixiv website many times in a short time, you may be forbiddened
-    to visit website, now you can try add proxy server and run again
-    
     ira mode you need input that illuster id ,not image id
     crawler log image will rename to array number + image id, 
-    you can use this id to find original image in Pixiv website
+    you can use this id to find original image with URL:
+    https://www.pixiv.net/member_illust.php?mode=medium&illust_id=<your known id>
     
-    Pixiv website will often change the image URL, please use the lastest results from javascript console
-    
-    Because Pixiv set an author of all the artworks into each page shows up to 20 images, 
-    so that if crawler crawls more than 20 images, it must request different URL pages several times, 
-    which is ... fxxk
+    Pixiv website will often change the image URL frame, 
+    please use the lastest results from javascript console
     
     Remember delete login.cr info before push or commit issue
     
-    Two question: mainpage request only first page and daily-rank r18 403 error,
-    their reason are same: login website failed
+    Login successed, Pixiv sees the post-data rather than the headers,
+    as long as the opener is guaranteed to be used correctly, 
+    no headers can be successfully logged in
+    Now you can use this crawler to crawl all target from Pixiv
     

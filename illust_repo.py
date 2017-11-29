@@ -4,8 +4,8 @@
 # =====================================================================
 # this python script is built to get a illust all repo images
 
-import urllib2, cookielib, re                                       # crawler depends
-import datetime, string
+import re                                                           # crawler depends
+import time, string
 import pllc, priv_lib                                               # local lib
 
 pp = priv_lib.PrivateLib()
@@ -34,30 +34,21 @@ class IllustRepoAll:
             :param logPath: log save path
             :return:        request images count
         """
-        cnt_url = pllc.illustHomeURL + self.illustInputID           # get illust artwork count mainpage url
-        # build http request
-        request = urllib2.Request(url=cnt_url,
-                                  data=pllc.loginData[2])
-        response = pp.opener.open(request, timeout=300)
+        # get illust artwork count mainpage url
+        cnt_url = pllc.mainPage + self.illustInputID
+        response = pp.opener.open(fullurl=cnt_url,
+                                  data=pllc.loginData[2],
+                                  timeout=300)
         web_src = response.read().decode("UTF-8", "ignore")
 
-        # mate illust name
+        # mate illustrator name
         illustNamePattern = re.compile(pllc.illustNameRegex, re.S)
-        self.illustName = re.findall(illustNamePattern, web_src)[0][18:][:-1]
+        self.illustName = re.findall(illustNamePattern, web_src)[0][10:][:-1]
 
-        # mate images name
-        imagesNamePattern = re.compile(pllc.imagesNameRegex, re.S)
-        origName = re.findall(imagesNamePattern, web_src)
-        self.imagesName = origName[1:21]
-
-        # mate id and max count parse
-        pattern = re.compile(pllc.illustAWCntRegex(self.illustInputID), re.S)
-        dataCapture = re.findall(pattern, web_src)
-
-        # cut count from include parse
-        nbrPattern = re.compile(pllc.nbrRegex, re.S)
-        nbrMate = re.findall(nbrPattern, dataCapture[0])
-        maxCnt = string.atoi(nbrMate[1])                            # nbrMate[0] is input id, nbrMate[1] is max count
+        # mate max count
+        pattern = re.compile(pllc.illustAWCntRegex, re.S)
+        maxCntword = re.findall(pattern, web_src)[1][5:][:-2]
+        maxCnt = string.atoi(maxCntword)
 
         # input want image count
         capCnt = string.atoi(raw_input(pllc.SHELLHEAD
@@ -87,36 +78,36 @@ class IllustRepoAll:
         step1url = pllc.mainPage + self.illustInputID + pllc.mainPagemiddle
         if array == 1:
             urlTarget = step1url
-            referer = step1url
         elif array == 2:
             urlTarget = step1url + pllc.mainPagetail + str(array)
-            referer = step1url
         else:
             urlTarget = step1url + pllc.mainPagetail + str(array)
-            referer = step1url + pllc.mainPagetail + str(array - 1)
-        mainPageHeader = pllc.MainpageRequestHeaders(referer)
-        request = urllib2.Request(url=urlTarget,
+        response = pp.opener.open(fullurl=urlTarget,
                                   data=pllc.loginData[2],
-                                  headers=mainPageHeader)
-        # build and install opener
-        cookie = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
-        opener = urllib2.build_opener(cookie)
-        urllib2.install_opener(opener)
-
-        response = opener.open(request, timeout=300)
-        # response = urllib2.urlopen(request, timeout=300)
+                                  timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = "mainpage %d response successed" % array
         else:
             logContext = "mainpage %d response timeout, failed" % array
         pp.LogCrawlerWork(logPath, logContext)
-
         # each page cut thumbnail image url
         web_src = response.read().decode("UTF-8", "ignore")
-        pattern = re.compile(pllc.imgThumbnailRegex, re.S)
-        urlCapture = re.findall(pattern, web_src)[1:21]
 
-        return urlCapture
+        # mate artworks name
+        imageNamePattern = re.compile(pllc.imagesNameRegex, re.S)
+        imagesNameword = re.findall(imageNamePattern, web_src)
+        imagesName = []
+        for i in imagesNameword:
+            imagesName.append(i[10:-1])
+
+        # thumbnail image urls
+        pattern = re.compile(pllc.mainpageThumbnailRegex, re.S)
+        thumbnailImageurls = re.findall(pattern, web_src)
+
+        logContext = "mainpage %d data gather finished" % array
+        pp.LogCrawlerWork(logPath, logContext)
+
+        return thumbnailImageurls, imagesName
 
     @staticmethod
     def PackAllPageURL(self, nbr, logPath):
@@ -133,18 +124,21 @@ class IllustRepoAll:
         else:
             needPagecnt = (nbr / 20) + 1                            # calcus need request count
 
-        # request all url
-        allURLcollection = []
+        # gather all data(thumbnail images and names)
+        allThumbnailimage = []
+        allArtworkName = []
         for i in range(needPagecnt):
-            allURLcollection += self.CrawlAllTargetURL(self, i + 1, logPath)
+            dataCapture = self.CrawlAllTargetURL(self, i + 1, logPath)
+            allThumbnailimage += dataCapture[0]
+            allArtworkName += dataCapture[1]
 
         nbrPattern = re.compile(pllc.nbrRegex, re.S)                # cut artwork id list
 
         artworkIDs = []                                             # images id list
         imgOriginalhttps = []                                       # image original page url
         self.basePages = []                                         # image basic page
-        for i in allURLcollection[:nbr]:
-            vaildWord = i[-47:-18]                                  # cut vaild words
+        for i in allThumbnailimage[:nbr]:
+            vaildWord = i[50:][:-19]                                # cut vaild words
             # init to png, then will change jpg
             build_http = pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail
             # build basic page use to request image
@@ -157,7 +151,8 @@ class IllustRepoAll:
         # log images info
         logContext = 'illustrator: ' + self.illustName + ' id: ' + self.illustInputID + ' artworks info====>'
         pp.LogCrawlerWork(logPath, logContext)
-        for k, i in enumerate(self.imagesName[:nbr]):
+
+        for k, i in enumerate(allArtworkName[:nbr]):
             logContext = 'no.%d image: %s id: %s url: %s' % ((k + 1), i, artworkIDs[k], imgOriginalhttps[k])
             pp.LogCrawlerWork(logPath, logContext)
 
@@ -171,7 +166,7 @@ class IllustRepoAll:
         # make dir
         pp.MkDir(self.logpath, self.workdir)
         # log runtime
-        starttime = datetime.datetime.now()
+        starttime = time.time()
         # check website can response crawler
         pp.ProxyServerCrawl(self.logpath)
         pp.CamouflageLogin(self.logpath)
@@ -181,11 +176,11 @@ class IllustRepoAll:
         # save images
         pp.TargetImageDownload(urls, self.basePages, self.workdir, self.logpath)
         # stop log time
-        endtime = datetime.datetime.now()
-        logContext = "elapsed time: %ds" % (endtime - starttime).seconds
+        endtime = time.time()
+        logContext = "elapsed time: %ds" % (endtime - starttime)
         pp.LogCrawlerWork(self.logpath, logContext)
         # finish
-        pp.htmlBuilder(self, self.workdir, self.htmlpath, self.logpath)
+        pp.htmlBuilder(self.workdir, self.htmlpath, self.logpath)
         pp.WorkFinished(self.logpath)
 
 # =====================================================================

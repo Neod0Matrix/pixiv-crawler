@@ -26,6 +26,7 @@ class PrivateLib:
         #    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝    #
         #                                                                                                       #
         #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                       #
+        #    Version: 4.8.0                                                                                     #
         #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                           #
         #    MatPixivCrawler Help Page                                                                          #
         #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                      #
@@ -38,9 +39,6 @@ class PrivateLib:
             class init and create some self var
             here build a sample opener
         """
-        # login use url, post way data, headers
-        self.loginURL = pllc.originHost
-        self.loginHeaders = pllc.loginHeaders
         # from first login save cookie and create global opener
         ## self.cookie = cookielib.LWPCookieJar()                   # create a cookie words
         self.cookie = cookielib.CookieJar()                         # create a cookie words
@@ -111,51 +109,49 @@ class PrivateLib:
         for i in range(1, len(proxyRawwords)):
             ip_info = proxyRawwords[i]
             tds = ip_info.find_all(pllc.arrangeProxyServerRegex)
-            ip_list.append(tds[1].text + ':' + tds[2].text)
+            # build a format: ip:port
+            ip_list.append('http://' + tds[1].text + ':' + tds[2].text)
 
-        proxy_list = []
-        for ip in ip_list:
-            proxy_list.append('http://' + ip)
-        proxy_ip = random.choice(proxy_list)                        # random catch a proxy
+        proxy_ip = random.choice(ip_list)                           # random choose a proxy
         proxyServer = {'http': proxy_ip}                            # setting proxy server
         logContext = 'choose proxy server: ' + proxy_ip
         self.LogCrawlerWork(logPath, logContext)
 
         return proxyServer
 
-    @staticmethod
-    def postKeyGather():
+    def postKeyGather(self, logPath):
         """
             POST way login need post-key
             :return:    post way request data
         """
+        # request a post key
+        response = self.opener.open(pllc.postKeyGeturl, timeout=300)
+        if response.getcode() == pllc.reqSuccessCode:
+            logContext = 'post-key response successed'
+        else:
+            logContext = 'post-key response failed, return code: %d' % response.getcode()
+        self.LogCrawlerWork(logPath, logContext)
+        # cookie check
+        for item in self.cookie:
+            logContext = 'cookie: [name:' + item.name + '-value:' + item.value + ']'
+            self.LogCrawlerWork(logPath, logContext)
+        # mate post key
+        web_src = response.read().decode("UTF-8", "ignore")
+        postPattern = re.compile(pllc.postKeyRegex, re.S)
+        postKey = re.findall(postPattern, web_src)[0]
+        logContext = 'get post-key: ' + postKey
+        self.LogCrawlerWork(logPath, logContext)
+
         # build basic dict
         postTabledict = OrderedDict()                               # this post data must has a order
         postTabledict['pixiv_id'] = pllc.loginData[0]
         postTabledict['password'] = pllc.loginData[1]
         postTabledict['captcha'] = ""
         postTabledict['g_recaptcha_response'] = ""
-
-        # request a post key
-        request = urllib2.Request(pllc.postKeyGeturl)
-        response = urllib2.urlopen(request, timeout=300)
-        if response.getcode() == pllc.reqSuccessCode:
-            logContext = pllc.SHELLHEAD + 'post-key response successed'
-        else:
-            logContext = pllc.SHELLHEAD + 'post-key response failed, return code: %d' % response.getcode()
-        print logContext
-        # mate post key
-        web_src = response.read().decode("UTF-8", "ignore")
-        postPattern = re.compile(pllc.postKeyRegex, re.S)
-        postKey = re.findall(postPattern, web_src)[0]
-        print pllc.SHELLHEAD + 'get post-key: ' + postKey           # display key
-
-        # pack the dict with order
         postTabledict['post_key'] = postKey
         postTabledict['source'] = "pc"
         postTabledict['ref'] = pllc.login_ref
         postTabledict['return_to'] = pllc.hostWebURL
-
         # transfer to json data format
         post_data = urllib.urlencode(postTabledict).encode("UTF-8")
 
@@ -168,26 +164,14 @@ class PrivateLib:
             :return:        none
         """
         # login init need to commit post data to Pixiv
-        postData = self.postKeyGather()                             # get post-key and build post-data
-        request = urllib2.Request(url=self.loginURL,
-                                  data=postData,
-                                  headers=self.loginHeaders)
-        response = self.opener.open(request)                        # this opener include cookie container
+        postData = self.postKeyGather(logPath)                      # get post-key and build post-data
+        response = self.opener.open(fullurl=pllc.originHost, data=postData, timeout=300)
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'login response successed'
         else:
-            # response failed, you need to check network status
             logContext = 'login response fatal, return code %d' % response.getcode()
         self.LogCrawlerWork(logPath, logContext)
-
-        # print cookie
-        item = ''
-        for item in self.cookie:
-            logContext =  'cookie: [name:' + item.name + '-value:' + item.value + ']'
-            self.LogCrawlerWork(logPath, logContext)
-
-        return item
 
     def testSavehtml(self, workdir, content, logPath):
         htmlfile = open(workdir + '/test.html', "wb")
@@ -218,10 +202,10 @@ class PrivateLib:
         # pixiv website image format have jpg and png two format
         img_type_flag = 0                                           # replace png format, reset last
         img_id = img_url[57:][:-7]                                  # cut id from url
-        image_name = str(i + 1) + '-' + img_id                      # image name, pixiv image name img_id + '_p0'
+        ## image_name = str(i + 1) + '-' + img_id
+        image_name = img_id                                         # in order to better organize images, use image id name image
         try:
             img_response = urllib2.urlopen(img_request, timeout=300)
-            ## img_response = opener.open(img_url, timeout=300)
         # http error because only use png format to build url
         # after except error, url will be changed to jpg format
         except Exception, e:
@@ -293,18 +277,18 @@ class PrivateLib:
             PrivateLib().SaveOneImage(self.i, self.img_url, self.base_pages, self.imgPath, self.logPath)
             ## self.lock.release()
 
-    def TargetImageDownload(self, urls, basePages, workdir, logpath):
+    def TargetImageDownload(self, urls, basePages, workdir, logPath):
         """
             multi-process download all image
             test speed: daily-rank top 50 whole crawl elapsed time 1min
             :param urls:        all original images urls
             :param basePages:   all referer basic pages
             :param workdir:     work directory
-            :param logpath:     log save path
+            :param logPath:     log save path
             :return:            none
         """
         logContext = 'start to download target(s)======>'
-        self.LogCrawlerWork(logpath, logContext)
+        self.LogCrawlerWork(logPath, logContext)
 
         lock = threading.Lock()                                     # object lock
         for i, img_url in enumerate(urls):
@@ -312,7 +296,7 @@ class PrivateLib:
             ## self.SaveOneImage(i, img_url, basePages, workdir, logpath)
 
             # create overwrite threading.Thread object
-            subprocess = self.MultiThread(lock, i, img_url, basePages, workdir, logpath)
+            subprocess = self.MultiThread(lock, i, img_url, basePages, workdir, logPath)
             subprocess.setDaemon(False)                             # set every download sub-process is non-daemon process
             subprocess.start()                                      # start download
             ## subprocess.join()                                       # block sub-process, it may turn to easy process
@@ -323,12 +307,19 @@ class PrivateLib:
             aliveThreadCnt = threading.active_count()               # update count
             # display currently remaining process count
             logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, len(urls))
-            self.LogCrawlerWork(logpath, logContext)
+            self.LogCrawlerWork(logPath, logContext)
         logContext = 'all of threads reclaim, download finished=====>'
-        self.LogCrawlerWork(logpath, logContext)
+        self.LogCrawlerWork(logPath, logContext)
 
-    @staticmethod
-    def htmlBuilder(self, workdir, htmlpath, logpath):
+    def htmlBuilder(self, workdir, htmlpath, logPath):
+        """
+            build a html file to browse image
+            :param self:        class self
+            :param workdir:     work directory
+            :param htmlpath:    html file save path
+            :param logPath:     log save path
+            :return:            none
+        """
         htmlFile = open(htmlpath, "wb")                             # write html file
         # build html background page text
         htmlFile.writelines("<html>\r\n<head>\r\n<title>pixiv-crawler(MatPixivCrawler) ResultPage</title>\r\n</head>\r\n<body>\r\n")
@@ -349,7 +340,7 @@ class PrivateLib:
                     width, height = Image.open(workdir + '\\' + filename).size
                 except Exception, e:
                     logContext = str(e) + "read image file error, jump out"
-                    self.LogCrawlerWork(logpath, logContext)
+                    self.LogCrawlerWork(logPath, logContext)
                     time.sleep(5)                                   # wait download sub-process end
                     width, height = Image.open(workdir + '\\' + filename).size
                 filename = filename.replace("#", "%23")
@@ -362,6 +353,8 @@ class PrivateLib:
         # end of htmlfile
         htmlFile.writelines("</body>\r\n</html>")
         htmlFile.close()
+        logContext = 'image browse html product finished'
+        self.LogCrawlerWork(logPath, logContext)
 
     def WorkFinished(self, logPath):
         """
