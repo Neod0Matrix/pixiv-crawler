@@ -145,22 +145,19 @@ class DWMRankingTop(object):
             class main call process
             :return:    none
         """
-        # prepare works
         info = self.gather_essential_info(self.workdir, self.logpath)
-        # log runtime
+
         starttime = time.time()
-        # check website can response crawler
-        pvmx.getproxyserver(self.logpath)
-        pvmx.camouflage_login(self.logpath)
-        # get ids and urls
-        datas = self.gather_rankingdata(info[1], info[0])
-        # save images
+
+        pvmx.camouflage_login(self.logpath)                         # login website, key step
+        datas = self.gather_rankingdata(info[1], info[0])           # gather data
+        # download images
         pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)
-        # stop log time
+
         endtime = time.time()
         logContext = "elapsed time: %0.2fs" % (endtime - starttime)
         pvmx.logprowork(self.logpath, logContext)
-        # finish
+
         pvmx.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
         pvmx.work_finished(self.logpath)
 

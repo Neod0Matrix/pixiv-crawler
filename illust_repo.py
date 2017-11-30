@@ -164,23 +164,21 @@ class IllustratorRepos(object):
             include this class run logic
             :return:    none
         """
-        # make dir
         pvmx.mkworkdir(self.logpath, self.workdir)
-        # log runtime
+
         starttime = time.time()
-        # check website can response crawler
-        pvmx.getproxyserver(self.logpath)
-        pvmx.camouflage_login(self.logpath)
-        # get capture image count
+
+        pvmx.camouflage_login(self.logpath)                         # login website, key step
+        # gather info and data
         info = self.gather_preloadinfo(self.logpath)
         datas = self.crawl_allpage_target(info[0], info[1], self.logpath)
-        # save images
+        # download images
         pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)
-        # stop log time
+
         endtime = time.time()
         logContext = "elapsed time: %0.2fs" % (endtime - starttime)
         pvmx.logprowork(self.logpath, logContext)
-        # finish
+
         pvmx.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
         pvmx.work_finished(self.logpath)
 

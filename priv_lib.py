@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 import threading
 from PIL import Image
 from collections import OrderedDict
+from retrying import retry
 
 pllc.encode_resolve()
 
@@ -38,7 +39,7 @@ class Matrix:
         self.cookie = cookielib.LWPCookieJar()                      # create a cookie words
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie) # add http cookie words
         self.opener = urllib2.build_opener(self.cookieHandler)      # build the opener
-        urllib2.install_opener(self.opener)
+        urllib2.install_opener(self.opener)                         # install it
 
     @staticmethod
     def logprowork(logpath, savecontent):
@@ -79,8 +80,8 @@ class Matrix:
     def getproxyserver(self, logpath):
         """
             catch a proxy server when crwaler crawl many times website forbidden host ip
-        :param logpath: log save path
-        :return:        proxy server ip dict
+            :param logpath: log save path
+            :return:        proxy server, add to opener
         """
         req_ps_url = pllc.proxyServerRequestURL
         psHeaders = {}
@@ -90,7 +91,7 @@ class Matrix:
             psHeaders = {'User-Agent': pllc.userAgentWindows}
         request = urllib2.Request(url=req_ps_url,
                                   headers=psHeaders)
-        response = urllib2.urlopen(request, timeout=300)
+        response = urllib2.urlopen(request, timeout=40)
         proxyRawwords = []
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'crawl proxy successed'
@@ -120,7 +121,7 @@ class Matrix:
             :return:    post way request data
         """
         # request a post key
-        response = self.opener.open(pllc.postKeyGeturl, timeout=300)
+        response = self.opener.open(pllc.postKeyGeturl, timeout=40)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'post-key response successed'
         else:
@@ -162,7 +163,7 @@ class Matrix:
         postData = self.gatherpostkey(logpath)                      # get post-key and build post-data
         response = self.opener.open(fullurl=pllc.originHost,
                                     data=postData,
-                                    timeout=300)
+                                    timeout=40)
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'login response successed'
@@ -177,19 +178,24 @@ class Matrix:
         logContext = 'save request html page ok'
         self.logprowork(logpath, logContext)
 
-    def requestpack(self, mode, url, headers, timeout):
+    @retry
+    def requestpack(self, mode, url, headers, proxy, timeout):
         """
             package a request with two mode, use to test
             test result: mode 1 slower, mode 2 faster
             :param mode:        mode choose, 1 or 2
             :param url:         request url address
             :param headers:     add headers
+            :param proxy:      proxy handler
             :param timeout:     request timeout
             :return:            response frame
         """
         response = None
+        if proxy != 0:
+            proxy_handler = urllib2.ProxyHandler(proxy)                 # generate a proxy handler
+            self.opener = urllib2.build_opener(proxy_handler)           # add proxy handler
         if mode == 1:
-            list_headers = pllc.dict_transto_list(headers)               # change headers data type(opener use list, urlopen use dict)
+            list_headers = pllc.dict_transto_list(headers)              # change headers data type(opener use list, urlopen use dict)
             self.opener.addheaders = list_headers                       # add headers to opener
             urllib2.install_opener(self.opener)                         # must install new
             response = self.opener.open(fullurl=url, timeout=timeout)
@@ -219,26 +225,41 @@ class Matrix:
         ## image_name = str(i + 1) + '-' + img_id
         image_name = img_id
 
-        img_headers = pllc.build_original_headers(base_pages[i])           # setting headers
+        img_headers = pllc.build_original_headers(base_pages[i])    # setting headers
         try:
-            img_response = self.requestpack(request_mode, img_url, img_headers, 300)
+            img_response = self.requestpack(request_mode, img_url, img_headers, 0, 40)
         # http error because only use png format to build url
         # after except error, url will be changed to jpg format
-        except Exception, e:
+        except urllib2.HTTPError, e:
             # this error display can release
-            logContext = str(e)
+            logContext = str(e.code)
             self.logprowork(logpath, logContext)
+            # http error 404, change image type
+            if e.code == pllc.reqNotFound:
+                img_type_flag += 1
+                changeToJPGurl = img_url[0:-3] + 'jpg'              # replace to jpg format
+                try:
+                    img_response = self.requestpack(request_mode, changeToJPGurl, img_headers, 0, 40)
+                except urllib2.HTTPError, e:
+                    # this error display can release
+                    logContext = str(e.code)
+                    self.logprowork(logpath, logContext)
+                    # if timeout, use proxy reset request
+                    proxy = self.getproxyserver(logpath)
+                    img_response = self.requestpack(request_mode, changeToJPGurl, img_headers, proxy, 40)
 
-            img_type_flag += 1
-            changeToJPGurl = img_url[0:-3] + 'jpg'                  # replace to jpg format
-            img_response = self.requestpack(request_mode, changeToJPGurl, img_headers, 300)
-            if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
-                logContext = 'capture target no.%d jpg image ok' % (i + 1)
-                self.logprowork(logpath, logContext)
-                with open(img_path + '/' + image_name + '.jpg', 'wb') as jpg:
-                    jpg.write(img_response.read())
-                logContext = 'download no.%d image finished' % (i + 1)
-                self.logprowork(logpath, logContext)
+                if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
+                    logContext = 'capture target no.%d jpg image ok' % (i + 1)
+                    self.logprowork(logpath, logContext)
+                    with open(img_path + '/' + image_name + '.jpg', 'wb') as jpg:
+                        jpg.write(img_response.read())
+                    logContext = 'download no.%d image finished' % (i + 1)
+                    self.logprowork(logpath, logContext)
+
+            # if timeout, use proxy reset request
+            else:
+                proxy = self.getproxyserver(logpath)
+                img_response = self.requestpack(request_mode, img_url, img_headers, proxy, 40)
 
         # no http error, image is png format, continue request
         if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
@@ -304,10 +325,10 @@ class Matrix:
             ## self.save_oneimage(i, img_url, basePages, workdir, logpath)
 
             # create overwrite threading.Thread object
-            subprocess = self.MultiThread(lock, i, img_url, base_pages, workdir, logpath)
-            subprocess.setDaemon(False)                             # set every download sub-process is non-daemon process
-            subprocess.start()                                      # start download
-            ## subprocess.join()                                       # block sub-process, it may turn to easy process
+            sub_thread = self.MultiThread(lock, i, img_url, base_pages, workdir, logpath)
+            sub_thread.setDaemon(False)                             # set every download sub-process is non-daemon process
+            sub_thread.start()                                      # start download
+            ## sub_thread.join()                                       # block sub-process, it may turn to easy process
         # parent process wait all sub-process end
         aliveThreadCnt = threading.active_count()
         while aliveThreadCnt != 1:                                  # finally only parent process
@@ -316,6 +337,7 @@ class Matrix:
             # display currently remaining process count
             logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, len(urls))
             self.logprowork(logpath, logContext)
+
         logContext = 'all of threads reclaim, download finished=====>'
         self.logprowork(logpath, logContext)
 
