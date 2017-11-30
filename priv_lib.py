@@ -14,6 +14,7 @@ from collections import OrderedDict
 from retrying import retry
 
 pllc.encode_resolve()
+proxyHascreated = False                                             # global var init value
 
 class Matrix:
     """
@@ -195,9 +196,13 @@ class Matrix:
         imgDatatype = 'png'                                         # default png format
         image_name = url[57:-7]                                     # cut id from url to build image name
 
-        # preload proxy
-        proxy = self.getproxyserver(logpath)
-        proxy_handler = urllib2.ProxyHandler(proxy)
+        # preload proxy, just once
+        proxy_handler = None
+        global proxyHascreated
+        if proxyHascreated is False:
+            proxyHascreated = True
+            proxy = self.getproxyserver(logpath)
+            proxy_handler = urllib2.ProxyHandler(proxy)
 
         # setting headers
         headers = pllc.build_original_headers(basepages[index])
@@ -205,6 +210,7 @@ class Matrix:
         self.opener.addheaders = list_headers
         urllib2.install_opener(self.opener)                         # must install new
         response = None
+
         try:
             response = self.opener.open(fullurl=url,
                                         timeout=timeout)
@@ -229,6 +235,8 @@ class Matrix:
                     # not 404 change proxy
                     if e.code != pllc.reqNotFound:
                         # if timeout, use proxy reset request
+                        logContext = "change proxy server"
+                        self.logprowork(logpath, logContext)
                         self.opener = urllib2.build_opener(proxy_handler) # add proxy handler
                         response = self.opener.open(fullurl=changeToJPGurl,
                                                     timeout=timeout)
@@ -236,6 +244,8 @@ class Matrix:
                         pass
             # if timeout, use proxy reset request
             else:
+                logContext = "change proxy server"
+                self.logprowork(logpath, logContext)
                 self.opener = urllib2.build_opener(proxy_handler)   # add proxy handler
                 response = self.opener.open(fullurl=url,
                                             timeout=timeout)
@@ -251,7 +261,7 @@ class Matrix:
             logContext = 'download no.%d image finished' % (index + 1)
             self.logprowork(logpath, logContext)
 
-    class MultiThread(threading.Thread):
+    class MultiThreading(threading.Thread):
         """
             overrides its run method by inheriting the Thread class
             this class can be placed outside the main class, you can also put inside
@@ -300,17 +310,15 @@ class Matrix:
         logContext = 'start to download target(s)======>'
         self.logprowork(logpath, logContext)
 
+        sub_thread = None
         lock = threading.Lock()                                     # object lock
         for i, img_url in enumerate(urls):
-            # easy process run
-            ## self.save_oneimage(i, img_url, basePages, workdir, logpath)
-
             # create overwrite threading.Thread object
-            sub_thread = self.MultiThread(lock, i, img_url, base_pages, workdir, logpath)
+            sub_thread = self.MultiThreading(lock, i, img_url, base_pages, workdir, logpath)
             sub_thread.setDaemon(False)                             # set every download sub-process is non-daemon process
             sub_thread.start()                                      # start download
-            ## sub_thread.join()                                       # block sub-process, it may turn to easy process
-        # parent process wait all sub-process end
+            time.sleep(0.5)                                         # confirm thread has been created
+        # parent thread wait all sub-thread end
         aliveThreadCnt = threading.active_count()
         while aliveThreadCnt != 1:                                  # finally only parent process
             time.sleep(3)
@@ -318,6 +326,7 @@ class Matrix:
             # display currently remaining process count
             logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, len(urls))
             self.logprowork(logpath, logContext)
+            sub_thread.join()                                       # block parent-thread
 
         logContext = 'all of threads reclaim, download finished=====>'
         self.logprowork(logpath, logContext)
