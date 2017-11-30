@@ -8,11 +8,11 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v5p1_LTE'
+__version__         = 'v5p2_LTE'
 
-import urllib, json                                                 # post data build
-import time, os, linecache, sys                                     # name folder and files
-import getpass                                                      # user and passwd input
+import urllib, json
+import time, os, linecache, sys
+import getpass
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
@@ -259,7 +259,7 @@ ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
 # universal path
 logfile_name = '/CrawlerWork[%s].log' % ymd
 htmlfile_name = '/CrawlerWork[%s].html' % ymd
-ranking_folder = work_dir + 'RankTop_%s' % ymd
+ranking_folder = work_dir + 'RankTop_%s' % ymd                      # two layer folder
 # daily-rank path
 logfile_path = ranking_folder + logfile_name
 htmlfile_path = ranking_folder + htmlfile_name

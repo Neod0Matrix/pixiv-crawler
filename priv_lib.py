@@ -4,18 +4,17 @@
 # =====================================================================
 # this python script is built to create a private library use in this crawler
 
-import urllib, urllib2, cookielib, os                               # crawler depends
+import urllib, urllib2, cookielib, os
 import time, random, re
-import pllc                                                         # messages
+import pllc
 from bs4 import BeautifulSoup
-import threading                                                    # multi-threads
-from PIL import Image                                               # pillow image handle
+import threading
+from PIL import Image
 from collections import OrderedDict
 
 pllc.encode_resolve()
 
-class PrivateLib:
-    # help page
+class Matrix:
     """
         #########################################################################################################
         #    ██████╗ ██╗██╗  ██╗██╗██╗   ██╗       ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗     #
@@ -26,7 +25,7 @@ class PrivateLib:
         #    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝    #
         #                                                                                                       #
         #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                       #
-        #    Version: 5.1.0 LTE                                                                                 #
+        #    Version: 5.2.0 LTE                                                                                 #
         #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                           #
         #    MatPixivCrawler Help Page                                                                          #
         #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                      #
@@ -35,10 +34,6 @@ class PrivateLib:
         #########################################################################################################
     """
     def __init__(self):
-        """
-            class init and create some self var
-            here build a sample opener
-        """
         # from first login save cookie and create global opener
         self.cookie = cookielib.LWPCookieJar()                      # create a cookie words
         self.cookieHandler = urllib2.HTTPCookieProcessor(self.cookie) # add http cookie words
@@ -61,6 +56,7 @@ class PrivateLib:
     def mkworkdir(self, logpath, folder):
         """
             create a crawler work directory
+            :param self:    self class
             :param logpath: log save path
             :param folder:  folder create path
             :return:        folder create path
@@ -164,7 +160,9 @@ class PrivateLib:
         """
         # login init need to commit post data to Pixiv
         postData = self.gatherpostkey(logpath)                      # get post-key and build post-data
-        response = self.opener.open(fullurl=pllc.originHost, data=postData, timeout=300)
+        response = self.opener.open(fullurl=pllc.originHost,
+                                    data=postData,
+                                    timeout=300)
         # try to test website response
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'login response successed'
@@ -284,7 +282,7 @@ class PrivateLib:
             """
             # cancel lock release will let multi-process change to easy process
             ## self.lock.acquire()
-            PrivateLib().save_oneimage(self.i, self.img_url, self.base_pages, self.imgPath, self.logPath)
+            Matrix().save_oneimage(self.i, self.img_url, self.base_pages, self.imgPath, self.logPath)
             ## self.lock.release()
 
     def download_alltarget(self, urls, base_pages, workdir, logpath):

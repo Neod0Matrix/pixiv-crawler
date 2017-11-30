@@ -4,36 +4,39 @@
 # =====================================================================
 # this python script is built to get pixiv rank top images
 
-import re                                                           # crawler depends
+import re
 import time, string
-import pllc, priv_lib                                               # local lib
+import pllc
+import priv_lib
 
-pp = priv_lib.PrivateLib()
+pvmx = priv_lib.Matrix()
 pllc.encode_resolve()
 
-class DWMRankingTop:
+class DWMRankingTop(object):
     """
         Pixiv website has a rank top, ordinary and R18, daily, weekly, monthly
         this class include fuction will gather all of those rank
     """
-    def __init__(self):
-        """class include init process"""
-        # class inner global var
-        self.workdir = pllc.ranking_folder                           # setting global work directory
-        self.logpath = pllc.logfile_path                             # setting global log path
-        self.htmlpath = pllc.htmlfile_path                           # setting global html path
+    def __init__(self, workdir, logpath, htmlpath):
+        """
+            :param workdir:     work directory
+            :param logpath:     log save path
+            :param htmlpath:    html save path
+        """
+        self.workdir = workdir
+        self.logpath = logpath
+        self.htmlpath = htmlpath
 
     @staticmethod
-    def gather_essential_info(self, work_dir, logpath):
+    def gather_essential_info(work_dir, logpath):
         """
             get input image count
-            :param self:    self class
-            :param work_dir:      work directory
-            :param logpath:      log save path
-            :return:        crawl images count
+            :param work_dir:    work directory
+            :param logpath:     log save path
+            :return:            crawl images count
         """
         # first create folder
-        pp.mkworkdir(logpath, work_dir)
+        pvmx.mkworkdir(logpath, work_dir)
         # select ordinary top or r18 top
         # transfer ascii string to number
         ormode = raw_input(pllc.SHELLHEAD + 'select ordinary top or r18 top(tap "o"&"1" or "r"&"2"): ')
@@ -56,13 +59,9 @@ class DWMRankingTop:
         else:
             print pllc.SHELLHEAD + "argv(s) error\n"
             ormode = None
-        # set to global var
-        self.reqImageCnt = imgCnt
-        self.rtn_mode = ormode
 
-        return imgCnt
+        return imgCnt, ormode
 
-    @staticmethod
     def gather_rankingdata(self, ormode, img_nbr):
         """
             crawl dailyRank list
@@ -72,7 +71,8 @@ class DWMRankingTop:
             :return:        original images urls list
         """
         logContext = 'gather rank list======>'
-        pp.logprowork(self.logpath, logContext)
+        pvmx.logprowork(self.logpath, logContext)
+
         rankWord = ''
         page_url = ''
         if ormode == 'o' or ormode == '1':
@@ -102,16 +102,16 @@ class DWMRankingTop:
             logContext = 'crawler set target to %s r18 rank top %d image(s)' % (rankWord, img_nbr)
         else:
             print pllc.SHELLHEAD + "argv(s) error\n"
-        pp.logprowork(self.logpath, logContext)
-        response = pp.opener.open(fullurl=page_url,
-                                  data=pllc.login_data[2],
-                                  timeout=300)
+        pvmx.logprowork(self.logpath, logContext)
+        response = pvmx.opener.open(fullurl=page_url,
+                                    data=pllc.login_data[2],
+                                    timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = 'website response successed'
         else:
             # response failed, you need to check network status
             logContext = 'website response fatal, return code %d' % response.getcode()
-        pp.logprowork(self.logpath, logContext)
+        pvmx.logprowork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
 
         # build original image url
@@ -119,7 +119,7 @@ class DWMRankingTop:
         vwCapture = re.findall(vwPattern, web_src)
         targetURL = []
         for i in vwCapture[:img_nbr]:
-            vaildWord = i[5:][:-1]  # pixiv may change its position sometimes
+            vaildWord = i[5:-1]                                     # pixiv may change its position sometimes
             targetURL.append(pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail)
 
         # gather info of artworks
@@ -127,42 +127,42 @@ class DWMRankingTop:
         dataCapture = re.findall(infoPattern, web_src)
 
         logContext = 'top ' + str(img_nbr) + ' info======>'
-        pp.logprowork(self.logpath, logContext)
+        pvmx.logprowork(self.logpath, logContext)
         aw_ids = []                                                 # artwork id
-        self.basePages = []                                         # request original image need referer
+        basePages = []                                              # request original image need referer
         for k, i in enumerate(dataCapture[:img_nbr]):
             logContext = '------------no.%s-----------' % i[0]      # artwork array
-            pp.logprowork(self.logpath, logContext)
+            pvmx.logprowork(self.logpath, logContext)
             logContext = 'name: %s illustrator: %s id: %s url: %s' % (i[1], i[2], i[4], targetURL[k])
-            pp.logprowork(self.logpath, logContext)
+            pvmx.logprowork(self.logpath, logContext)
             aw_ids.append(i[4])
-            self.basePages.append(pllc.baseWebURL + i[4])           # every picture url address: base_url address + picture_id
+            basePages.append(pllc.baseWebURL + i[4])                # every picture url address: base_url address + picture_id
 
-        return targetURL
+        return targetURL, basePages
 
-    def start_rtn(self):
+    def start(self):
         """
             class main call process
             :return:    none
         """
         # prepare works
-        nbr = self.gather_essential_info(self, self.workdir, self.logpath)
+        info = self.gather_essential_info(self.workdir, self.logpath)
         # log runtime
         starttime = time.time()
         # check website can response crawler
-        pp.getproxyserver(self.logpath)
-        pp.camouflage_login(self.logpath)
+        pvmx.getproxyserver(self.logpath)
+        pvmx.camouflage_login(self.logpath)
         # get ids and urls
-        urls = self.gather_rankingdata(self, self.rtn_mode, nbr)
+        datas = self.gather_rankingdata(info[1], info[0])
         # save images
-        pp.download_alltarget(urls, self.basePages, self.workdir, self.logpath)
+        pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)
         # stop log time
         endtime = time.time()
         logContext = "elapsed time: %0.2fs" % (endtime - starttime)
-        pp.logprowork(self.logpath, logContext)
+        pvmx.logprowork(self.logpath, logContext)
         # finish
-        pp.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
-        pp.work_finished(self.logpath)
+        pvmx.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
+        pvmx.work_finished(self.logpath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

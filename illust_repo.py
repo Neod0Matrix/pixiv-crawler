@@ -4,29 +4,31 @@
 # =====================================================================
 # this python script is built to get a illust all repo images
 
-import re                                                           # crawler depends
+import re
 import time, string
-import pllc, priv_lib                                               # local lib
+import pllc
+import priv_lib
 
-pp = priv_lib.PrivateLib()
+pvmx = priv_lib.Matrix()
 pllc.encode_resolve()
 
-class IllustratorRepos:
+class IllustratorRepos(object):
     """
         every illustrator in Pixiv has own mainpage
         this class include fuction will crawl all of those page all images
     """
-    def __init__(self):
-        """class include init process"""
-        # global illust id
-        self.illustInputID = raw_input(pllc.SHELLHEAD
-                + 'enter you want to crawl illuster id: ')
-        # work directory create
-        self.workdir = pllc.setting_platform_workdir() + self.illustInputID
-        self.logpath = self.workdir + pllc.logfile_name
-        self.htmlpath = self.workdir + pllc.htmlfile_name
+    def __init__(self, iid, workdir, logname, htmlname):
+        """
+            :param iid:         illustrator id
+            :param workdir:     work directory
+            :param logname:     log name
+            :param htmlname:    html name
+        """
+        self.illustInputID = iid
+        self.workdir = workdir + self.illustInputID
+        self.logpath = self.workdir + logname
+        self.htmlpath = self.workdir + htmlname
 
-    @staticmethod
     def gather_preloadinfo(self, logpath):
         """
             crawler need to know how many images do you want
@@ -36,18 +38,18 @@ class IllustratorRepos:
         """
         # get illust artwork count mainpage url
         cnt_url = pllc.mainPage + self.illustInputID
-        response = pp.opener.open(fullurl=cnt_url,
-                                  data=pllc.login_data[2],
-                                  timeout=300)
+        response = pvmx.opener.open(fullurl=cnt_url,
+                                    data=pllc.login_data[2],
+                                    timeout=300)
         web_src = response.read().decode("UTF-8", "ignore")
 
         # mate illustrator name
         illustNamePattern = re.compile(pllc.illustNameRegex, re.S)
-        self.illustName = re.findall(illustNamePattern, web_src)[0][10:][:-1]
+        arthor_name = re.findall(illustNamePattern, web_src)[0][10:-1]
 
         # mate max count
         pattern = re.compile(pllc.illustAWCntRegex, re.S)
-        maxCntword = re.findall(pattern, web_src)[1][5:][:-2]
+        maxCntword = re.findall(pattern, web_src)[1][5:-2]
         maxCnt = string.atoi(maxCntword)
 
         # input want image count
@@ -58,11 +60,10 @@ class IllustratorRepos:
             capCnt = string.atoi(raw_input(pllc.SHELLHEAD
                 + 'error, input count must <= %d and not 0: ' % maxCnt))
         logContext = "check gather illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
-        pp.logprowork(logpath, logContext)
+        pvmx.logprowork(logpath, logContext)
 
-        return capCnt
+        return capCnt, arthor_name
 
-    @staticmethod
     def crawl_onepage_data(self, array, logpath):
         """
             crawl all target url about images
@@ -82,14 +83,14 @@ class IllustratorRepos:
             urlTarget = step1url + pllc.mainPagetail + str(array)
         else:
             urlTarget = step1url + pllc.mainPagetail + str(array)
-        response = pp.opener.open(fullurl=urlTarget,
-                                  data=pllc.login_data[2],
-                                  timeout=300)
+        response = pvmx.opener.open(fullurl=urlTarget,
+                                    data=pllc.login_data[2],
+                                    timeout=300)
         if response.getcode() == pllc.reqSuccessCode:
             logContext = "mainpage %d response successed" % array
         else:
             logContext = "mainpage %d response timeout, failed" % array
-        pp.logprowork(logpath, logContext)
+        pvmx.logprowork(logpath, logContext)
         # each page cut thumbnail image url
         web_src = response.read().decode("UTF-8", "ignore")
 
@@ -105,18 +106,18 @@ class IllustratorRepos:
         thumbnailImageurls = re.findall(pattern, web_src)
 
         logContext = "mainpage %d data gather finished" % array
-        pp.logprowork(logpath, logContext)
+        pvmx.logprowork(logpath, logContext)
 
         return thumbnailImageurls, imagesName
 
-    @staticmethod
-    def crawl_allpage_target(self, nbr, logpath):
+    def crawl_allpage_target(self, nbr, arthor_name, logpath):
         """
             package all gather url
-            :param self:    self class
-            :param nbr:     package images count
-            :param logpath: log save path
-            :return:        build original images urls list
+            :param self:        self class
+            :param nbr:         package images count
+            :param arthor_name: arthor name
+            :param logpath:     log save path
+            :return:            build original images urls list
         """
         # calcus nbr need request count
         if nbr <= 20:
@@ -128,60 +129,60 @@ class IllustratorRepos:
         allThumbnailimage = []
         allArtworkName = []
         for i in range(needPagecnt):
-            dataCapture = self.crawl_onepage_data(self, i + 1, logpath)
+            dataCapture = self.crawl_onepage_data(i + 1, logpath)
             allThumbnailimage += dataCapture[0]
             allArtworkName += dataCapture[1]
 
         nbrPattern = re.compile(pllc.nbrRegex, re.S)                # cut artwork id list
 
         artworkIDs = []                                             # images id list
-        imgOriginalhttps = []                                       # image original page url
-        self.basePages = []                                         # image basic page
+        targetURL = []                                              # image original page url
+        basePages = []                                              # image basic page
         for i in allThumbnailimage[:nbr]:
-            vaildWord = i[50:][:-19]                                # cut vaild words
+            vaildWord = i[50:-19]                                   # cut vaild words
             # init to png, then will change jpg
             build_http = pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail
             # build basic page use to request image
             img_id = re.findall(nbrPattern, vaildWord)[6]           # no.6 member is id
             basePage = pllc.baseWebURL + img_id
             artworkIDs.append(img_id)                               # image id list
-            imgOriginalhttps.append(build_http)                     # image url list
-            self.basePages.append(basePage)                         # basic page list
+            targetURL.append(build_http)                            # image url list
+            basePages.append(basePage)                              # basic page list
 
         # log images info
-        logContext = 'illustrator: ' + self.illustName + ' id: ' + self.illustInputID + ' artworks info====>'
-        pp.logprowork(logpath, logContext)
+        logContext = 'illustrator: ' + arthor_name + ' id: ' + self.illustInputID + ' artworks info====>'
+        pvmx.logprowork(logpath, logContext)
 
         for k, i in enumerate(allArtworkName[:nbr]):
-            logContext = 'no.%d image: %s id: %s url: %s' % ((k + 1), i, artworkIDs[k], imgOriginalhttps[k])
-            pp.logprowork(logpath, logContext)
+            logContext = 'no.%d image: %s id: %s url: %s' % ((k + 1), i, artworkIDs[k], targetURL[k])
+            pvmx.logprowork(logpath, logContext)
 
-        return imgOriginalhttps
+        return targetURL, basePages
 
-    def start_ira(self):
+    def start(self):
         """
             include this class run logic
             :return:    none
         """
         # make dir
-        pp.mkworkdir(self.logpath, self.workdir)
+        pvmx.mkworkdir(self.logpath, self.workdir)
         # log runtime
         starttime = time.time()
         # check website can response crawler
-        pp.getproxyserver(self.logpath)
-        pp.camouflage_login(self.logpath)
+        pvmx.getproxyserver(self.logpath)
+        pvmx.camouflage_login(self.logpath)
         # get capture image count
-        target_cnt = self.gather_preloadinfo(self, self.logpath)
-        urls = self.crawl_allpage_target(self, target_cnt, self.logpath)
+        info = self.gather_preloadinfo(self.logpath)
+        datas = self.crawl_allpage_target(info[0], info[1], self.logpath)
         # save images
-        pp.download_alltarget(urls, self.basePages, self.workdir, self.logpath)
+        pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)
         # stop log time
         endtime = time.time()
         logContext = "elapsed time: %0.2fs" % (endtime - starttime)
-        pp.logprowork(self.logpath, logContext)
+        pvmx.logprowork(self.logpath, logContext)
         # finish
-        pp.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
-        pp.work_finished(self.logpath)
+        pvmx.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
+        pvmx.work_finished(self.logpath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
