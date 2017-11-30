@@ -26,7 +26,7 @@ class Matrix:
         #    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝    #
         #                                                                                                       #
         #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                       #
-        #    Version: 5.2.0 LTE                                                                                 #
+        #    Version: 5.3.0 LTE                                                                                 #
         #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                           #
         #    MatPixivCrawler Help Page                                                                          #
         #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                      #
@@ -179,95 +179,76 @@ class Matrix:
         self.logprowork(logpath, logContext)
 
     @retry
-    def requestpack(self, mode, url, headers, proxy, timeout):
-        """
-            package a request with two mode, use to test
-            test result: mode 1 slower, mode 2 faster
-            :param mode:        mode choose, 1 or 2
-            :param url:         request url address
-            :param headers:     add headers
-            :param proxy:      proxy handler
-            :param timeout:     request timeout
-            :return:            response frame
-        """
-        response = None
-        if proxy != 0:
-            proxy_handler = urllib2.ProxyHandler(proxy)                 # generate a proxy handler
-            self.opener = urllib2.build_opener(proxy_handler)           # add proxy handler
-        if mode == 1:
-            list_headers = pllc.dict_transto_list(headers)              # change headers data type(opener use list, urlopen use dict)
-            self.opener.addheaders = list_headers                       # add headers to opener
-            urllib2.install_opener(self.opener)                         # must install new
-            response = self.opener.open(fullurl=url, timeout=timeout)
-        elif mode == 2:
-            request = urllib2.Request(url=url, headers=headers)
-            response = urllib2.urlopen(request, timeout=timeout)
-        else:
-            pass
-
-        return response                                                 # call it
-
-    def save_oneimage(self, i, img_url, base_pages, img_path, logpath):
+    def save_oneimage(self, index, url, basepages, savepath, logpath):
         """
             download one target image, then multi-process will call here
-            :param i:           image index
-            :param img_url:     image urls list
-            :param base_pages:  referer basic pages list
-            :param img_path:     image save path
+            add retry decorator, if first try failed, it will auto-retry
+            :param index:       image index
+            :param url:         image urls list
+            :param basepages:   referer basic pages list
+            :param savepath:    image save path
             :param logpath:     log save path
             :return:            none
         """
-        request_mode = 2                                            # set request images mode
-
         # set images download arguments
-        img_type_flag = 0                                           # replace png format, reset last
-        img_id = img_url[57:][:-7]                                  # cut id from url
-        ## image_name = str(i + 1) + '-' + img_id
-        image_name = img_id
+        timeout = 30                                                # default set to 30s
+        imgDatatype = 'png'                                         # default png format
+        image_name = url[57:-7]                                     # cut id from url to build image name
 
-        img_headers = pllc.build_original_headers(base_pages[i])    # setting headers
+        # preload proxy
+        proxy = self.getproxyserver(logpath)
+        proxy_handler = urllib2.ProxyHandler(proxy)
+
+        # setting headers
+        headers = pllc.build_original_headers(basepages[index])
+        list_headers = pllc.dict_transto_list(headers)
+        self.opener.addheaders = list_headers
+        urllib2.install_opener(self.opener)                         # must install new
+        response = None
         try:
-            img_response = self.requestpack(request_mode, img_url, img_headers, 0, 40)
-        # http error because only use png format to build url
-        # after except error, url will be changed to jpg format
+            response = self.opener.open(fullurl=url,
+                                        timeout=timeout)
+        # timeout or image data type error
         except urllib2.HTTPError, e:
             # this error display can release
-            logContext = str(e.code)
-            self.logprowork(logpath, logContext)
+            ## logContext = str(e.code)
+            ## self.logprowork(logpath, logContext)
+
             # http error 404, change image type
             if e.code == pllc.reqNotFound:
-                img_type_flag += 1
-                changeToJPGurl = img_url[0:-3] + 'jpg'              # replace to jpg format
+                imgDatatype = 'jpg'                                 # change data type
+                changeToJPGurl = url[0:-3] + imgDatatype
                 try:
-                    img_response = self.requestpack(request_mode, changeToJPGurl, img_headers, 0, 40)
+                    response = self.opener.open(fullurl=changeToJPGurl,
+                                                timeout=timeout)
                 except urllib2.HTTPError, e:
                     # this error display can release
-                    logContext = str(e.code)
-                    self.logprowork(logpath, logContext)
-                    # if timeout, use proxy reset request
-                    proxy = self.getproxyserver(logpath)
-                    img_response = self.requestpack(request_mode, changeToJPGurl, img_headers, proxy, 40)
+                    ## logContext = str(e.code)
+                    ## self.logprowork(logpath, logContext)
 
-                if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 1:
-                    logContext = 'capture target no.%d jpg image ok' % (i + 1)
-                    self.logprowork(logpath, logContext)
-                    with open(img_path + '/' + image_name + '.jpg', 'wb') as jpg:
-                        jpg.write(img_response.read())
-                    logContext = 'download no.%d image finished' % (i + 1)
-                    self.logprowork(logpath, logContext)
-
+                    # not 404 change proxy
+                    if e.code != pllc.reqNotFound:
+                        # if timeout, use proxy reset request
+                        self.opener = urllib2.build_opener(proxy_handler) # add proxy handler
+                        response = self.opener.open(fullurl=changeToJPGurl,
+                                                    timeout=timeout)
+                    else:
+                        pass
             # if timeout, use proxy reset request
             else:
-                proxy = self.getproxyserver(logpath)
-                img_response = self.requestpack(request_mode, img_url, img_headers, proxy, 40)
+                self.opener = urllib2.build_opener(proxy_handler)   # add proxy handler
+                response = self.opener.open(fullurl=url,
+                                            timeout=timeout)
 
-        # no http error, image is png format, continue request
-        if img_response.getcode() == pllc.reqSuccessCode and img_type_flag == 0:
-            logContext = 'capture target no.%d png image ok' % (i + 1)
+        if response.getcode() == pllc.reqSuccessCode:
+            # save response data to image format
+            imgBindata = response.read()
+            logContext = 'capture target no.%d image ok' % (index + 1)
             self.logprowork(logpath, logContext)
-            with open(img_path + '/' + image_name + '.png', 'wb') as png:
-                png.write(img_response.read())
-            logContext = 'download no.%d image finished' % (i + 1)
+            # this step will delay much time
+            with open(savepath + '/' + image_name + '.' + imgDatatype, 'wb') as jpg:
+                jpg.write(imgBindata)
+            logContext = 'download no.%d image finished' % (index + 1)
             self.logprowork(logpath, logContext)
 
     class MultiThread(threading.Thread):

@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v5p2_LTE'
+__version__         = 'v5p3_LTE'
 
 import urllib, json
 import time, os, linecache, sys
