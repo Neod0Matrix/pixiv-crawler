@@ -256,7 +256,7 @@ class Matrix:
             logContext = 'capture target no.%d image ok' % (index + 1)
             self.logprowork(logpath, logContext)
             # this step will delay much time
-            with open(savepath + image_name + '.' + imgDatatype, 'wb') as jpg:
+            with open(savepath + pllc.symbol + image_name + '.' + imgDatatype, 'wb') as jpg:
                 jpg.write(imgBindata)
             logContext = 'download no.%d image finished' % (index + 1)
             self.logprowork(logpath, logContext)
@@ -354,21 +354,13 @@ class Matrix:
                             "this.height = this.attributes['oriHeight'].value;}}}};</script>")
         for i in os.listdir(workdir):
             if i[-4:len(i)] in [".png", ".jpg", ".bmp"]:            # support image format
-                filename = i
-                # this step must protect image download end, or will get a IOError
-                try:
-                    width, height = Image.open(workdir + filename).size
-                except Exception, e:
-                    logContext = str(e) + "read image file error, jump out"
-                    self.logprowork(logpath, logContext)
-                    time.sleep(5)                                   # wait download sub-process end
-                    width, height = Image.open(workdir + filename).size
-                filename = filename.replace("#", "%23")
+                width, height = Image.open(workdir + pllc.symbol + i).size
+                i = i.replace("#", "%23")
                 ## htmlFile.writelines("<a href = \"%s\">"%("./" + filename))
                 # set image source line
                 htmlFile.writelines(
                     "<img src = \"%s\" width = \"%dpx\" height = \"%dpx\" oriWidth = %d oriHeight = %d />\r\n"
-                    % ("./" + filename, width * 1.0 / height * 200, 200, width, height)) # limit display images size
+                    % ("./" + i, width * 1.0 / height * 200, 200, width, height)) # limit display images size
                 ## htmlFile.writelines("</a>\r\n")
         # end of htmlfile
         htmlFile.writelines("</body>\r\n</html>")
