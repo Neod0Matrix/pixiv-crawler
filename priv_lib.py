@@ -27,7 +27,7 @@ class Matrix:
         #    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝    #
         #                                                                                                       #
         #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                       #
-        #    Version: 5.3.0 LTE                                                                                 #
+        #    Version: 5.4.0 LTE                                                                                 #
         #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                           #
         #    MatPixivCrawler Help Page                                                                          #
         #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                      #
@@ -173,7 +173,7 @@ class Matrix:
         self.logprowork(logpath, logContext)
 
     def save_test_html(self, workdir, content, logpath):
-        htmlfile = open(workdir + '/test.html', "wb")
+        htmlfile = open(workdir + pllc.symbol + 'test.html', "wb")
         htmlfile.write(content)
         htmlfile.close()
         logContext = 'save request html page ok'
@@ -256,7 +256,7 @@ class Matrix:
             logContext = 'capture target no.%d image ok' % (index + 1)
             self.logprowork(logpath, logContext)
             # this step will delay much time
-            with open(savepath + '/' + image_name + '.' + imgDatatype, 'wb') as jpg:
+            with open(savepath + image_name + '.' + imgDatatype, 'wb') as jpg:
                 jpg.write(imgBindata)
             logContext = 'download no.%d image finished' % (index + 1)
             self.logprowork(logpath, logContext)
@@ -357,12 +357,12 @@ class Matrix:
                 filename = i
                 # this step must protect image download end, or will get a IOError
                 try:
-                    width, height = Image.open(workdir + '\\' + filename).size
+                    width, height = Image.open(workdir + filename).size
                 except Exception, e:
                     logContext = str(e) + "read image file error, jump out"
                     self.logprowork(logpath, logContext)
                     time.sleep(5)                                   # wait download sub-process end
-                    width, height = Image.open(workdir + '\\' + filename).size
+                    width, height = Image.open(workdir + filename).size
                 filename = filename.replace("#", "%23")
                 ## htmlFile.writelines("<a href = \"%s\">"%("./" + filename))
                 # set image source line

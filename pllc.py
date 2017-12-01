@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v5p3_LTE'
+__version__         = 'v5p4_LTE'
 
 import urllib, json
 import time, os, linecache, sys
@@ -238,29 +238,35 @@ def platform_filemanager():
 def setting_platform_workdir ():
     """
         set os platform to set folder format
+        folder must with directory symbol '/' or '\\'
         :return:    platform work directory
     """
     homeFolder = ''
+    folderSymbol = ''
     # linux
     if os.name == 'posix':
         homeFolder = '/home/neod-anderjon/Pictures/Crawler/'
+        folderSymbol = '/'
     # windows
     elif os.name == 'nt':
         homeFolder = 'E:\\Workstation_Files\\Pictures\\Comic\\IllustratorDesign\\Crawler\\'
+        folderSymbol = '\\'
     else:
         pass
 
-    return homeFolder
-work_dir = setting_platform_workdir()                               # call once
+    return homeFolder, folderSymbol
+platform = setting_platform_workdir()
+work_dir = platform[0]
+symbol = platform[1]
 
 # real time clock
 rtc = time.localtime()
 ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
 
 # universal path
-logfile_name = '/CrawlerWork[%s].log' % ymd
-htmlfile_name = '/CrawlerWork[%s].html' % ymd
-ranking_folder = work_dir + 'RankTop_%s' % ymd                      # two layer folder
+logfile_name = symbol + 'CrawlerWork[%s].log' % ymd
+htmlfile_name = symbol + 'CrawlerWork[%s].html' % ymd
+ranking_folder = work_dir + 'RankTop_%s%s' % (ymd, symbol)
 # daily-rank path
 logfile_path = ranking_folder + logfile_name
 htmlfile_path = ranking_folder + htmlfile_name
